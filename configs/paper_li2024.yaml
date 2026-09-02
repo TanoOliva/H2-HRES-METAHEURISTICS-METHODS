@@ -1,0 +1,36 @@
+# Escenario de replicacion del paper.
+#
+# Li et al. (2024), "Capacity optimization of a wind-photovoltaic-electrolysis-
+# battery (WPEB) hybrid energy system for power and hydrogen generation".
+#
+# Solo se declara lo que difiere de los defaults del paquete, que ya son los
+# valores del paper. Cualquier clave desconocida hace fallar la carga.
+
+name: paper_li2024
+description: >-
+  Replicacion de la linea base: Damao Banner (Baotou, Mongolia Interior),
+  Wind + PV = 200 MW, AGSR <= 20%, electrolizador continuo y bateria
+  dimensionada como 30% de la potencia del electrolizador.
+
+site:
+  lat: 41.70
+  lon: 110.43
+  start_year: 2001
+  end_year: 2021
+  # El paper reporta 2008 como ano tipico. Dejar en null para que el ano se
+  # elija por complementariedad a partir de los datos descargados.
+  analysis_year: 2008
+
+constraints:
+  total_generation_capacity_mw: 200.0
+  agsr_max: 0.20
+  electrolyzer_ratio_max: 0.50
+
+search:
+  wind_step_mw: 10.0
+  electrolyzer_step_mw: 5.0
+
+economics:
+  project_lifetime_years: 25
+  real_discount_rate: 0.0435
+  lcoe_energy_basis: electrolyzer_plus_grid

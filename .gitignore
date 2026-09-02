@@ -1,0 +1,32 @@
+# Datos descargados de NASA POWER
+wpeb_data/
+data/
+
+# Resultados de corridas
+results/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Entornos
+.venv/
+venv/
+env/
+
+# Numba
+__pycache__/
+*.nbc
+*.nbi
+
+# Editores
+.vscode/
+.idea/
+*.swp
+.DS_Store

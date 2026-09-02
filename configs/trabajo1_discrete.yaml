@@ -1,0 +1,44 @@
+# Escenario de la extension discreta (trabajo 1).
+#
+# Mantiene el contexto experimental del paper para conservar comparabilidad, y
+# convierte el diseno en un problema mixto que se resuelve con metaheuristicas.
+#
+# Variables de decision:
+#   wind_mw               continua, con pv_mw = 200 - wind_mw
+#   n_electrolyzer_units  entera, unidades de 5 MW
+#   battery_mw            discreta, multiplos de 5 MW
+#   battery_duration_h    discreta, del catalogo de duraciones
+
+name: trabajo1_discrete
+description: >-
+  Extension discreta con electrolizador modular de 5 MW, bateria de potencia y
+  duracion discretas, y resolucion por metaheuristicas sobre un espacio mixto.
+
+site:
+  lat: 41.70
+  lon: 110.43
+  start_year: 2001
+  end_year: 2021
+  analysis_year: 2008
+
+electrolyzer:
+  unit_mw: 5.0
+  min_units: 10   # 50 MW
+  max_units: 20   # 100 MW
+  min_load_ratio: 0.30
+
+battery:
+  power_step_mw: 5.0
+  power_min_mw: 0.0
+  power_max_mw: 50.0
+  # Una sola duracion mientras costs.battery no tenga componente por kWh: si la
+  # duracion es libre y alargarla no cuesta nada, el optimizador la lleva al
+  # maximo y ese resultado no significa nada. Ver CHANGELOG.md, correccion 3.
+  duration_candidates_h: [1.0]
+
+metaheuristic:
+  population: 20
+  iterations: 30
+  seed: 42
+  penalty_infeasible: 1.0e6
+  penalty_agsr_weight: 1.0e3

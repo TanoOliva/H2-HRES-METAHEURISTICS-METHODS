@@ -1,0 +1,10 @@
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+requests>=2.31
+PyYAML>=6.0
+tqdm>=4.65
+
+# Opcionales
+# numba>=0.58   # acelera el despacho horario (pip install -e .[fast])
+# pytest>=7.4   # tests (pip install -e .[dev])
