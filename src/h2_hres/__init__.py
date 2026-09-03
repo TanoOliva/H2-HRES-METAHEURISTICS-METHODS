@@ -9,6 +9,6 @@ metaheuristicas.
 
 from .config import ScenarioConfig, default_scenario, load_scenario
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
 
 __all__ = ["ScenarioConfig", "default_scenario", "load_scenario", "__version__"]

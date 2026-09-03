@@ -1,0 +1,75 @@
+# Escenario de la comparativa de metaheuristicas (Fase 2 del proyecto de titulo).
+#
+# Extiende trabajo1_discrete.yaml en un solo punto: la duracion de bateria deja
+# de estar fija en 1 h y pasa a ser variable de decision real, junto con la
+# potencia. Eso exige resolver antes el problema que trabajo1_discrete.yaml
+# evitaba fijando la duracion: sin costo por kWh, alargar la bateria es gratis y
+# el optimizador la lleva al maximo sin que el resultado signifique nada.
+#
+# Variables de decision:
+#   wind_mw               continua, con pv_mw = 200 - wind_mw
+#   n_electrolyzer_units  entera, unidades de 5 MW
+#   battery_mw            discreta, multiplos de 5 MW
+#   battery_duration_h    discreta, {1, 2, 4} h
+
+name: metaheuristicas
+description: >-
+  Comparativa GWO / PSO / GA / random sobre el espacio discreto de la
+  extension del trabajo 1, con duracion de bateria como variable de decision.
+
+site:
+  lat: 41.70
+  lon: 110.43
+  start_year: 2001
+  end_year: 2021
+  analysis_year: 2008
+
+electrolyzer:
+  unit_mw: 5.0
+  min_units: 10   # 50 MW
+  max_units: 20   # 100 MW
+  min_load_ratio: 0.30
+
+battery:
+  power_step_mw: 5.0
+  power_min_mw: 0.0
+  power_max_mw: 50.0
+  duration_candidates_h: [1.0, 2.0, 4.0]
+
+# Reparto NPC-neutro de los 2549/500/10 CNY-por-kW del paper (Tabla 4) en un
+# componente por kW (convertidor) y uno por kWh (celdas), 30%/70%. A 1 h la
+# suma da exactamente los valores del paper -- la validacion de Fase 1 contra
+# el paper no se mueve -- y a mas horas la bateria pasa a costar mas. Es un
+# supuesto explicito, no un dato: el paper no permite separar los dos
+# componentes porque sus tres casos publicados son todos de 1 h. Ver
+# CHANGELOG.md y entrega/README.md, seccion de supuestos declarados.
+costs:
+  battery:
+    capex_cny_per_kw: 764.70          # 2549 * 0.30
+    capex_cny_per_kwh: 1784.30        # 2549 * 0.70
+    replacement_cny_per_kw: 150.0     # 500 * 0.30
+    replacement_cny_per_kwh: 350.0    # 500 * 0.70
+    om_cny_per_kw_year: 3.0           # 10 * 0.30
+    om_cny_per_kwh_year: 7.0          # 10 * 0.70
+    life_years: 10
+
+metaheuristic:
+  population: 20
+  iterations: 30
+  seed: 42
+  penalty_infeasible: 1.0e6
+  penalty_agsr_weight: 1.0e3
+  # Coeficientes canonicos de la literatura (Clerc-Kennedy para PSO; torneo +
+  # BLX-alpha + mutacion gaussiana para GA), sin ajustar a este problema: la
+  # comparativa no debe leerse como un torneo con un favorito afinado.
+  pso:
+    inertia: 0.729
+    cognitive: 1.49445
+    social: 1.49445
+    velocity_clamp_ratio: 0.20
+  ga:
+    crossover_rate: 0.90
+    mutation_rate: 0.10
+    mutation_sigma_ratio: 0.10
+    tournament_size: 3
+    elite_count: 2

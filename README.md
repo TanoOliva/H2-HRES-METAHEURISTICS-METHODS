@@ -22,7 +22,9 @@ en [tests/notebook_reference.py](tests/notebook_reference.py) como referencia de
 - **Métricas**: LCOE, LCOH, energía vendida a red, factor de capacidad del electrolizador.
 
 Y lo extiende con una **formulación discreta** — electrolizador modular de 5 MW, potencia
-y duración de batería discretas — resuelta con metaheurísticas.
+y duración de batería discretas — resuelta y comparada con cuatro metaheurísticas
+(GWO, PSO, GA y una línea base aleatoria), con estudio de sensibilidad y significancia
+estadística. Ver [entrega/README.md](entrega/README.md) para los resultados completos.
 
 ## Instalación
 
@@ -44,6 +46,9 @@ h2hres cases        --config configs/paper_li2024.yaml   # casos con nombre del 
 h2hres validate     --config configs/paper_li2024.yaml   # contraste contra las cifras del paper
 h2hres grid-search  --config configs/paper_li2024.yaml   # barrido exhaustivo del modelo base
 h2hres optimize     --config configs/trabajo1_discrete.yaml --algorithm gwo --runs 10
+h2hres compare      --config configs/metaheuristicas.yaml --runs 30   # gwo/pso/ga/random + tests
+h2hres sensitivity  --config configs/metaheuristicas.yaml             # AGSR y carga mínima
+h2hres report       --config configs/metaheuristicas.yaml --out entrega  # todo lo anterior
 ```
 
 `download` se reanuda: solo descarga los años que falten en `wpeb_data/`.
@@ -55,6 +60,11 @@ h2hres optimize     --config configs/trabajo1_discrete.yaml --algorithm gwo --ru
 Cada corrida crea `results/<timestamp>_<etiqueta>/` con la **configuración resuelta**
 (`config.yaml`), las tablas en CSV y las figuras. Ese directorio contiene todo lo
 necesario para reproducir el resultado — no hace falta recordar qué se ejecutó.
+
+`report` es distinto: en vez de un directorio con timestamp, escribe (y sobrescribe) una
+carpeta fija `entrega/` pensada para versionar en git y citar desde un documento externo —
+las rutas no cambian entre corridas. Encadena `validate` + `compare` + `sensitivity` y
+arma un `README.md` cuyas tablas se inyectan desde los CSV en el momento de generar.
 
 ### Como biblioteca
 
@@ -84,25 +94,33 @@ print(result.best.design, result.best_score)
 | [simulation/dispatch.py](src/h2_hres/simulation/dispatch.py) | Núcleo horario del SOC |
 | [simulation/simulator.py](src/h2_hres/simulation/simulator.py) | Modelos base y discreto |
 | [optimization/encoding.py](src/h2_hres/optimization/encoding.py) | Espacio de decisión mixto |
-| [optimization/metaheuristics/](src/h2_hres/optimization/metaheuristics/) | GWO, búsqueda aleatoria |
+| [optimization/metaheuristics/](src/h2_hres/optimization/metaheuristics/) | GWO, PSO, GA, búsqueda aleatoria |
+| [optimization/comparison.py](src/h2_hres/optimization/comparison.py) | Bucle algoritmo × semilla, compartido por `compare` y `report` |
+| [analysis/statistics.py](src/h2_hres/analysis/statistics.py) | Wilcoxon pareado, tamaño del efecto A₁₂ |
+| [analysis/sensitivity.py](src/h2_hres/analysis/sensitivity.py) | Barridos de AGSR y carga mínima |
+| [analysis/style.py](src/h2_hres/analysis/style.py) | Paleta y `rcParams` compartidos, validados con `dataviz` |
+| [analysis/report.py](src/h2_hres/analysis/report.py) | Genera `entrega/` y su `README.md` |
 | [analysis/](src/h2_hres/analysis/) | Resúmenes, comparación con el paper, figuras |
 
 ### Agregar una metaheurística
 
-Es el punto de extensión principal. Escribir la subclase, registrarla, y queda disponible
-en `--algorithm` y en las comparaciones estadísticas:
+Es el punto de extensión principal. `gwo.py`, `pso.py` y `ga.py` en
+[optimization/metaheuristics/](src/h2_hres/optimization/metaheuristics/) son los tres
+ejemplos reales a seguir: escribir la subclase, registrarla, y queda disponible en
+`--algorithm`, en `compare`/`report`, y en las comparaciones estadísticas:
 
 ```python
-# src/h2_hres/optimization/metaheuristics/pso.py
+# src/h2_hres/optimization/metaheuristics/woa.py
 from .base import Optimizer
 
-class ParticleSwarm(Optimizer):
-    name = "pso"
+class WhaleOptimization(Optimizer):
+    name = "woa"
 
     def _search(self) -> None:
         positions = self.space.sample(self.rng, self.config.population)
         for iteration in range(self.config.iterations):
             for i in range(len(positions)):
+                positions[i] = self.space.clip(positions[i])
                 self._evaluate(positions[i])     # actualiza self.best
             ...                                   # operador de movimiento
             self._record(iteration + 1)
@@ -110,13 +128,19 @@ class ParticleSwarm(Optimizer):
 
 ```python
 # metaheuristics/__init__.py
-REGISTRY = {..., ParticleSwarm.name: ParticleSwarm}
+REGISTRY = {..., WhaleOptimization.name: WhaleOptimization}
 ```
 
 La clase base aporta semilla, caché, historial por iteración, conteo de evaluaciones y
 cronometraje, de modo que dos algoritmos produzcan historiales comparables sin trabajo
 extra. El presupuesto (`population × iterations`) es el mismo para todos, que es la
-condición para que la comparación sea justa.
+condición para que la comparación sea justa — los 5 tests parametrizados por
+`sorted(REGISTRY)` en `test_optimizers.py` lo verifican solos para cualquier algoritmo
+nuevo. Si necesita hiperparámetros propios, agregar un bloque `<Nombre>Config` anidado en
+`MetaheuristicConfig` (`config/schema.py`) siguiendo el patrón de `PSOConfig`/`GAConfig`,
+y asignarle un color en `analysis/style.py` — re-corriendo el validador de la skill
+`dataviz` con la paleta completa si va a aparecer junto a las demás en un boxplot o
+dispersión.
 
 ## Configuración
 
@@ -138,23 +162,32 @@ Dos decisiones de modelado que conviene conocer:
   deja en cero **y** la duración de la batería es variable de decisión, alargarla es
   gratis y el optimizador la lleva al máximo sin que ese resultado signifique nada. El
   paquete lo avisa por consola; `configs/trabajo1_discrete.yaml` fija una sola duración
-  para evitarlo.
+  para evitarlo, y `configs/metaheuristicas.yaml` en cambio reparte el costo de la Tabla 4
+  del paper en 30% potencia / 70% energía (NPC-neutro a 1 h) para que la duración sí sea
+  una variable de decisión con sentido económico. Ver CHANGELOG.md, sección 0.3.0.
 
 ## Verificación
 
 ```bash
-pytest -q                                            # 126 tests, sin acceso a red
+pytest -q                                            # 188 tests, sin acceso a red
 h2hres validate --config configs/paper_li2024.yaml   # contraste contra el paper
 ```
 
-Dos niveles, con propósitos distintos:
+Varios niveles, con propósitos distintos:
 
 - [tests/test_paper_validation.py](tests/test_paper_validation.py) fija como regresión cada
-  una de las siete correcciones de modelado, para que una refactorización futura no las
-  deshaga en silencio.
+  una de las correcciones de modelado (incluida el reparto del costo de batería), para que
+  una refactorización futura no las deshaga en silencio.
 - [tests/test_parity.py](tests/test_parity.py) verifica que la **lógica de despacho** siga
   siendo idéntica a la del notebook, hora por hora. Ya no compara el modelo completo: ese
   cambió a propósito para acercarse al paper, y su validación es ahora `h2hres validate`.
+- [tests/test_optimizers.py](tests/test_optimizers.py) verifica, para **cualquier**
+  algoritmo registrado, que consuma exactamente `population × iterations` evaluaciones, sea
+  reproducible por semilla y que el mejor score nunca empeore entre iteraciones.
+- [tests/test_statistics.py](tests/test_statistics.py),
+  [tests/test_sensitivity.py](tests/test_sensitivity.py),
+  [tests/test_comparison_plots.py](tests/test_comparison_plots.py) y
+  [tests/test_report.py](tests/test_report.py) cubren la comparativa de la Fase 2.
 
 El notebook original sigue ejecutable en
 [tests/notebook_reference.py](tests/notebook_reference.py) como referencia congelada.
@@ -214,3 +247,25 @@ completo la producción fotovoltaica. Todas están documentadas con su efecto me
 
 **Fuera de alcance**: NPV, IRR, ROI y payback exigen precio del H₂, *feed-in tariff* y
 prioridad de despacho, que el paper no publica.
+
+## Comparativa de metaheurísticas
+
+Con la réplica ya validada, `h2hres compare` corre GWO, PSO, GA y una línea base aleatoria
+sobre el mismo espacio discreto (electrolizador modular, potencia y duración de batería
+como variables de decisión), con presupuesto de evaluaciones idéntico para los cuatro.
+
+A escala completa (4 algoritmos × 30 semillas, 600 evaluaciones cada una, año 2008):
+
+| algoritmo | mejor score | media | desv. std |
+|---|---|---|---|
+| GA | 0.28100 | 0.28387 | 0.00201 |
+| PSO | 0.28104 | 0.28325 | 0.00136 |
+| GWO | 0.28104 | 0.28310 | 0.00158 |
+| random | 0.28150 | 0.28540 | 0.00263 |
+
+Con Wilcoxon pareado por semilla (Holm-Bonferroni sobre 6 pares), **GWO y PSO baten a la
+línea base aleatoria con significancia estadística** (p < 0.05); las diferencias entre
+GWO, PSO y GA no lo son. El detalle completo — convergencia, distribución de resultados,
+tamaño del efecto A₁₂, y el estudio de sensibilidad sobre AGSR y carga mínima del
+electrolizador — está en [entrega/README.md](entrega/README.md), regenerable con
+`h2hres report --config configs/metaheuristicas.yaml --out entrega` (~4-5 min).

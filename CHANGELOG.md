@@ -1,5 +1,121 @@
 # Changelog
 
+## 0.3.0 — Comparativa de metaheurísticas
+
+Con la réplica ya validada (9/10 objetivos del paper), esta fase agrega dos metaheurísticas
+al GWO existente, un estudio de sensibilidad, comparación estadística entre algoritmos y una
+carpeta `entrega/` versionada que consolida todo para el documento de título.
+
+Ejecutar `h2hres report --config configs/metaheuristicas.yaml` regenera `entrega/` entera
+(~4-5 min, 4 algoritmos × 30 semillas). Resultado a esa escala: GA obtuvo el mejor score
+(0.2810), pero solo GWO y PSO baten a `random` con significancia estadística tras la
+corrección de Holm-Bonferroni (2 de 6 pares, Wilcoxon pareado por semilla).
+
+---
+
+### PSO y GA agregados al registro de metaheurísticas
+
+**Antes.** Solo `gwo` y `random` estaban registrados; no había base para afirmar que una
+metaheurística resuelve mejor el espacio discreto que el paper deja abierto en §3.3.
+
+**Ahora.**
+
+- **PSO** (`optimization/metaheuristics/pso.py`): constricción de Clerc-Kennedy
+  (χ=0.729, c₁=c₂=1.49445), velocidad acotada a un 20% del rango de cada variable.
+- **GA** (`optimization/metaheuristics/ga.py`): codificación real, selección por torneo
+  (k=3), cruce BLX-α, mutación gaussiana (σ=10% del rango), elitismo (2 individuos).
+
+Ambos siguen exactamente el patrón de `gwo.py` — clip → evaluar → mover → `_record` —
+así que consumen `population × iterations` evaluaciones, ni una más ni una menos, y
+heredan automáticamente los 5 tests parametrizados por `sorted(REGISTRY)` sin escribir
+nada adicional. Los hiperparámetros son los valores canónicos de la literatura, no un
+ajuste fino a este problema: la comparativa no debe leerse como un torneo con un
+favorito afinado.
+
+Nuevos bloques `PSOConfig` y `GAConfig` anidados en `MetaheuristicConfig`, con la misma
+validación en `__post_init__` que el resto del esquema (`ga.elite_count` y
+`ga.tournament_size` no pueden superar `population`).
+
+### El costo de batería se reparte en potencia y energía
+
+**Antes.** `configs/trabajo1_discrete.yaml` fijaba la duración de batería en 1 h porque
+`costs.battery` solo cobraba por kW: con costo de energía en cero, alargar la batería
+era gratis y el optimizador la llevaba al máximo sin que el resultado significara nada.
+El paper no permite resolver esto directamente — sus tres casos publicados son todos de
+1 h, así que potencia y energía son numéricamente iguales en los datos que reporta.
+
+**Ahora.** `configs/metaheuristicas.yaml` reparte los 2549/500/10 ¥/kW del paper
+(capex/reemplazo/O&M) en 30% potencia / 70% energía. A 1 h la suma da exactamente los
+valores originales — **NPC-neutro**, verificado en
+`test_paper_validation.py::test_battery_cost_split_is_npc_neutral_at_one_hour` — así que
+la validación de la Fase 1 no se mueve; a 4 h la batería cuesta 3.1× más. Es un supuesto
+explícito, documentado como tal en `entrega/README.md`, no un dato del paper.
+
+Con esto, `duration_candidates_h: [1.0, 2.0, 4.0]` deja de necesitar fijarse en un solo
+valor y `DecisionSpace.warnings()` deja de emitir su aviso para este escenario.
+
+### Comparación estadística entre algoritmos
+
+**Antes.** `aggregate_runs()` ya agrupaba por algoritmo, pero nada decidía si una
+diferencia de medias era real o ruido de semilla.
+
+**Ahora.** Módulo `analysis/statistics.py`:
+
+- **Wilcoxon pareado por semilla** entre cada par de algoritmos, corregido por
+  Holm-Bonferroni sobre las C(n,2) comparaciones. Pareado porque la misma semilla define
+  el mismo problema para todos los algoritmos (arranque, orden de muestreo); no
+  paramétrico porque los scores de un optimizador estocástico no son normales en general.
+- **A₁₂ de Vargha-Delaney**: tamaño del efecto — probabilidad de que una corrida de A
+  gane a una de B, más la mitad de los empates. 0.5 = indistinguibles, 1.0 = A domina
+  siempre. Es el estándar en la literatura de metaheurísticas porque no asume
+  normalidad ni varianzas iguales.
+
+`scipy` vuelve a ser dependencia (solo para `wilcoxon`, seis llamadas al final de una
+corrida) — no contradice haberlo quitado en la Fase 1, donde el problema era `pearsonr`
+llamado ~7700 veces dentro de un bucle caliente.
+
+### Estudio de sensibilidad
+
+**Nuevo.** `analysis/sensitivity.py` + `h2hres sensitivity`: barre `constraints.agsr_max`
+∈ {10%, 15%, 20%, 25%, 30%} y `electrolyzer.min_load_ratio` ∈ {20%, 30%, 40%, 50%} con
+`run_grid_search` sobre el modelo base — determinista, sin ruido de semilla — y reporta
+cómo se mueve el óptimo y el tamaño del dominio factible. Confirma lo que el paper
+afirma en §3.1: relajar el AGSR crece el dominio factible y baja el LCOE óptimo
+monotónicamente (16→151 configuraciones factibles, LCOE 0.327→0.254 ¥/kWh entre 10% y
+30% sobre los datos de 2008).
+
+### Subcomandos `compare`, `sensitivity` y `report`
+
+- `h2hres compare --algorithms gwo,pso,ga,random --runs 30`: corre N algoritmos sobre las
+  mismas semillas y el mismo `ObjectiveFunction` compartido, y escribe
+  `statistics.csv` / `pairwise_tests.csv` además de lo que ya escribía `optimize`.
+- `h2hres sensitivity`: los dos barridos, con sus figuras.
+- `h2hres report --out entrega`: encadena validación + comparativa + sensibilidad y
+  consolida todo en una carpeta fija versionada (no timestamped) con un `README.md`
+  cuyas tablas se inyectan desde los CSV en el momento de generar — no puede quedar
+  desincronizado de sus propios datos.
+
+El bucle algoritmo × semilla vivía duplicado entre `cmd_compare` y lo que iba a ser el
+generador de reporte; se extrajo a `optimization/comparison.py::run_comparison()`, que
+ahora es la única fuente de verdad para ambos.
+
+### Paleta y estilo compartido de las figuras
+
+**Antes.** `plots.py` no fijaba ningún tema: colores del ciclo por defecto de
+matplotlib, sin orden garantizado entre figuras.
+
+**Ahora.** `analysis/style.py`, validado con el script de la skill `dataviz` (método
+OKLab/CVD de Arcuri) para las cuatro series apareciendo juntas a la vez — el contexto
+más exigente (boxplot, dispersión). Solo los tres primeros colores del catálogo de
+referencia superan esa validación en conjunto (azul, naranja, verde-agua); `random` no
+recibe un cuarto matiz categórico porque es la línea base, no un algoritmo competidor —
+se codifica con gris neutro y línea discontinua, la convención habitual para una
+referencia. Cinco figuras nuevas en `analysis/comparison_plots.py`: convergencia por
+algoritmo (mediana + banda intercuartil), boxplot de scores finales, dispersión
+calidad-tiempo, y los dos barridos de sensibilidad — ninguna con eje Y doble.
+
+---
+
 ## 0.2.0 — Replicación fiel del paper
 
 Con el PDF de Li et al. (2024) a la vista, se cerraron las brechas de modelado que separaban

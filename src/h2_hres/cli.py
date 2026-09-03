@@ -10,6 +10,9 @@ depende de recordar que celdas se ejecutaron ni en que orden.
     h2hres cases        --config configs/paper_li2024.yaml
     h2hres validate     --config configs/paper_li2024.yaml
     h2hres optimize     --config configs/trabajo1_discrete.yaml --algorithm gwo --runs 10
+    h2hres compare      --config configs/metaheuristicas.yaml --runs 30
+    h2hres sensitivity  --config configs/metaheuristicas.yaml
+    h2hres report       --config configs/metaheuristicas.yaml --out entrega
 """
 
 from __future__ import annotations
@@ -24,6 +27,12 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
+from .analysis.comparison_plots import (
+    plot_convergence_by_algorithm,
+    plot_quality_vs_time,
+    plot_score_boxplot,
+    plot_sensitivity_sweep,
+)
 from .analysis.plots import (
     plot_convergence,
     plot_feasible_domain,
@@ -31,6 +40,15 @@ from .analysis.plots import (
     plot_typical_year_selection,
     save_figure,
 )
+from .analysis.report import generate_report
+from .analysis.sensitivity import (
+    AGSR_MAX_VALUES,
+    MIN_LOAD_RATIO_VALUES,
+    sweep_agsr_max,
+    sweep_min_load_ratio,
+)
+from .analysis.statistics import comparison_table, pairwise_wilcoxon
+from .analysis.style import ALGORITHM_ORDER
 from .analysis.validation import resource_metrics, validate_scenario
 from .analysis.summaries import (
     aggregate_runs,
@@ -42,6 +60,7 @@ from .config.loader import default_scenario, dump_scenario, load_scenario
 from .config.schema import ScenarioConfig
 from .data.cache import DEFAULT_FOLDER, get_or_download, load_years
 from .data.typical_year import choose_typical_year, validate_against_paper
+from .optimization.comparison import run_comparison
 from .optimization.encoding import DecisionSpace
 from .optimization.exhaustive import run_grid_search
 from .optimization.metaheuristics import REGISTRY, get_optimizer
@@ -313,6 +332,159 @@ def cmd_optimize(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_compare(args: argparse.Namespace) -> int:
+    """Corre varias metaheuristicas sobre el mismo objetivo y las contrasta."""
+    config = _load_config(args)
+    year, hourly = _load_analysis_year(config, args)
+
+    algorithms = [name.strip() for name in args.algorithms.split(",") if name.strip()]
+    unknown = [name for name in algorithms if name not in REGISTRY]
+    if unknown:
+        raise KeyError(
+            "algoritmo(s) desconocido(s) {}. Disponibles: {}".format(
+                unknown, ", ".join(sorted(REGISTRY))
+            )
+        )
+
+    base_seed = args.seed if args.seed is not None else config.metaheuristic.seed
+    seeds = [base_seed + offset for offset in range(args.runs)]
+
+    for message in DecisionSpace(config).warnings():
+        print("AVISO: {}".format(message))
+
+    print("Ano de analisis: {} | algoritmos: {} | semillas: {}".format(
+        year, algorithms, seeds))
+    print("Presupuesto por corrida: {} evaluaciones ({} x {}), identico para todos".format(
+        config.metaheuristic.evaluation_budget,
+        config.metaheuristic.population,
+        config.metaheuristic.iterations,
+    ))
+    print()
+
+    # Un solo objetivo compartido entre algoritmos y semillas: el cache de
+    # perfiles de generacion persiste durante toda la comparativa.
+    objective = ObjectiveFunction(hourly, config)
+
+    def _print_progress(algorithm: str, seed: int, result) -> None:
+        best = result.best.result
+        print(
+            "  {:<7} semilla {:<5} score={:.6f} feasible={!s:<5} "
+            "W{:.1f} E{:.0f} B{:.0f}MW/{:.0f}h ({:.1f}s)".format(
+                algorithm, seed, result.best_score, best.feasible,
+                best.wind_mw, best.electrolyzer_mw, best.battery_mw,
+                best.battery_duration_h, result.elapsed_s,
+            )
+        )
+
+    all_history, runs = run_comparison(objective, algorithms, seeds, on_result=_print_progress)
+    stats = comparison_table(runs)
+
+    print()
+    print("Ranking por mejor score (menor es mejor):")
+    print(stats.to_string(index=False, float_format=lambda v: "{:,.6f}".format(v)))
+
+    pairwise: Optional[pd.DataFrame] = None
+    if len(algorithms) >= 2 and args.runs >= 2:
+        pairwise = pairwise_wilcoxon(runs)
+        print()
+        print("Wilcoxon pareado por semilla, corregido por Holm-Bonferroni:")
+        print(pairwise.to_string(index=False, float_format=lambda v: "{:,.4f}".format(v)))
+    else:
+        print()
+        print(
+            "Sin comparaciones pareadas: hacen falta >=2 algoritmos y >=2 "
+            "semillas comunes."
+        )
+
+    run_dir = _run_directory(args.out, "compare-{}".format(base_seed))
+    dump_scenario(config, run_dir / "config.yaml")
+    all_history.to_csv(run_dir / "history.csv", index=False)
+    runs.to_csv(run_dir / "runs.csv", index=False)
+    stats.to_csv(run_dir / "statistics.csv", index=False)
+    if pairwise is not None:
+        pairwise.to_csv(run_dir / "pairwise_tests.csv", index=False)
+
+    best_overall = runs.loc[runs["score"].idxmin()].to_dict()
+    (run_dir / "best.json").write_text(
+        json.dumps({"analysis_year": year, **best_overall}, indent=2, default=str),
+        encoding="utf-8",
+    )
+
+    save_figure(
+        plot_convergence_by_algorithm(all_history),
+        run_dir / "convergence_by_algorithm.png",
+    )
+    save_figure(plot_score_boxplot(runs), run_dir / "score_boxplot.png")
+    save_figure(plot_quality_vs_time(runs), run_dir / "quality_vs_time.png")
+
+    print()
+    print("Resultados en {}".format(run_dir))
+    return 0
+
+
+def cmd_sensitivity(args: argparse.Namespace) -> int:
+    """Barre AGSR maximo y carga minima del electrolizador con el modelo base."""
+    config = _load_config(args)
+    year, hourly = _load_analysis_year(config, args)
+    print("Ano de analisis: {}".format(year))
+
+    print()
+    print("Barriendo constraints.agsr_max: {}".format(list(AGSR_MAX_VALUES)))
+    agsr_table = sweep_agsr_max(hourly, config, progress=not args.quiet)
+    print(agsr_table.to_string(index=False, float_format=lambda v: "{:,.4f}".format(v)))
+
+    print()
+    print("Barriendo electrolyzer.min_load_ratio: {}".format(list(MIN_LOAD_RATIO_VALUES)))
+    min_load_table = sweep_min_load_ratio(hourly, config, progress=not args.quiet)
+    print(min_load_table.to_string(index=False, float_format=lambda v: "{:,.4f}".format(v)))
+
+    run_dir = _run_directory(args.out, "sensitivity")
+    dump_scenario(config, run_dir / "config.yaml")
+    agsr_table.to_csv(run_dir / "sensitivity_agsr_max.csv", index=False)
+    min_load_table.to_csv(run_dir / "sensitivity_min_load_ratio.csv", index=False)
+
+    save_figure(
+        plot_sensitivity_sweep(agsr_table, "Limite AGSR"),
+        run_dir / "sensitivity_agsr_max.png",
+    )
+    save_figure(
+        plot_sensitivity_sweep(min_load_table, "Carga minima del electrolizador"),
+        run_dir / "sensitivity_min_load_ratio.png",
+    )
+
+    print()
+    print("Resultados en {}".format(run_dir))
+    return 0
+
+
+def cmd_report(args: argparse.Namespace) -> int:
+    """Genera entrega/: comparativa, sensibilidad, validacion y el README maestro."""
+    config = _load_config(args)
+    year, hourly = _load_analysis_year(config, args)
+
+    algorithms = [name.strip() for name in args.algorithms.split(",") if name.strip()]
+    unknown = [name for name in algorithms if name not in REGISTRY]
+    if unknown:
+        raise KeyError(
+            "algoritmo(s) desconocido(s) {}. Disponibles: {}".format(
+                unknown, ", ".join(sorted(REGISTRY))
+            )
+        )
+
+    out_dir = generate_report(
+        hourly, config, year,
+        out_dir=args.out,
+        algorithms=algorithms,
+        runs=args.runs,
+        seed=args.seed,
+        on_progress=print,
+    )
+
+    print()
+    print("Entrega escrita en {}".format(out_dir))
+    return 0
+
+
 def cmd_info(args: argparse.Namespace) -> int:
     """Estado del entorno: util para explicar diferencias de rendimiento."""
     from . import __version__
@@ -396,6 +568,51 @@ def build_parser() -> argparse.ArgumentParser:
     )
     optimize.add_argument("--seed", type=int, help="semilla inicial")
     optimize.set_defaults(func=cmd_optimize)
+
+    default_algorithms = ",".join(name for name in ALGORITHM_ORDER if name in REGISTRY)
+    compare = subparsers.add_parser(
+        "compare", help="corre varias metaheuristicas y las contrasta estadisticamente"
+    )
+    add_common(compare)
+    compare.add_argument("--year", type=int, help="fuerza el ano de analisis")
+    compare.add_argument(
+        "--algorithms", default=default_algorithms,
+        help="algoritmos separados por coma (default: %(default)s)",
+    )
+    compare.add_argument(
+        "--runs", type=int, default=30,
+        help="numero de semillas consecutivas por algoritmo (default: %(default)s)",
+    )
+    compare.add_argument("--seed", type=int, help="semilla inicial")
+    compare.set_defaults(func=cmd_compare)
+
+    sensitivity = subparsers.add_parser(
+        "sensitivity", help="sensibilidad del optimo a AGSR y a la carga minima"
+    )
+    add_common(sensitivity)
+    sensitivity.add_argument("--year", type=int, help="fuerza el ano de analisis")
+    sensitivity.add_argument(
+        "--quiet", action="store_true", help="oculta la barra de progreso de cada barrido"
+    )
+    sensitivity.set_defaults(func=cmd_sensitivity)
+
+    report = subparsers.add_parser(
+        "report",
+        help="genera entrega/: comparativa, sensibilidad, validacion y README",
+    )
+    add_common(report)
+    report.set_defaults(out="entrega")
+    report.add_argument("--year", type=int, help="fuerza el ano de analisis")
+    report.add_argument(
+        "--algorithms", default=default_algorithms,
+        help="algoritmos separados por coma (default: %(default)s)",
+    )
+    report.add_argument(
+        "--runs", type=int, default=30,
+        help="numero de semillas consecutivas por algoritmo (default: %(default)s)",
+    )
+    report.add_argument("--seed", type=int, help="semilla inicial")
+    report.set_defaults(func=cmd_report)
 
     validate = subparsers.add_parser(
         "validate", help="contrasta la replicacion contra las cifras del paper"

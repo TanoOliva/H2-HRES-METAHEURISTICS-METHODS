@@ -10,9 +10,11 @@ import math
 import numpy as np
 import pytest
 
+from h2_hres.config.loader import load_scenario
 from h2_hres.config.schema import ScenarioConfig
 from h2_hres.data.nasa_power import WIND_SURFACE_ALPHA
 from h2_hres.models.economics import (
+    component_npc,
     hydrogen_storage_npc,
     npc_from_capacities,
     salvage_value,
@@ -175,3 +177,39 @@ def test_local_time_grouping_changes_the_daily_split():
     utc = daily_pearson_distribution(frame, utc_offset_hours=0.0)
     local = daily_pearson_distribution(frame, utc_offset_hours=8.0)
     assert not np.allclose(utc.to_numpy(), local.to_numpy())
+
+
+# --- Fase 2: reparto del costo de bateria en potencia y energia ------------
+
+
+def test_battery_cost_split_is_npc_neutral_at_one_hour():
+    """configs/metaheuristicas.yaml no debe mover el NPC de la Fase 1 a 1 h.
+
+    El reparto 30% potencia / 70% energia de los 2549/500/10 CNY/kW del paper
+    existe para que la duracion de bateria tenga sentido economico como
+    variable de decision (ver CHANGELOG.md y entrega/README.md, seccion de
+    supuestos declarados). A 1 h -- donde potencia y energia coinciden
+    numericamente -- la suma debe reproducir exactamente el costo original,
+    o la comparativa de metaheuristicas ya no partiria de la base validada
+    contra el paper.
+    """
+    paper = ScenarioConfig()
+    split = load_scenario("configs/metaheuristicas.yaml")
+
+    power_mw, energy_mwh = 30.0, 30.0  # 1 h: potencia == energia
+
+    npc_paper = component_npc(
+        power_mw * 1000.0, 0.0, paper.costs.battery, paper.economics
+    )
+    npc_split = component_npc(
+        power_mw * 1000.0, energy_mwh * 1000.0, split.costs.battery, split.economics
+    )
+    assert npc_split == pytest.approx(npc_paper, rel=1e-9)
+
+
+def test_battery_cost_split_makes_longer_duration_more_expensive():
+    """A mas horas, la misma potencia cuesta mas -- ya no es gratis alargarla."""
+    config = load_scenario("configs/metaheuristicas.yaml")
+    one_hour = component_npc(30_000.0, 30_000.0, config.costs.battery, config.economics)
+    four_hours = component_npc(30_000.0, 120_000.0, config.costs.battery, config.economics)
+    assert four_hours > one_hour

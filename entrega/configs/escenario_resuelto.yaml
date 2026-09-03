@@ -1,0 +1,114 @@
+name: metaheuristicas
+description: Comparativa GWO / PSO / GA / random sobre el espacio discreto de la extension
+  del trabajo 1, con duracion de bateria como variable de decision.
+site:
+  lat: 41.7
+  lon: 110.43
+  start_year: 2001
+  end_year: 2021
+  analysis_year: 2008
+  utc_offset_hours: 8.0
+wind:
+  turbine_rated_mw: 5.0
+  cut_in_ms: 2.5
+  rated_ms: 10.5
+  cut_out_ms: 25.0
+  hub_height_m: 105.0
+  wind_surface: vegtype_9
+  wind_speed_source: measured_50m
+pv:
+  dc_ac_ratio: 1.2
+  temp_coeff_pct_per_c: -0.5
+  noct_c: 47.0
+  stc_efficiency_pct: 13.0
+  derating_factor: 0.9
+battery:
+  roundtrip_efficiency: 0.9
+  power_ratio_to_electrolyzer: 0.3
+  power_rounding_step_mw: 2.5
+  duration_h: 1.0
+  power_step_mw: 5.0
+  power_min_mw: 0.0
+  power_max_mw: 50.0
+  duration_candidates_h:
+  - 1.0
+  - 2.0
+  - 4.0
+electrolyzer:
+  efficiency: 0.75
+  h2_hhv_kwh_per_kg: 39.4
+  min_load_ratio: 0.3
+  unit_mw: 5.0
+  min_units: 10
+  max_units: 20
+  hydrogen_storage_kg: 10000.0
+converter:
+  inverter_efficiency: 0.95
+  rectifier_efficiency: 0.95
+  bidirectional_efficiency: 0.95
+  plant_load_ratio: 0.0
+economics:
+  project_lifetime_years: 25
+  real_discount_rate: 0.0435
+  lcoe_energy_basis: electrolyzer_plus_grid
+constraints:
+  total_generation_capacity_mw: 200.0
+  agsr_max: 0.2
+  electrolyzer_ratio_max: 0.5
+  grid_export_limit_mw: null
+search:
+  wind_step_mw: 10.0
+  electrolyzer_step_mw: 5.0
+metaheuristic:
+  population: 20
+  iterations: 30
+  seed: 42
+  penalty_infeasible: 1000000.0
+  penalty_agsr_weight: 1000.0
+  pso:
+    inertia: 0.729
+    cognitive: 1.49445
+    social: 1.49445
+    velocity_clamp_ratio: 0.2
+  ga:
+    crossover_rate: 0.9
+    mutation_rate: 0.1
+    mutation_sigma_ratio: 0.1
+    tournament_size: 3
+    elite_count: 2
+costs:
+  wind:
+    capex_cny_per_kw: 5917.0
+    replacement_cny_per_kw: 0.0
+    om_cny_per_kw_year: 40.2
+    capex_cny_per_kwh: 0.0
+    replacement_cny_per_kwh: 0.0
+    om_cny_per_kwh_year: 0.0
+    life_years: 25
+  pv:
+    capex_cny_per_kw: 4633.0
+    replacement_cny_per_kw: 0.0
+    om_cny_per_kw_year: 17.6
+    capex_cny_per_kwh: 0.0
+    replacement_cny_per_kwh: 0.0
+    om_cny_per_kwh_year: 0.0
+    life_years: 25
+  electrolyzer:
+    capex_cny_per_kw: 6964.0
+    replacement_cny_per_kw: 5969.14
+    om_cny_per_kw_year: 208.92
+    capex_cny_per_kwh: 0.0
+    replacement_cny_per_kwh: 0.0
+    om_cny_per_kwh_year: 0.0
+    life_years: 15
+  battery:
+    capex_cny_per_kw: 764.7
+    replacement_cny_per_kw: 150.0
+    om_cny_per_kw_year: 3.0
+    capex_cny_per_kwh: 1784.3
+    replacement_cny_per_kwh: 350.0
+    om_cny_per_kwh_year: 7.0
+    life_years: 10
+  hydrogen_storage_capex_cny_per_kg: 6611.77
+  hydrogen_storage_om_cny_per_kg_year: 141.68
+  hydrogen_storage_life_years: 25

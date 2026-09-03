@@ -8,11 +8,15 @@ y anadirla al REGISTRY. Queda inmediatamente disponible en la CLI mediante
 from typing import Dict, Type
 
 from .base import OptimizationResult, Optimizer
+from .ga import GeneticAlgorithm
 from .gwo import GreyWolfOptimizer
+from .pso import ParticleSwarm
 from .random_search import RandomSearch
 
 REGISTRY: Dict[str, Type[Optimizer]] = {
     GreyWolfOptimizer.name: GreyWolfOptimizer,
+    ParticleSwarm.name: ParticleSwarm,
+    GeneticAlgorithm.name: GeneticAlgorithm,
     RandomSearch.name: RandomSearch,
 }
 
@@ -31,9 +35,11 @@ def get_optimizer(name: str) -> Type[Optimizer]:
 
 __all__ = [
     "REGISTRY",
+    "GeneticAlgorithm",
     "GreyWolfOptimizer",
     "OptimizationResult",
     "Optimizer",
+    "ParticleSwarm",
     "RandomSearch",
     "get_optimizer",
 ]

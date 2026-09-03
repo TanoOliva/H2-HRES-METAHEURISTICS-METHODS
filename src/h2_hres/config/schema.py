@@ -24,6 +24,8 @@ __all__ = [
     "EconomicsConfig",
     "ConstraintsConfig",
     "SearchConfig",
+    "PSOConfig",
+    "GAConfig",
     "MetaheuristicConfig",
     "ComponentCost",
     "CostConfig",
@@ -374,6 +376,55 @@ class SearchConfig:
 
 
 @dataclass(frozen=True)
+class PSOConfig:
+    """Hiperparametros del enjambre de particulas (PSO).
+
+    Los defaults son los coeficientes de constriccion de Clerc-Kennedy, el
+    valor canonico de la literatura, no un ajuste fino a este problema: la
+    comparativa de metaheuristicas no debe leerse como un torneo con un
+    favorito afinado.
+    """
+
+    inertia: float = 0.729
+    cognitive: float = 1.49445
+    social: float = 1.49445
+    velocity_clamp_ratio: float = 0.20
+
+    def __post_init__(self) -> None:
+        if self.inertia < 0:
+            raise ConfigError("inertia debe ser >= 0")
+        if self.cognitive < 0:
+            raise ConfigError("cognitive debe ser >= 0")
+        if self.social < 0:
+            raise ConfigError("social debe ser >= 0")
+        if not 0.0 < self.velocity_clamp_ratio <= 1.0:
+            raise ConfigError("velocity_clamp_ratio debe estar en (0, 1]")
+
+
+@dataclass(frozen=True)
+class GAConfig:
+    """Hiperparametros del algoritmo genetico de codificacion real."""
+
+    crossover_rate: float = 0.90
+    mutation_rate: float = 0.10
+    mutation_sigma_ratio: float = 0.10
+    tournament_size: int = 3
+    elite_count: int = 2
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.crossover_rate <= 1.0:
+            raise ConfigError("crossover_rate debe estar en [0, 1]")
+        if not 0.0 <= self.mutation_rate <= 1.0:
+            raise ConfigError("mutation_rate debe estar en [0, 1]")
+        if self.mutation_sigma_ratio <= 0:
+            raise ConfigError("mutation_sigma_ratio debe ser > 0")
+        if self.tournament_size < 2:
+            raise ConfigError("tournament_size debe ser >= 2")
+        if self.elite_count < 0:
+            raise ConfigError("elite_count debe ser >= 0")
+
+
+@dataclass(frozen=True)
 class MetaheuristicConfig:
     """Presupuesto y reproducibilidad de los optimizadores poblacionales."""
 
@@ -382,6 +433,8 @@ class MetaheuristicConfig:
     seed: int = 42
     penalty_infeasible: float = 1e6
     penalty_agsr_weight: float = 1e3
+    pso: PSOConfig = field(default_factory=PSOConfig)
+    ga: GAConfig = field(default_factory=GAConfig)
 
     def __post_init__(self) -> None:
         if self.population < 1:
@@ -392,6 +445,18 @@ class MetaheuristicConfig:
             raise ConfigError("penalty_infeasible debe ser >= 0")
         if self.penalty_agsr_weight < 0:
             raise ConfigError("penalty_agsr_weight debe ser >= 0")
+        if self.ga.elite_count > self.population:
+            raise ConfigError(
+                "ga.elite_count ({}) no puede superar population ({})".format(
+                    self.ga.elite_count, self.population
+                )
+            )
+        if self.ga.tournament_size > self.population:
+            raise ConfigError(
+                "ga.tournament_size ({}) no puede superar population ({})".format(
+                    self.ga.tournament_size, self.population
+                )
+            )
 
     @property
     def evaluation_budget(self) -> int:
@@ -629,6 +694,8 @@ _NESTED_TYPES = {
     "ConstraintsConfig": ConstraintsConfig,
     "ConverterConfig": ConverterConfig,
     "SearchConfig": SearchConfig,
+    "PSOConfig": PSOConfig,
+    "GAConfig": GAConfig,
     "MetaheuristicConfig": MetaheuristicConfig,
     "ComponentCost": ComponentCost,
     "CostConfig": CostConfig,

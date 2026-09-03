@@ -4,6 +4,7 @@ matplotlib>=3.7
 requests>=2.31
 PyYAML>=6.0
 tqdm>=4.65
+scipy>=1.11   # tests estadisticos (Wilcoxon) de la comparativa de metaheuristicas
 
 # Opcionales
 # numba>=0.58   # acelera el despacho horario (pip install -e .[fast])

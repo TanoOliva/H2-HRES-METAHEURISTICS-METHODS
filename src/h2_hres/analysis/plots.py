@@ -27,6 +27,8 @@ if "MPLBACKEND" not in os.environ and "matplotlib.pyplot" not in sys.modules:
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from .style import apply_style
+
 __all__ = [
     "plot_typical_year_selection",
     "plot_feasible_domain",
@@ -36,6 +38,10 @@ __all__ = [
 ]
 
 PathLike = Union[str, Path]
+
+# Aplicado una vez al importar: todas las figuras del paquete -- las de aqui y
+# las de comparison_plots.py -- comparten tipografia, grilla y dpi.
+apply_style()
 
 
 def save_figure(figure: plt.Figure, path: PathLike, dpi: int = 150) -> Path:

@@ -44,6 +44,16 @@ def test_unknown_top_level_key_is_rejected():
         {"constraints": {"agsr_max": 1.5}},
         {"economics": {"lcoe_energy_basis": "otra_cosa"}},
         {"site": {"start_year": 2030}},                # start > end
+        {"wind": {"hub_height_m": 5.0}},                # fuera de [10, 300]
+        {"wind": {"wind_speed_source": "a_150m"}},      # no es measured_50m ni hub_height
+        {"site": {"utc_offset_hours": 15.0}},           # fuera de [-14, 14]
+        {"battery": {"power_rounding_step_mw": 0.0}},
+        {"metaheuristic": {"pso": {"inertia": -0.1}}},
+        {"metaheuristic": {"pso": {"velocity_clamp_ratio": 0.0}}},
+        {"metaheuristic": {"ga": {"crossover_rate": 1.5}}},
+        {"metaheuristic": {"ga": {"tournament_size": 1}}},        # < 2
+        {"metaheuristic": {"population": 2, "ga": {"elite_count": 5}}},
+        {"metaheuristic": {"population": 2, "ga": {"tournament_size": 5}}},
     ],
 )
 def test_invalid_ranges_are_rejected(payload):
@@ -70,8 +80,26 @@ def test_roundtrip_through_yaml(tmp_path):
 
 
 def test_shipped_scenarios_load():
-    for name in ("paper_li2024", "trabajo1_discrete"):
+    for name in ("paper_li2024", "trabajo1_discrete", "metaheuristicas"):
         load_scenario("configs/{}.yaml".format(name))
+
+
+def test_pso_and_ga_defaults_are_the_canonical_literature_values():
+    """No estan afinados a este problema; ver analysis/report.py, seccion 3."""
+    config = ScenarioConfig()
+    assert config.metaheuristic.pso.inertia == pytest.approx(0.729)
+    assert config.metaheuristic.pso.cognitive == pytest.approx(1.49445)
+    assert config.metaheuristic.pso.social == pytest.approx(1.49445)
+    assert config.metaheuristic.ga.tournament_size == 3
+    assert config.metaheuristic.ga.elite_count == 2
+
+
+def test_pso_ga_overrides_do_not_disturb_unrelated_defaults():
+    """Un override anidado parcial no debe tocar el resto del bloque."""
+    config = ScenarioConfig.from_dict({"metaheuristic": {"pso": {"inertia": 0.5}}})
+    assert config.metaheuristic.pso.inertia == pytest.approx(0.5)
+    assert config.metaheuristic.pso.social == pytest.approx(1.49445)
+    assert config.metaheuristic.ga == ScenarioConfig().metaheuristic.ga
 
 
 def test_config_is_frozen():
