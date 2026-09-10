@@ -275,3 +275,36 @@ los otros tres. El detalle completo — convergencia, distribución de resultado
 efecto A₁₂, y el estudio de sensibilidad sobre AGSR y carga mínima del electrolizador — está
 en [entrega/README.md](entrega/README.md), regenerable con
 `h2hres report --config configs/metaheuristicas.yaml --out entrega` (~5 min).
+
+## Batería fija vs. batería variable
+
+La comparativa de arriba usa `configs/metaheuristicas.yaml`, donde la duración de batería
+es variable de decisión (∈ {1, 2, 4} h) gracias al reparto de costos descrito más abajo. Pero
+el escenario original de la extensión discreta, `configs/trabajo1_discrete.yaml`, fija la
+duración en 1 h — la variable de decisión es solo potencia, no potencia+duración — porque sin
+el reparto de costos alargar la batería era gratis. Correr la misma comparativa sobre ese
+escenario (`h2hres report --config configs/trabajo1_discrete.yaml --out entrega_bateria_fija`)
+da un **ranking distinto**, no solo números distintos:
+
+| | batería fija (3 variables) | batería variable (4 variables) |
+|---|---|---|
+| mejor algoritmo | **GWO / PSO** (empatados, ~0.2810) | **GA** (0.2810) |
+| peor algoritmo | SHO (0.2814, std 0.0037) | WOA (0.2817, std 0.0047) |
+| pares significativos | 8 de 15 | 5 de 15 |
+| GA vs. GWO/PSO | GA pierde (p<0.05 con ambos) | GA gana (sin significancia) |
+
+Con batería fija, GWO y PSO dominan con claridad: baten a GA, SHO, WOA y random con
+significancia estadística, y quedan estadísticamente empatados entre sí — el único par "top"
+no significativo de toda la tabla. Al liberar la duración como cuarta variable, **GA pasa a
+ser el mejor**: su cruce BLX-α parece explotar mejor una dimensión discreta extra que el
+encierro continuo de GWO/PSO. Es decir, **la elección de algoritmo no es neutral al tamaño
+del espacio de búsqueda** — un hallazgo que solo aparece al comparar ambos escenarios uno
+contra el otro, no mirando ninguno por separado.
+
+La validación contra el paper y el estudio de sensibilidad (AGSR, carga mínima) dan
+resultados prácticamente idénticos entre ambos escenarios, como es esperable: ambos barridos
+corren sobre el modelo base con duración de batería fija en 1 h, que no depende de
+`duration_candidates_h`. La diferencia real está solo en el espacio que exploran las
+metaheurísticas. Detalle completo en
+[entrega_bateria_fija/README.md](entrega_bateria_fija/README.md), regenerable con
+`h2hres report --config configs/trabajo1_discrete.yaml --out entrega_bateria_fija`.
