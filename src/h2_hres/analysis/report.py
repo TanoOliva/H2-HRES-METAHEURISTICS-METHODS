@@ -15,6 +15,7 @@ de los CSV que lo acompanan.
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Callable, Dict, Optional, Sequence, Union
 
@@ -23,6 +24,7 @@ import pandas as pd
 from ..config.loader import dump_scenario
 from ..config.schema import ScenarioConfig
 from ..optimization.comparison import run_comparison
+from ..optimization.metaheuristics import REGISTRY
 from ..optimization.objectives import ObjectiveFunction
 from ..simulation.simulator import HourlyData
 from .comparison_plots import (
@@ -34,13 +36,19 @@ from .comparison_plots import (
 from .plots import save_figure
 from .sensitivity import AGSR_MAX_VALUES, MIN_LOAD_RATIO_VALUES, run_sensitivity_study
 from .statistics import comparison_table, pairwise_wilcoxon
+from .style import ALGORITHM_ORDER
 from .validation import resource_metrics, validate_scenario
 
 __all__ = ["generate_report", "DEFAULT_ALGORITHMS"]
 
 PathLike = Union[str, Path]
 
-DEFAULT_ALGORITHMS: Sequence[str] = ("gwo", "pso", "ga", "random")
+# Deriva del mismo orden que usa la CLI (``style.ALGORITHM_ORDER`` filtrado por
+# lo realmente registrado), para que agregar un algoritmo no deje este default
+# desactualizado como paso silenciosamente con los primeros cuatro.
+DEFAULT_ALGORITHMS: Sequence[str] = tuple(
+    name for name in ALGORITHM_ORDER if name in REGISTRY
+)
 
 
 def generate_report(
@@ -66,6 +74,8 @@ def generate_report(
     def notify(message: str) -> None:
         if on_progress is not None:
             on_progress(message)
+
+    started = time.perf_counter()
 
     out = Path(out_dir)
     figures_dir = out / "figuras"
@@ -125,6 +135,8 @@ def generate_report(
         figures_dir / "sensibilidad_carga_minima.png",
     )
 
+    elapsed_s = time.perf_counter() - started
+
     notify("Escribiendo entrega/README.md...")
     readme = _build_readme(
         config=config,
@@ -136,6 +148,7 @@ def generate_report(
         algorithms=list(algorithms),
         runs=runs,
         sensitivity=sensitivity,
+        elapsed_s=elapsed_s,
     )
     (out / "README.md").write_text(readme, encoding="utf-8")
 
@@ -146,6 +159,14 @@ def generate_report(
 # Tabla markdown minima, sin depender de ``tabulate`` (no es dependencia del
 # paquete; agregarla solo para esto no se justifica).
 # ---------------------------------------------------------------------------
+
+
+def _format_duration(elapsed_s: float) -> str:
+    """Formato legible para el tiempo total medido de ``generate_report``."""
+    minutes, seconds = divmod(int(round(elapsed_s)), 60)
+    if minutes == 0:
+        return "{} s".format(seconds)
+    return "{} min {} s".format(minutes, seconds)
 
 
 def _markdown_table(df: pd.DataFrame, float_format: str = "{:.4f}") -> str:
@@ -165,6 +186,61 @@ def _markdown_table(df: pd.DataFrame, float_format: str = "{:.4f}") -> str:
     return "\n".join([header, sep] + rows)
 
 
+# Metadatos de cada algoritmo para la seccion "Que se comparo": familia,
+# hiperparametros (como funcion de la config, para que el valor mostrado sea
+# siempre el que realmente se uso) y la fuente. Si se registra un algoritmo
+# nuevo sin entrada aqui, aparece en la tabla con un aviso en vez de romper la
+# generacion del reporte.
+_ALGORITHM_INFO = {
+    "gwo": (
+        "Enjambre jerarquico",
+        lambda cfg: "jerarquia alpha-beta-delta, `a` decae 2->0",
+        "Mirjalili et al. (2014)",
+    ),
+    "pso": (
+        "Enjambre",
+        lambda cfg: "constriccion Clerc-Kennedy: chi={:.3f}, c1=c2={:.5f}".format(
+            cfg.pso.inertia, cfg.pso.cognitive
+        ),
+        "Clerc & Kennedy (2002)",
+    ),
+    "ga": (
+        "Evolutivo",
+        lambda cfg: (
+            "torneo k={}, BLX-alpha, mutacion gaussiana sigma={:.0%} del "
+            "rango, elite={}".format(
+                cfg.ga.tournament_size, cfg.ga.mutation_sigma_ratio, cfg.ga.elite_count
+            )
+        ),
+        "estandar real-coded GA",
+    ),
+    "sho": (
+        "Enjambre jerarquico",
+        lambda cfg: "encierro sobre un unico lider (presa), h decae {:.1f}->0".format(
+            cfg.sho.h_max
+        ),
+        "Dhiman & Kumar (2017)",
+    ),
+    "woa": (
+        "Enjambre",
+        lambda cfg: (
+            "encierro/espiral bubble-net sorteados 50/50 por agente, "
+            "b={:.1f}, a decae 2->0".format(cfg.woa.spiral_constant)
+        ),
+        "Mirjalili & Lewis (2016)",
+    ),
+    "random": (
+        "Linea base",
+        lambda cfg: "muestreo uniforme sobre la malla discreta",
+        "--",
+    ),
+}
+
+# Algoritmos cuyo comportamiento depende de un bloque de hiperparametros
+# propio en MetaheuristicConfig (gwo y random no tienen ninguno que ajustar).
+_TUNABLE_HYPERPARAM_ALGORITHMS = ("pso", "ga", "sho", "woa")
+
+
 def _build_readme(
     config: ScenarioConfig,
     year: int,
@@ -175,6 +251,7 @@ def _build_readme(
     algorithms: list,
     runs: int,
     sensitivity: Dict[str, pd.DataFrame],
+    elapsed_s: float,
 ) -> str:
     n_ok = int((validation_table["veredicto"] == "OK").sum())
     n_total = len(validation_table)
@@ -187,6 +264,14 @@ def _build_readme(
         n_pairs = len(pairwise_table)
     else:
         n_significant = n_pairs = 0
+
+    n_algorithms = len(algorithms)
+    competing = [name for name in algorithms if name != "random"]
+    algorithms_phrase = (
+        "{} metaheuristicas y una linea base aleatoria".format(len(competing))
+        if "random" in algorithms and competing
+        else "{} metaheuristicas".format(n_algorithms)
+    )
 
     agsr = sensitivity["agsr_max"].sort_values("value")
     min_load = sensitivity["min_load_ratio"].sort_values("value")
@@ -212,9 +297,9 @@ def _build_readme(
     add(
         "Extension discreta de Li et al. (2024), *Capacity optimization of a "
         "wind-photovoltaic-electrolysis-battery (WPEB) hybrid energy system for "
-        "power and hydrogen generation*, resuelta con cuatro metaheuristicas y "
-        "contrastada con un estudio de sensibilidad sobre las dos restricciones "
-        "que fijan el dominio factible del paper."
+        "power and hydrogen generation*, resuelta con {} y contrastada con un "
+        "estudio de sensibilidad sobre las dos restricciones que fijan el "
+        "dominio factible del paper.".format(algorithms_phrase)
     )
     add("")
     add(
@@ -248,15 +333,18 @@ def _build_readme(
     )
     add(
         "- **Presupuesto**: {} evaluaciones por corrida ({} individuos x {} "
-        "iteraciones), identico para los cuatro algoritmos -- es la condicion "
+        "iteraciones), identico para los {} algoritmos -- es la condicion "
         "para que la comparacion sea justa, y los tests del paquete la "
         "verifican automaticamente para cualquier algoritmo nuevo que se "
-        "registre.".format(budget, config.metaheuristic.population, config.metaheuristic.iterations)
+        "registre.".format(
+            budget, config.metaheuristic.population, config.metaheuristic.iterations,
+            n_algorithms,
+        )
     )
     add(
         "- **Reproducibilidad**: {} semillas consecutivas por algoritmo, "
         "compartiendo un unico cache de perfiles de generacion (mismo dato "
-        "meteorologico, mismo modelo, para los cuatro).".format(runs)
+        "meteorologico, mismo modelo, para los {}).".format(runs, n_algorithms)
     )
     add("")
 
@@ -265,33 +353,29 @@ def _build_readme(
     add("")
     add("| Algoritmo | Familia | Hiperparametros | Fuente |")
     add("|---|---|---|---|")
-    add(
-        "| GWO | Enjambre jerarquico | jerarquia alpha-beta-delta, "
-        "`a` decae 2->0 | Mirjalili et al. (2014) |"
-    )
-    add(
-        "| PSO | Enjambre | constriccion Clerc-Kennedy: chi={:.3f}, "
-        "c1=c2={:.5f} | Clerc & Kennedy (2002) |".format(
-            config.metaheuristic.pso.inertia, config.metaheuristic.pso.cognitive
-        )
-    )
-    add(
-        "| GA | Evolutivo | torneo k={}, BLX-alpha, mutacion gaussiana "
-        "sigma={:.0%} del rango, elite={} | estandar real-coded GA |".format(
-            config.metaheuristic.ga.tournament_size,
-            config.metaheuristic.ga.mutation_sigma_ratio,
-            config.metaheuristic.ga.elite_count,
-        )
-    )
-    add("| random | Linea base | muestreo uniforme sobre la malla discreta | -- |")
+    for algorithm in algorithms:
+        info = _ALGORITHM_INFO.get(algorithm)
+        if info is None:
+            add("| {} | -- | (sin describir; agregar a `_ALGORITHM_INFO`) | -- |".format(
+                algorithm.upper()
+            ))
+            continue
+        family, hyperparams_fn, source = info
+        label = "random" if algorithm == "random" else algorithm.upper()
+        add("| {} | {} | {} | {} |".format(
+            label, family, hyperparams_fn(config.metaheuristic), source
+        ))
     add("")
-    add(
-        "Los hiperparametros de PSO y GA son los valores canonicos de la "
-        "literatura, no un ajuste fino a este problema: la comparativa no "
-        "debe leerse como un torneo con un favorito afinado. Ver "
-        "`configs/metaheuristicas.yaml` para el escenario completo."
-    )
-    add("")
+    tunable_present = [a for a in competing if a in _TUNABLE_HYPERPARAM_ALGORITHMS]
+    if tunable_present:
+        add(
+            "Los hiperparametros de {} son los valores canonicos de la "
+            "literatura, no un ajuste fino a este problema: la comparativa no "
+            "debe leerse como un torneo con un favorito afinado. Ver "
+            "`configs/metaheuristicas.yaml` para el escenario "
+            "completo.".format("/".join(a.upper() for a in tunable_present))
+        )
+        add("")
 
     # -- 4. Resultados --------------------------------------------------------
     add("## Resultados")
@@ -390,12 +474,18 @@ def _build_readme(
     add(
         "Paleta y `rcParams` compartidos en `src/h2_hres/analysis/style.py`, "
         "validados con el script de la skill `dataviz` (metodo OKLab/CVD de "
-        "Arcuri) para las cuatro series apareciendo juntas a la vez (boxplot, "
-        "dispersion) -- el contexto mas exigente. Solo los tres primeros "
-        "colores del catalogo de referencia superan esa validacion en "
-        "conjunto; `random` es la linea base, no un algoritmo competidor, asi "
-        "que se codifica con gris neutro y linea discontinua en vez de un "
-        "cuarto matiz categorico."
+        "Arcuri) para los {} algoritmos de esta corrida. El resultado depende "
+        "del tipo de grafico: convergencia (lineas) y distribucion de scores "
+        "(boxplot, cajas en orden fijo) se leen por adyacencia y los {} "
+        "matices categoricos pasan la validacion en ese modo; la dispersion "
+        "calidad-tiempo es el contexto mas exigente ('todos los pares "
+        "visibles a la vez') y ahi el color por si solo no alcanza, asi que "
+        "cada algoritmo tiene ademas una forma de marcador propia como "
+        "codificacion primaria. `random` es la linea base, no un algoritmo "
+        "competidor, asi que se codifica con gris neutro, linea discontinua "
+        "y una 'x' como marcador en vez de un matiz categorico.".format(
+            n_algorithms, n_algorithms
+        )
     )
     add("")
     add("| Figura | Datos | Que muestra | Regenerar |")
@@ -480,9 +570,12 @@ def _build_readme(
         "- **`converter.plant_load_ratio = 0.0`**: el paper no publica el "
         "consumo parasito de la planta."
     )
-    add(
-        "- **Hiperparametros de PSO/GA sin ajustar**: valores canonicos de la "
-        "literatura, no afinados a este problema (seccion 3)."
+    if tunable_present:
+        add(
+            "- **Hiperparametros de {} sin ajustar**: valores canonicos de la "
+            "literatura, no afinados a este problema (seccion 3).".format(
+                "/".join(a.upper() for a in tunable_present)
+            )
     )
     add("")
 
@@ -514,10 +607,13 @@ def _build_readme(
     add(
         "`report` encadena validacion, comparativa ({} algoritmos x {} "
         "semillas, {} evaluaciones cada una) y los dos barridos de "
-        "sensibilidad. En esta maquina toma aproximadamente 4-5 minutos. Cada "
+        "sensibilidad. La ultima corrida en esta maquina tomo {} (medido, no "
+        "estimado -- se recalcula cada vez que se regenera `entrega/`). Cada "
         "corrida individual tambien queda en `results/<timestamp>_*/` via "
         "`h2hres compare` y `h2hres sensitivity` por separado, si hace falta "
-        "aislar una sin regenerar todo.".format(len(algorithms), runs, budget)
+        "aislar una sin regenerar todo.".format(
+            len(algorithms), runs, budget, _format_duration(elapsed_s)
+        )
     )
     add("")
 

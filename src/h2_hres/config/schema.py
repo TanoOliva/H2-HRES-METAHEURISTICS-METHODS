@@ -26,6 +26,8 @@ __all__ = [
     "SearchConfig",
     "PSOConfig",
     "GAConfig",
+    "SHOConfig",
+    "WOAConfig",
     "MetaheuristicConfig",
     "ComponentCost",
     "CostConfig",
@@ -425,6 +427,39 @@ class GAConfig:
 
 
 @dataclass(frozen=True)
+class SHOConfig:
+    """Hiperparametros del Spotted Hyena Optimizer (Dhiman & Kumar, 2017).
+
+    ``h_max`` es el unico hiperparametro de la literatura: el coeficiente ``h``
+    decae linealmente de ``h_max`` a 0 a lo largo de las iteraciones (en el SHO
+    original, de 5 a 0; en GWO, el analogo ``a`` decae de 2 a 0). Un rango mas
+    ancho da mas exploracion inicial que GWO con la misma estructura de
+    encierro sobre un unico lider (la "presa").
+    """
+
+    h_max: float = 5.0
+
+    def __post_init__(self) -> None:
+        if self.h_max <= 0:
+            raise ConfigError("h_max debe ser > 0")
+
+
+@dataclass(frozen=True)
+class WOAConfig:
+    """Hiperparametros del Whale Optimization Algorithm (Mirjalili & Lewis, 2016).
+
+    ``spiral_constant`` (``b`` en el paper) fija la forma de la espiral logaritmica
+    de la fase de ataque por burbujas; 1.0 es el valor que usan los autores.
+    """
+
+    spiral_constant: float = 1.0
+
+    def __post_init__(self) -> None:
+        if self.spiral_constant <= 0:
+            raise ConfigError("spiral_constant debe ser > 0")
+
+
+@dataclass(frozen=True)
 class MetaheuristicConfig:
     """Presupuesto y reproducibilidad de los optimizadores poblacionales."""
 
@@ -435,6 +470,8 @@ class MetaheuristicConfig:
     penalty_agsr_weight: float = 1e3
     pso: PSOConfig = field(default_factory=PSOConfig)
     ga: GAConfig = field(default_factory=GAConfig)
+    sho: SHOConfig = field(default_factory=SHOConfig)
+    woa: WOAConfig = field(default_factory=WOAConfig)
 
     def __post_init__(self) -> None:
         if self.population < 1:
@@ -696,6 +733,8 @@ _NESTED_TYPES = {
     "SearchConfig": SearchConfig,
     "PSOConfig": PSOConfig,
     "GAConfig": GAConfig,
+    "SHOConfig": SHOConfig,
+    "WOAConfig": WOAConfig,
     "MetaheuristicConfig": MetaheuristicConfig,
     "ComponentCost": ComponentCost,
     "CostConfig": CostConfig,

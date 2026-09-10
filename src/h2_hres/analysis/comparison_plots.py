@@ -15,7 +15,13 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from .style import ALGORITHM_ORDER, algorithm_color, algorithm_linestyle, apply_style
+from .style import (
+    ALGORITHM_ORDER,
+    algorithm_color,
+    algorithm_linestyle,
+    algorithm_marker,
+    apply_style,
+)
 
 __all__ = [
     "plot_convergence_by_algorithm",
@@ -110,15 +116,28 @@ def plot_quality_vs_time(runs: pd.DataFrame, score_column: str = "score") -> plt
     evaluaciones identico (ver ``MetaheuristicConfig.evaluation_budget``), el
     tiempo por corrida refleja el costo del operador de movimiento, no
     ventaja alguna. Sirve para decidir cuantas semillas correr en la practica.
+
+    Un grafico de dispersion es el contexto "todos los pares visibles a la
+    vez": con 5 algoritmos mas la linea base, el color solo no supera el
+    validador de CVD (ver ``style.py``). Por eso la forma del marcador es la
+    codificacion primaria de identidad; el color queda como refuerzo
+    consistente con las demas figuras.
     """
     figure, axes = plt.subplots(figsize=(8, 5.5))
 
+    # Los marcadores "sin relleno" de matplotlib (x, +, |, _, 1-4) no admiten
+    # un borde distinto de su color: pedirselo solo produce un aviso.
+    unfilled_markers = {"x", "+", "|", "_", "1", "2", "3", "4"}
+
     for algorithm in _ordered_algorithms(runs["algorithm"]):
         subset = runs[runs["algorithm"] == algorithm]
+        marker = algorithm_marker(algorithm)
+        edge_kwargs = {} if marker in unfilled_markers else {"edgecolors": "white", "linewidths": 0.5}
         axes.scatter(
             subset["elapsed_s"], subset[score_column],
-            color=algorithm_color(algorithm), label=algorithm.upper(),
-            alpha=0.75, s=42, edgecolors="white", linewidths=0.5,
+            color=algorithm_color(algorithm), marker=marker,
+            label=algorithm.upper(),
+            alpha=0.75, s=48, **edge_kwargs,
         )
 
     axes.set_title("Calidad vs. tiempo de computo (una corrida = un punto)")

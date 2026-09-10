@@ -11,6 +11,8 @@ from .metaheuristics import (
     Optimizer,
     ParticleSwarm,
     RandomSearch,
+    SpottedHyenaOptimizer,
+    WhaleOptimization,
     get_optimizer,
 )
 from .objectives import Evaluation, ObjectiveFunction, PenaltyPolicy
@@ -28,6 +30,8 @@ __all__ = [
     "ParticleSwarm",
     "PenaltyPolicy",
     "RandomSearch",
+    "SpottedHyenaOptimizer",
+    "WhaleOptimization",
     "get_optimizer",
     "grid_axes",
     "local_descent_search",

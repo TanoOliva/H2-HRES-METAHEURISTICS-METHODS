@@ -54,6 +54,10 @@ def test_unknown_top_level_key_is_rejected():
         {"metaheuristic": {"ga": {"tournament_size": 1}}},        # < 2
         {"metaheuristic": {"population": 2, "ga": {"elite_count": 5}}},
         {"metaheuristic": {"population": 2, "ga": {"tournament_size": 5}}},
+        {"metaheuristic": {"sho": {"h_max": 0.0}}},
+        {"metaheuristic": {"sho": {"h_max": -1.0}}},
+        {"metaheuristic": {"woa": {"spiral_constant": 0.0}}},
+        {"metaheuristic": {"woa": {"spiral_constant": -1.0}}},
     ],
 )
 def test_invalid_ranges_are_rejected(payload):
@@ -92,6 +96,8 @@ def test_pso_and_ga_defaults_are_the_canonical_literature_values():
     assert config.metaheuristic.pso.social == pytest.approx(1.49445)
     assert config.metaheuristic.ga.tournament_size == 3
     assert config.metaheuristic.ga.elite_count == 2
+    assert config.metaheuristic.sho.h_max == pytest.approx(5.0)
+    assert config.metaheuristic.woa.spiral_constant == pytest.approx(1.0)
 
 
 def test_pso_ga_overrides_do_not_disturb_unrelated_defaults():

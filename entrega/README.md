@@ -1,6 +1,6 @@
 # Comparativa de metaheuristicas sobre el sistema WPEB
 
-Extension discreta de Li et al. (2024), *Capacity optimization of a wind-photovoltaic-electrolysis-battery (WPEB) hybrid energy system for power and hydrogen generation*, resuelta con cuatro metaheuristicas y contrastada con un estudio de sensibilidad sobre las dos restricciones que fijan el dominio factible del paper.
+Extension discreta de Li et al. (2024), *Capacity optimization of a wind-photovoltaic-electrolysis-battery (WPEB) hybrid energy system for power and hydrogen generation*, resuelta con 5 metaheuristicas y una linea base aleatoria y contrastada con un estudio de sensibilidad sobre las dos restricciones que fijan el dominio factible del paper.
 
 **Estado de la replicacion del paper** (9 de 10 objetivos publicados dentro de tolerancia): ver `tablas/validacion_paper.csv` y `CHANGELOG.md` en la raiz del repositorio para el detalle de cada correccion de modelado y su efecto medido.
 
@@ -22,8 +22,8 @@ Extension discreta de Li et al. (2024), *Capacity optimization of a wind-photovo
 - **Modelo**: simulacion horaria (8760-8784 h, ano 2008) del despacho WPEB descrito en `src/h2_hres/simulation/`.
 - **Espacio de decision** (4 variables, `optimization/encoding.py`): capacidad eolica continua (PV = 200 - eolica), unidades de electrolizador enteras (5 MW cada una), potencia de bateria en multiplos de 5 MW, duracion de bateria discreta {1, 2, 4} h.
 - **Objetivo**: LCOE, igual que el paper. Una solucion infactible (AGSR > 20%) recibe una penalizacion proporcional a cuanto la viola, para que el optimizador tenga gradiente hacia la region factible en vez de un muro.
-- **Presupuesto**: 600 evaluaciones por corrida (20 individuos x 30 iteraciones), identico para los cuatro algoritmos -- es la condicion para que la comparacion sea justa, y los tests del paquete la verifican automaticamente para cualquier algoritmo nuevo que se registre.
-- **Reproducibilidad**: 30 semillas consecutivas por algoritmo, compartiendo un unico cache de perfiles de generacion (mismo dato meteorologico, mismo modelo, para los cuatro).
+- **Presupuesto**: 600 evaluaciones por corrida (20 individuos x 30 iteraciones), identico para los 6 algoritmos -- es la condicion para que la comparacion sea justa, y los tests del paquete la verifican automaticamente para cualquier algoritmo nuevo que se registre.
+- **Reproducibilidad**: 30 semillas consecutivas por algoritmo, compartiendo un unico cache de perfiles de generacion (mismo dato meteorologico, mismo modelo, para los 6).
 
 ## Que se comparo
 
@@ -32,9 +32,11 @@ Extension discreta de Li et al. (2024), *Capacity optimization of a wind-photovo
 | GWO | Enjambre jerarquico | jerarquia alpha-beta-delta, `a` decae 2->0 | Mirjalili et al. (2014) |
 | PSO | Enjambre | constriccion Clerc-Kennedy: chi=0.729, c1=c2=1.49445 | Clerc & Kennedy (2002) |
 | GA | Evolutivo | torneo k=3, BLX-alpha, mutacion gaussiana sigma=10% del rango, elite=2 | estandar real-coded GA |
+| SHO | Enjambre jerarquico | encierro sobre un unico lider (presa), h decae 5.0->0 | Dhiman & Kumar (2017) |
+| WOA | Enjambre | encierro/espiral bubble-net sorteados 50/50 por agente, b=1.0, a decae 2->0 | Mirjalili & Lewis (2016) |
 | random | Linea base | muestreo uniforme sobre la malla discreta | -- |
 
-Los hiperparametros de PSO y GA son los valores canonicos de la literatura, no un ajuste fino a este problema: la comparativa no debe leerse como un torneo con un favorito afinado. Ver `configs/metaheuristicas.yaml` para el escenario completo.
+Los hiperparametros de PSO/GA/SHO/WOA son los valores canonicos de la literatura, no un ajuste fino a este problema: la comparativa no debe leerse como un torneo con un favorito afinado. Ver `configs/metaheuristicas.yaml` para el escenario completo.
 
 ## Resultados
 
@@ -45,22 +47,33 @@ Ranking por mejor score alcanzado (menor LCOE penalizado es mejor), sobre 30 sem
 | 1 | ga | 30 | 0.2810 | 0.2839 | 0.0020 | 0.2882 | 30 |
 | 2 | pso | 30 | 0.2810 | 0.2832 | 0.0014 | 0.2876 | 30 |
 | 3 | gwo | 30 | 0.2810 | 0.2831 | 0.0016 | 0.2880 | 30 |
-| 4 | random | 30 | 0.2815 | 0.2854 | 0.0026 | 0.2919 | 30 |
+| 4 | sho | 30 | 0.2811 | 0.2857 | 0.0045 | 0.2957 | 30 |
+| 5 | random | 30 | 0.2815 | 0.2854 | 0.0026 | 0.2919 | 30 |
+| 6 | woa | 30 | 0.2817 | 0.2878 | 0.0047 | 0.3009 | 30 |
 
-**GA** obtuvo el mejor score (0.281003); **RANDOM** el peor (0.281502). Ver `figuras/convergencia_por_algoritmo.png` (mediana y rango intercuartil de convergencia) y `figuras/distribucion_scores.png` (dispersion de resultados finales).
+**GA** obtuvo el mejor score (0.281003); **WOA** el peor (0.281693). Ver `figuras/convergencia_por_algoritmo.png` (mediana y rango intercuartil de convergencia) y `figuras/distribucion_scores.png` (dispersion de resultados finales).
 
-**Significancia estadistica** (Wilcoxon pareado por semilla, corregido por Holm-Bonferroni sobre los 6 pares; A12 es el tamano del efecto de Vargha-Delaney -- 0.5 = indistinguibles, 1.0 = el primero domina siempre):
+**Significancia estadistica** (Wilcoxon pareado por semilla, corregido por Holm-Bonferroni sobre los 15 pares; A12 es el tamano del efecto de Vargha-Delaney -- 0.5 = indistinguibles, 1.0 = el primero domina siempre):
 
 | algoritmo_a | algoritmo_b | mediana_a | mediana_b | p_value_holm | a12 | significativo_alpha_0.05 |
 | --- | --- | --- | --- | --- | --- | --- |
-| ga | gwo | 0.2837 | 0.2830 | 0.1173 | 0.4067 | no |
-| ga | pso | 0.2837 | 0.2838 | 0.1173 | 0.3989 | no |
-| ga | random | 0.2837 | 0.2848 | 0.1173 | 0.6767 | no |
-| gwo | pso | 0.2830 | 0.2838 | 0.7611 | 0.4989 | no |
-| gwo | random | 0.2830 | 0.2848 | 0.0023 | 0.7844 | si |
-| pso | random | 0.2838 | 0.2848 | 0.0033 | 0.7567 | si |
+| ga | gwo | 0.2837 | 0.2830 | 0.2694 | 0.4067 | no |
+| ga | pso | 0.2837 | 0.2838 | 0.2550 | 0.3989 | no |
+| ga | random | 0.2837 | 0.2848 | 0.2346 | 0.6767 | no |
+| ga | sho | 0.2837 | 0.2835 | 0.8130 | 0.5456 | no |
+| ga | woa | 0.2837 | 0.2868 | 0.0010 | 0.7856 | si |
+| gwo | pso | 0.2830 | 0.2838 | 1.0000 | 0.4989 | no |
+| gwo | random | 0.2830 | 0.2848 | 0.0046 | 0.7844 | si |
+| gwo | sho | 0.2830 | 0.2835 | 0.3178 | 0.6533 | no |
+| gwo | woa | 0.2830 | 0.2868 | 0.0000 | 0.8522 | si |
+| pso | random | 0.2838 | 0.2848 | 0.0073 | 0.7567 | si |
+| pso | sho | 0.2838 | 0.2835 | 0.1205 | 0.6011 | no |
+| pso | woa | 0.2838 | 0.2868 | 0.0001 | 0.8467 | si |
+| random | sho | 0.2848 | 0.2835 | 1.0000 | 0.4356 | no |
+| random | woa | 0.2848 | 0.2868 | 0.1205 | 0.6456 | no |
+| sho | woa | 0.2835 | 0.2868 | 0.3178 | 0.6711 | no |
 
-2 de 6 pares muestran una diferencia significativa a alpha=0.05 tras la correccion. Ver `figuras/calidad_vs_tiempo.png` para el trade-off entre calidad alcanzada y tiempo de computo por corrida.
+5 de 15 pares muestran una diferencia significativa a alpha=0.05 tras la correccion. Ver `figuras/calidad_vs_tiempo.png` para el trade-off entre calidad alcanzada y tiempo de computo por corrida.
 
 ## Sensibilidad
 
@@ -91,7 +104,7 @@ De 20% a 50% (el paper usa 30%), el dominio factible cambia en -27 configuracion
 
 ## Como estan configurados los graficos
 
-Paleta y `rcParams` compartidos en `src/h2_hres/analysis/style.py`, validados con el script de la skill `dataviz` (metodo OKLab/CVD de Arcuri) para las cuatro series apareciendo juntas a la vez (boxplot, dispersion) -- el contexto mas exigente. Solo los tres primeros colores del catalogo de referencia superan esa validacion en conjunto; `random` es la linea base, no un algoritmo competidor, asi que se codifica con gris neutro y linea discontinua en vez de un cuarto matiz categorico.
+Paleta y `rcParams` compartidos en `src/h2_hres/analysis/style.py`, validados con el script de la skill `dataviz` (metodo OKLab/CVD de Arcuri) para los 6 algoritmos de esta corrida. El resultado depende del tipo de grafico: convergencia (lineas) y distribucion de scores (boxplot, cajas en orden fijo) se leen por adyacencia y los 6 matices categoricos pasan la validacion en ese modo; la dispersion calidad-tiempo es el contexto mas exigente ('todos los pares visibles a la vez') y ahi el color por si solo no alcanza, asi que cada algoritmo tiene ademas una forma de marcador propia como codificacion primaria. `random` es la linea base, no un algoritmo competidor, asi que se codifica con gris neutro, linea discontinua y una 'x' como marcador en vez de un matiz categorico.
 
 | Figura | Datos | Que muestra | Regenerar |
 |---|---|---|---|
@@ -115,7 +128,7 @@ Ningun grafico usa un eje Y doble: donde hay mas de una magnitud (capacidades y 
 - **Costo de bateria por potencia y energia**: el paper solo cotiza la bateria por kW (2549/500/10 CNY/kW capex/reemplazo/O&M) porque sus tres casos publicados son todos de 1 h, donde potencia y energia son numericamente iguales. Para que la duracion de bateria tenga sentido economico como variable de decision, este escenario reparte esos costos 30% potencia / 70% energia -- a 1 h la suma da exactamente los valores del paper (NPC-neutro, verificado en `tests/test_paper_validation.py`), y a mas horas la bateria cuesta mas. Es un supuesto explicito, no un dato del paper.
 - **`wind.wind_speed_source = measured_50m`**: la Tabla 3 del paper declara buje a 105 m, pero extrapolar a esa altura (via el parametro `WSC` de NASA POWER) da un CF eolico de ~56% contra el 40% publicado, mientras que la serie de 50 m sin extrapolar lo reproduce al 1%. Ver CHANGELOG.md, correccion 1.
 - **`converter.plant_load_ratio = 0.0`**: el paper no publica el consumo parasito de la planta.
-- **Hiperparametros de PSO/GA sin ajustar**: valores canonicos de la literatura, no afinados a este problema (seccion 3).
+- **Hiperparametros de PSO/GA/SHO/WOA sin ajustar**: valores canonicos de la literatura, no afinados a este problema (seccion 3).
 
 ## Cuestiones abiertas
 
@@ -129,5 +142,5 @@ h2hres download --config configs/metaheuristicas.yaml   # ~1 min, una vez
 h2hres report   --config configs/metaheuristicas.yaml --out entrega
 ```
 
-`report` encadena validacion, comparativa (4 algoritmos x 30 semillas, 600 evaluaciones cada una) y los dos barridos de sensibilidad. En esta maquina toma aproximadamente 4-5 minutos. Cada corrida individual tambien queda en `results/<timestamp>_*/` via `h2hres compare` y `h2hres sensitivity` por separado, si hace falta aislar una sin regenerar todo.
+`report` encadena validacion, comparativa (6 algoritmos x 30 semillas, 600 evaluaciones cada una) y los dos barridos de sensibilidad. La ultima corrida en esta maquina tomo 5 min 12 s (medido, no estimado -- se recalcula cada vez que se regenera `entrega/`). Cada corrida individual tambien queda en `results/<timestamp>_*/` via `h2hres compare` y `h2hres sensitivity` por separado, si hace falta aislar una sin regenerar todo.
 

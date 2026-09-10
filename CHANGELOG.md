@@ -1,5 +1,96 @@
 # Changelog
 
+## 0.4.0 — Spotted Hyena Optimizer y Whale Optimization Algorithm
+
+Agrega dos metaheurísticas más al marco de comparación: **SHO** (Dhiman & Kumar, 2017) y
+**WOA** (Mirjalili & Lewis, 2016), llevando el total a 6 algoritmos + línea base aleatoria.
+
+A escala completa (6 algoritmos × 30 semillas): **GA obtuvo el mejor score (0.2810)**,
+seguido de cerca por PSO y GWO (0.2810–0.2810). **SHO y WOA quedaron por debajo de la línea
+base aleatoria en varianza** (boxplots visiblemente más anchos, 0.2811 y 0.2817 de mejor
+score respectivamente) — un resultado real, no ajustado a modo: son enjambres jerárquicos
+de un solo líder o con ramas estocásticas 50/50, más propensos a estancarse en óptimos
+locales en este espacio de baja dimensión (4 variables) que PSO/GA/GWO. De los 15 pares
+(antes 6), **5 muestran diferencia estadísticamente significativa** tras Holm-Bonferroni:
+GWO y PSO siguen batiendo a random; ahora también GA y GWO/PSO baten a WOA.
+
+---
+
+### SHO (Dhiman & Kumar, 2017)
+
+`optimization/metaheuristics/sho.py`. Estructuralmente es GWO con **un solo líder** ("prey",
+la mejor posición conocida) en vez de tres, y un coeficiente `h` que decae de **`h_max`=5.0**
+a 0 (no de 2 a 0 como `a` en GWO) — un rango de exploración inicial más amplio con la misma
+estructura de encierro. Sigue la actualización de posición de la implementación de
+referencia de los propios autores; el paper describe además un paso narrativo de "formación
+de cluster" cuyo tamaño no queda especificado de forma reproducible y que esa implementación
+de referencia no usa, así que no se replica.
+
+Nuevo bloque `SHOConfig(h_max: float = 5.0)`.
+
+### WOA (Mirjalili & Lewis, 2016)
+
+`optimization/metaheuristics/woa.py`. Cada ballena sortea, una vez por iteración, entre dos
+mecanismos con probabilidad 50/50 — igual que en la implementación de referencia, los
+coeficientes `A`, `C`, `l` y la moneda `p` son **escalares por ballena**, no vectores por
+dimensión (un detalle que varía entre implementaciones de terceros, verificado contra el
+código de referencia de los propios autores antes de escribirlo):
+
+- `p < 0.5`: encierro sobre la mejor posición si `|A| < 1` (explotación), o sobre una
+  ballena aleatoria de la manada si `|A| >= 1` (exploración) — el mismo esquema que GWO/SHO.
+- `p >= 0.5`: espiral logarítmica tipo "bubble-net" alrededor de la mejor posición
+  (`spiral_constant`=1.0, el único hiperparámetro de la literatura).
+
+`a` decae de 2 a 0, como en GWO. Al sortearse una moneda distinta por ballena, el operador
+de movimiento no es vectorizable sobre toda la población a la vez como el de GWO; recorre la
+población en un bucle, igual de aceptable en costo que el de PSO/GA — la simulación horaria
+domina el tiempo, no el operador de movimiento.
+
+Nuevo bloque `WOAConfig(spiral_constant: float = 1.0)`.
+
+Ambos siguen exactamente el contrato de `Optimizer` (clip → evaluar → mover → `_record`) y
+heredan automáticamente los 5 tests parametrizados por `sorted(REGISTRY)` sin escribir nada
+adicional — se registraron y ya tenían cobertura de regresión antes de escribir una sola
+línea de test específico.
+
+### La paleta, extendida con una distinción que antes no hacía falta
+
+Con 5 algoritmos reales + línea base, el aviso que dejó `style.py` en la Fase 2 ("agregar un
+quinto algoritmo exige re-validar") se activó. Se corrió el validador de la skill `dataviz`
+en los dos contextos, no solo se asumió:
+
+| contexto | resultado con 5 matices (azul/naranja/aqua/amarillo/magenta) |
+|---|---|
+| **adyacente** (líneas, barras/boxplot) | **pasa** en claro y oscuro |
+| **todos-los-pares** (dispersión) | **falla**: normal-vision ΔE 12.9, bajo el piso de 15 |
+
+Un gráfico de líneas o un boxplot (cajas en orden fijo) se lee por adyacencia; una
+dispersión, donde cualquier par de puntos puede terminar vecino en el plano, es el contexto
+más exigente. Por eso `convergencia_por_algoritmo.png` y `distribucion_scores.png` usan
+directamente los 5 matices, y `calidad_vs_tiempo.png` suma **forma de marcador por
+algoritmo** (círculo/cuadrado/triángulo/diamante/estrella, `x` para random) como
+codificación primaria de identidad en ese gráfico — la forma no depende del color, así que
+la restricción de CVD deja de aplicar sobre la identidad del punto.
+
+### El generador de `entrega/README.md` tenía secciones hardcodeadas
+
+Al integrar los 6 algoritmos apareció un problema real en `analysis/report.py`: las tablas
+del README se inyectan desde los CSV (como se diseñó en la Fase 2), pero varias frases de
+alrededor — la introducción ("cuatro metaheurísticas"), el presupuesto ("idéntico para los
+cuatro algoritmos"), el párrafo de paleta, y la tabla "Qué se comparó" (con filas fijas para
+GWO/PSO/GA/random) — estaban escritas a mano asumiendo el conteo de la Fase 2. Con 6
+algoritmos, el README resultante tenía datos correctos pero narrativa incorrecta.
+
+Se corrigió generando esas secciones desde `algorithms` y un diccionario `_ALGORITHM_INFO`
+(familia, hiperparámetros como función de la config, fuente) en vez de texto fijo, y se
+agregó `test_readme_narrative_reflects_the_actual_algorithm_count` para que esta clase de
+desincronización no vuelva a colarse en silencio. De paso, `DEFAULT_ALGORITHMS` en
+`report.py` — hasta ahora una tupla fija de 4 nombres, no usada por la CLI pero exportada
+como default de la función pública — pasó a derivarse de `style.ALGORITHM_ORDER ∩ REGISTRY`,
+igual que ya hacía `cli.py`. También se reemplazó el estimado de tiempo escrito a mano
+("4-5 minutos") por el tiempo real medido de la corrida que generó el reporte.
+
+---
 ## 0.3.0 — Comparativa de metaheurísticas
 
 Con la réplica ya validada (9/10 objetivos del paper), esta fase agrega dos metaheurísticas

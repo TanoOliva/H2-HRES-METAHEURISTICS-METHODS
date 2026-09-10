@@ -12,11 +12,15 @@ from .ga import GeneticAlgorithm
 from .gwo import GreyWolfOptimizer
 from .pso import ParticleSwarm
 from .random_search import RandomSearch
+from .sho import SpottedHyenaOptimizer
+from .woa import WhaleOptimization
 
 REGISTRY: Dict[str, Type[Optimizer]] = {
     GreyWolfOptimizer.name: GreyWolfOptimizer,
     ParticleSwarm.name: ParticleSwarm,
     GeneticAlgorithm.name: GeneticAlgorithm,
+    SpottedHyenaOptimizer.name: SpottedHyenaOptimizer,
+    WhaleOptimization.name: WhaleOptimization,
     RandomSearch.name: RandomSearch,
 }
 
@@ -41,5 +45,7 @@ __all__ = [
     "Optimizer",
     "ParticleSwarm",
     "RandomSearch",
+    "SpottedHyenaOptimizer",
+    "WhaleOptimization",
     "get_optimizer",
 ]

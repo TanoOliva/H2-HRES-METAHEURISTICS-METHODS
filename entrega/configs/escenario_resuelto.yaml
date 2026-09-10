@@ -76,6 +76,10 @@ metaheuristic:
     mutation_sigma_ratio: 0.1
     tournament_size: 3
     elite_count: 2
+  sho:
+    h_max: 5.0
+  woa:
+    spiral_constant: 1.0
 costs:
   wind:
     capex_cny_per_kw: 5917.0

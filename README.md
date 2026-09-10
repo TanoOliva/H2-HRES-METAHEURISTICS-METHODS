@@ -250,22 +250,28 @@ prioridad de despacho, que el paper no publica.
 
 ## Comparativa de metaheurísticas
 
-Con la réplica ya validada, `h2hres compare` corre GWO, PSO, GA y una línea base aleatoria
-sobre el mismo espacio discreto (electrolizador modular, potencia y duración de batería
-como variables de decisión), con presupuesto de evaluaciones idéntico para los cuatro.
+Con la réplica ya validada, `h2hres compare` corre GWO, PSO, GA, SHO, WOA y una línea base
+aleatoria sobre el mismo espacio discreto (electrolizador modular, potencia y duración de
+batería como variables de decisión), con presupuesto de evaluaciones idéntico para los seis.
 
-A escala completa (4 algoritmos × 30 semillas, 600 evaluaciones cada una, año 2008):
+A escala completa (6 algoritmos × 30 semillas, 600 evaluaciones cada una, año 2008):
 
 | algoritmo | mejor score | media | desv. std |
 |---|---|---|---|
-| GA | 0.28100 | 0.28387 | 0.00201 |
-| PSO | 0.28104 | 0.28325 | 0.00136 |
-| GWO | 0.28104 | 0.28310 | 0.00158 |
-| random | 0.28150 | 0.28540 | 0.00263 |
+| GA | 0.28100 | 0.28395 | 0.00198 |
+| PSO | 0.28100 | 0.28324 | 0.00143 |
+| GWO | 0.28104 | 0.28306 | 0.00160 |
+| SHO | 0.28114 | 0.28568 | 0.00447 |
+| random | 0.28150 | 0.28540 | 0.00261 |
+| WOA | 0.28169 | 0.28783 | 0.00467 |
 
-Con Wilcoxon pareado por semilla (Holm-Bonferroni sobre 6 pares), **GWO y PSO baten a la
-línea base aleatoria con significancia estadística** (p < 0.05); las diferencias entre
-GWO, PSO y GA no lo son. El detalle completo — convergencia, distribución de resultados,
-tamaño del efecto A₁₂, y el estudio de sensibilidad sobre AGSR y carga mínima del
-electrolizador — está en [entrega/README.md](entrega/README.md), regenerable con
-`h2hres report --config configs/metaheuristicas.yaml --out entrega` (~4-5 min).
+Con Wilcoxon pareado por semilla (Holm-Bonferroni sobre 15 pares), **GWO y PSO baten a la
+línea base aleatoria con significancia estadística** (p < 0.05), y junto con GA también
+baten a WOA; las diferencias entre GWO, PSO y GA no lo son. SHO y WOA —ambos con una única
+rama de encierro jerárquico o ramas estocásticas 50/50— muestran una varianza notablemente
+mayor (desv. std ~2–3× la de GWO/PSO/GA), visible en `entrega/figuras/distribucion_scores.png`:
+en este espacio de 4 variables, parecen más propensos a estancarse en óptimos locales que
+los otros tres. El detalle completo — convergencia, distribución de resultados, tamaño del
+efecto A₁₂, y el estudio de sensibilidad sobre AGSR y carga mínima del electrolizador — está
+en [entrega/README.md](entrega/README.md), regenerable con
+`h2hres report --config configs/metaheuristicas.yaml --out entrega` (~5 min).

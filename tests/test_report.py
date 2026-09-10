@@ -100,6 +100,42 @@ def test_generate_report_skips_pairwise_with_one_algorithm(hourly, report_config
     assert "No se corrieron tests pareados" in readme
 
 
+def test_readme_narrative_reflects_the_actual_algorithm_count(hourly, report_config, tmp_path):
+    """Regresion: la narrativa del README no debe hardcodear un numero de algoritmos.
+
+    Se agregaron SHO y WOA despues de escribir las primeras seis metaheuristicas
+    del reporte, y varias frases (introduccion, presupuesto, reproducibilidad,
+    parrafo de paleta) quedaron con "cuatro" escrito a mano aunque las tablas
+    inyectadas desde los CSV si reflejaban el numero real. Este test corre con
+    5 algoritmos + linea base para que ese desajuste no pueda colarse de nuevo.
+    """
+    path = generate_report(
+        hourly, report_config, year=2008, out_dir=tmp_path / "entrega",
+        algorithms=("gwo", "pso", "ga", "sho", "woa", "random"), runs=2,
+        agsr_values=(0.10,), min_load_values=(0.20,),
+    )
+    readme = (path / "README.md").read_text(encoding="utf-8")
+
+    # Los 5 algoritmos que compiten (sin contar random) deben quedar en el
+    # numero que reporta la narrativa, no un valor fijo de una version previa.
+    assert "5 metaheuristicas" in readme
+    assert "identico para los 6 algoritmos" in readme
+    assert "para los 6)" in readme
+    assert "validados con el script de la skill `dataviz` (metodo OKLab/CVD de " in readme
+    assert "para los 6 algoritmos de esta corrida" in readme
+
+    # SHO y WOA deben aparecer en la tabla "Que se comparo" con su fuente,
+    # no solo en las tablas de datos.
+    assert "Dhiman & Kumar (2017)" in readme
+    assert "Mirjalili & Lewis (2016)" in readme
+    assert "SHO" in readme
+    assert "WOA" in readme
+
+    # Los cuatro algoritmos con hiperparametros propios deben citarse juntos
+    # en la seccion de supuestos, no solo PSO/GA (gwo no tiene bloque propio).
+    assert "PSO/GA/SHO/WOA" in readme
+
+
 def test_generate_report_is_idempotent_on_the_same_directory(hourly, report_config, tmp_path):
     """Regenerar sobre la misma carpeta reemplaza el contenido, no lo apila."""
     out_dir = tmp_path / "entrega"
