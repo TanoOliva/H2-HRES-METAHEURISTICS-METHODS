@@ -142,5 +142,5 @@ h2hres download --config configs/metaheuristicas.yaml   # ~1 min, una vez
 h2hres report   --config configs/metaheuristicas.yaml --out entrega
 ```
 
-`report` encadena validacion, comparativa (6 algoritmos x 30 semillas, 600 evaluaciones cada una) y los dos barridos de sensibilidad. La ultima corrida en esta maquina tomo 5 min 12 s (medido, no estimado -- se recalcula cada vez que se regenera `entrega/`). Cada corrida individual tambien queda en `results/<timestamp>_*/` via `h2hres compare` y `h2hres sensitivity` por separado, si hace falta aislar una sin regenerar todo.
+`report` encadena validacion, comparativa (6 algoritmos x 30 semillas, 600 evaluaciones cada una) y los dos barridos de sensibilidad. La ultima corrida en esta maquina tomo 7 min 12 s (medido, no estimado -- se recalcula cada vez que se regenera `entrega/`). Cada corrida individual tambien queda en `results/<timestamp>_*/` via `h2hres compare` y `h2hres sensitivity` por separado, si hace falta aislar una sin regenerar todo.
 
