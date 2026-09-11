@@ -1,0 +1,27 @@
+\begin{titlepage}
+  \addtocounter{page}{-1}
+  \thispagestyle{plain}
+
+  \makeatletter
+  \begin{picture}(0,0)
+    \put(-75,-80){\includegraphics[width=20cm]{assets/encabezado.png}}
+  \end{picture}
+
+  \begin{flushright}
+    \vspace*{\fill}
+
+    {\textcolor{titlecolor}{\LARGE\bfseries\MakeUppercase{\@title}}}
+
+    \vspace*{\fill}
+
+    {\textcolor{titlecolor}{\Large\bfseries\textsc{\@author}}}
+
+    \vspace{1cm}
+
+    {\textcolor{titlecolor}{\bfseries\textsc{
+      Seminario de Proyectos\\[0.2cm]
+      \@date
+    }}}
+  \end{flushright}
+  \makeatother
+\end{titlepage}

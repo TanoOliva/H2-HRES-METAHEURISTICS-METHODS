@@ -30,3 +30,20 @@ __pycache__/
 .idea/
 *.swp
 .DS_Store
+
+# LaTeX: artefactos de compilacion y plantilla PUCV sin usar
+latex/.build/
+latex/_archivo_no_usado/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.lof
+*.lot
+*.nlo
+*.run.xml
+*.synctex.gz
+*.toc
+
+# PDF compilado (regenerable con latex/compilar.ps1)
+pdf/

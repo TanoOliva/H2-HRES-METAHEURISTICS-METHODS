@@ -1,0 +1,130 @@
+\chapter{Diseño experimental}
+
+Este capítulo define con precisión qué se optimiza, sobre qué dominio, bajo qué presupuesto computacional y con qué criterios se decide si una diferencia observada entre dos algoritmos es real o atribuible al azar. La separación respecto del capítulo de metodología es deliberada: allí se describió \textit{cómo se construyó el simulador}; aquí se describe \textit{cómo se experimenta con él}.
+
+\section{Dos instancias de optimización, no una}
+\label{sec:dos_instancias}
+
+Una fuente recurrente de confusión en la literatura de dimensionamiento consiste en comparar valores de función objetivo que provienen de problemas distintos. Para evitarla, este trabajo distingue explícitamente dos instancias de optimización que comparten el simulador horario y la estructura de costos, pero que difieren en su conjunto de variables de decisión, en su política de despacho y, por tanto, en su región factible.
+
+La \textbf{instancia base} reproduce el problema tal como lo plantea el artículo de referencia \cite{Li2024WPEB}: dos grados de libertad efectivos (el reparto eólica--fotovoltaica y el tamaño del electrolizador), con la batería determinada como una cantidad derivada del electrolizador y una duración nominal fija de una hora. Su dominio es lo bastante pequeño para enumerarse por completo, lo que le confiere un papel particular: no es un competidor de las metaheurísticas, sino una \textbf{referencia de corrección}, porque en ella el óptimo global se conoce con certeza en lugar de estimarse.
+
+La \textbf{instancia discreta} es la formulación propia de este trabajo y constituye el problema que resuelven las metaheurísticas. En ella el almacenamiento electroquímico deja de ser un parámetro derivado y pasa a ser objeto de diseño en dos dimensiones independientes --- potencia y duración ---, lo que eleva la cardinalidad del dominio en casi dos órdenes de magnitud y lo vuelve inabordable por enumeración dentro del presupuesto experimental fijado.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Diferencias formales entre las dos instancias de optimización}
+\label{tab:dos_instancias}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{p{3.3cm} p{5.4cm} p{5.4cm}}
+\hline
+ & \textbf{Instancia base} & \textbf{Instancia discreta} \\
+\hline
+Variables de decisión & $W$, $E$ \quad (con $P = 200 - W$) & $W$, $n_E$, $B^{P}$, índice de duración \\
+Batería & Derivada: $B^{P} = \lceil 0{,}30\,E / 2{,}5 \rceil \cdot 2{,}5$, duración fija de 1 h & Libre: $B^{P} \in [0, 50]$ MW en pasos de 5 MW; duración $\in \{1, 2, 4\}$ h \\
+Política de despacho & \texttt{TOP\_UP}: la batería completa la carga mínima y revierte la descarga si no la alcanza & \texttt{THRESHOLD}: la batería solo se descarga si con ello se supera el umbral de carga mínima \\
+Cardinalidad del dominio & 420 configuraciones ($21 \times 20$) & 14.883 configuraciones ($41 \times 11 \times 11 \times 3$) \\
+Método de resolución & Barrido exhaustivo & Seis optimizadores, 600 evaluaciones cada uno \\
+Naturaleza del óptimo & Óptimo global exacto sobre la malla & Mejor solución hallada dentro del presupuesto \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Advertencia metodológica sobre la comparación entre instancias}
+
+Los mejores valores obtenidos en ambas instancias --- 0,285878 CNY/kWh en la base y 0,281003 CNY/kWh en la discreta --- \textbf{no constituyen una comparación directa entre el barrido exhaustivo y las metaheurísticas}. La diferencia de $-1{,}71\,\%$ agrega dos efectos que el diseño experimental no permite separar: el cambio de política de despacho (de \texttt{TOP\_UP} a \texttt{THRESHOLD}) y la ampliación del espacio de diseño de la batería. Interpretar esa brecha como una mejora aportada por las metaheurísticas sería un error de atribución.
+
+En consecuencia, las metaheurísticas se comparan entre sí, y contra la línea base aleatoria, exclusivamente dentro de la instancia discreta. La instancia base cumple dos funciones distintas: verificar que el simulador reproduce el modelo publicado y caracterizar la geometría del dominio factible.
+
+\section{Espacio de decisión y codificación}
+
+Los seis optimizadores operan sobre un vector real $\mathbf{x} \in \mathbb{R}^4$ acotado por caja, que una función de decodificación proyecta sobre el reticulado admisible antes de cada simulación. Esta separación entre \textit{representación interna continua} y \textit{solución evaluable discreta} permite que los operadores de búsqueda de cada algoritmo trabajen sin modificaciones respecto de su formulación canónica, mientras el simulador recibe siempre configuraciones físicamente realizables.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Variables de decisión de la instancia discreta y su proyección al dominio admisible}
+\label{tab:espacio_decision}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c p{3.7cm} c c p{5.0cm}}
+\hline
+\textbf{Índice} & \textbf{Variable} & \textbf{Lím. inf.} & \textbf{Lím. sup.} & \textbf{Proyección aplicada} \\
+\hline
+$x_0$ & Capacidad eólica $W$ [MW] & 0{,}0 & 200{,}0 & Continua; la fotovoltaica se obtiene por complemento, $P = 200 - W$ \\
+$x_1$ & Módulos de electrólisis $n_E$ & 10 & 20 & Entero más cercano; $E = 5\,n_E$ MW \\
+$x_2$ & Potencia de batería $B^{P}$ [MW] & 0{,}0 & 50{,}0 & Múltiplo de 5 MW más cercano \\
+$x_3$ & Índice de duración de batería & 0 & 2 & Índice del catálogo $\{1{,}0;\ 2{,}0;\ 4{,}0\}$ h \\
+\hline
+\end{tabular}
+\end{table}
+
+La capacidad eólica permanece continua de forma deliberada: el artículo de referencia no impone una granularidad sobre el reparto renovable, y discretizarla habría restringido artificialmente el dominio. Su consecuencia computacional se analiza en la discusión de resultados, dado que degrada la eficacia de la memoización de perfiles de generación. Discretizando la capacidad eólica en pasos de 5 MW únicamente a efectos de conteo, el dominio admisible contiene $41 \times 11 \times 11 \times 3 = 14.883$ configuraciones, frente a las 600 evaluaciones disponibles por ejecución: cada corrida explora aproximadamente el 4\,\% del espacio.
+
+\section{Función objetivo y tratamiento de restricciones}
+
+El problema se formula como una minimización monoobjetivo del costo nivelado de la energía, expresado en CNY/kWh. El costo presente neto y el costo nivelado del hidrógeno se calculan y se reportan para cada solución, pero no intervienen en la función de aptitud; la extensión multiobjetivo se discute como línea futura en el capítulo de conclusiones.
+
+Las restricciones se tratan mediante una estrategia mixta de \textbf{proyección y penalización}. Aquellas que pueden verificarse sin simular --- no negatividad de las capacidades, capacidad renovable total igual a 200 MW, tamaño del electrolizador acotado por $E \leq 0{,}5\,(W+P)$ y pertenencia de las variables discretas a su catálogo --- se resuelven por proyección o, cuando la violación no es reparable, provocan el rechazo inmediato del candidato sin incurrir en el costo de la simulación anual.
+
+La restricción sobre la fracción anual de energía vendida a la red (AGSR) es de naturaleza distinta: solo puede evaluarse \textit{después} de simular las 8.784 horas, por lo que se trata mediante una penalización proporcional al exceso, que preserva información direccional y orienta la búsqueda hacia la región factible en lugar de aplanar el paisaje:
+
+\begin{equation}
+f(\mathbf{x}) =
+\begin{cases}
+\mathrm{LCOE}(\mathbf{x}), & \text{si la solución es factible,} \\[4pt]
+10^{6}, & \text{si viola una restricción de capacidad,} \\[4pt]
+10^{6} + 10^{3} \cdot \max\!\left(\mathrm{AGSR}(\mathbf{x}) - 0{,}20,\ 0\right), & \text{si } \mathrm{AGSR}(\mathbf{x}) > 0{,}20.
+\end{cases}
+\label{eq:funcion_objetivo}
+\end{equation}
+
+La magnitud de la penalización base, seis órdenes por encima de cualquier valor factible de LCOE, garantiza que ninguna solución infactible pueda competir con una factible, mientras que el término proporcional ordena entre sí a las infactibles según su distancia a la frontera. Esta última propiedad es relevante en las primeras iteraciones, cuando buena parte de la población puede encontrarse fuera de la región admisible.
+
+\section{Protocolo experimental}
+
+El principio rector del banco de pruebas es la \textbf{equiparación del presupuesto de evaluaciones}. Comparar metaheurísticas por tiempo de reloj penaliza a las implementaciones menos optimizadas y premia detalles ajenos al algoritmo; comparar por número de iteraciones favorece a los algoritmos con poblaciones mayores. En un problema donde el costo dominante es la evaluación de la función objetivo --- una simulación horaria completa ---, el número de evaluaciones constituye la unidad de comparación justa \cite{Derrac2011Tutorial}.
+
+Los seis optimizadores reciben en consecuencia un presupuesto idéntico de 20 individuos por 30 iteraciones, es decir, 600 evaluaciones por ejecución. Cada algoritmo se ejecuta 30 veces con las semillas 42 a 71, de modo que la semilla $s$ produce condiciones iniciales comparables entre algoritmos y habilita un \textbf{diseño pareado por bloques}: el efecto de una semilla particularmente favorable o desfavorable afecta a todos los competidores por igual y puede descontarse en el análisis estadístico. El experimento completo comprende $6 \times 30 \times 600 = 108.000$ simulaciones horarias.
+
+Cada optimizador recibe un generador \texttt{numpy.random.Generator} inicializado con su propia semilla, de forma que la reproducibilidad no depende del estado global del intérprete. Los seis comparten además una única instancia de la función objetivo y, con ella, la misma memoria intermedia de perfiles de generación, lo que evita que las diferencias de tiempo medido reflejen distintos grados de aprovechamiento del caché.
+
+La Tabla~\ref{tab:hiperparametros} resume los hiperparámetros empleados. Todos corresponden a los valores canónicos recomendados en las publicaciones originales de cada algoritmo; no se realizó ajuste fino de hiperparámetros, decisión que se discute entre las limitaciones del trabajo.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Configuración de los seis optimizadores comparados}
+\label{tab:hiperparametros}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{l p{3.1cm} p{2.4cm} p{5.9cm}}
+\hline
+\textbf{Código} & \textbf{Algoritmo} & \textbf{Familia} & \textbf{Hiperparámetros} \\
+\hline
+\texttt{gwo} & Grey Wolf Optimizer & Enjambre jerárquico & $a$ decae linealmente de 2 a 0; líderes $\alpha$, $\beta$, $\delta$ \\
+\texttt{pso} & Particle Swarm Optimization & Enjambre & $\chi = 0{,}729$; $c_1 = c_2 = 1{,}49445$; $|v| \leq 20\,\%$ del rango \\
+\texttt{ga} & Algoritmo genético de codificación real & Evolutivo & Torneo $k=3$; cruce BLX-0,5 con $p_c = 0{,}9$; mutación gaussiana $p_m = 0{,}1$ con $\sigma$ igual al 10\,\% del rango; elitismo de 2 individuos \\
+\texttt{sho} & Spotted Hyena Optimizer & Enjambre jerárquico & $h$ decae de 5,0 a 0; líder único \\
+\texttt{woa} & Whale Optimization Algorithm & Enjambre & Encierro y espiral con probabilidad 50/50; $b = 1{,}0$; $a$ decae de 2 a 0 \\
+\texttt{random} & Búsqueda aleatoria & Línea base & Muestreo uniforme directo sobre la malla discreta \\
+\hline
+\end{tabular}
+\end{table}
+
+La inclusión de la búsqueda aleatoria no es accesoria. Un banco de pruebas que solo enfrenta metaheurísticas entre sí puede establecer un ordenamiento relativo, pero es incapaz de responder la pregunta previa y más importante: si alguno de los competidores aporta algo sobre el muestreo no informado del dominio. Sin esa referencia, un ranking carece de interpretación absoluta \cite{Arcuri2014Hitchhiker}.
+
+\section{Protocolo de análisis estadístico}
+
+Los valores finales de aptitud de una metaheurística no siguen una distribución normal ni presentan varianzas homogéneas entre algoritmos, por lo que el análisis se apoya en contrastes no paramétricos, siguiendo la práctica recomendada para la comparación de algoritmos evolutivos y de inteligencia de enjambre \cite{Derrac2011Tutorial}.
+
+Para cada uno de los $\binom{6}{2} = 15$ pares de algoritmos se aplica el \textbf{contraste de rangos con signo de Wilcoxon} \cite{Wilcoxon1945} sobre las 30 diferencias pareadas por semilla. Dado que quince contrastes simultáneos sobre la misma familia de hipótesis inflan la probabilidad de obtener al menos un falso positivo, los valores $p$ se corrigen mediante el \textbf{procedimiento secuencialmente rechazante de Holm} \cite{Holm1979}, que controla la tasa de error por familia sin la pérdida de potencia estadística de la corrección de Bonferroni simple.
+
+La significancia estadística indica que una diferencia probablemente no es nula, pero no informa sobre su magnitud. Se reporta por ello el tamaño de efecto $A_{12}$ de Vargha y Delaney \cite{Vargha2000A12}, que estima la probabilidad de que una ejecución del primer algoritmo produzca un resultado mejor que una del segundo. Con la convención de minimización empleada en la implementación, $A_{12} > 0{,}5$ indica que el algoritmo de la fila obtiene con mayor frecuencia un LCOE menor; los umbrales convencionales sitúan en 0,56, 0,64 y 0,71 las fronteras de efecto pequeño, medio y grande \cite{Arcuri2014Hitchhiker}.
+
+\subsection{Sobre la ausencia de un contraste ómnibus}
+
+Podría esperarse la aplicación previa de un contraste de Friedman seguido de un análisis \textit{post hoc} de Nemenyi. Se ha optado por prescindir de él por dos razones.
+
+La primera es de adecuación del instrumento: el contraste de Friedman está concebido para comparar $k$ algoritmos sobre $N$ \textit{problemas distintos}, tratando cada problema como un bloque. El diseño de este trabajo enfrenta seis algoritmos sobre un \textit{único} problema replicado con 30 semillas, escenario para el cual los contrastes pareados directos con corrección por familia constituyen el instrumento apropiado \cite{Derrac2011Tutorial}.
+
+La segunda es de valor informativo: el interés no reside en la hipótesis global de que al menos un algoritmo difiere de los demás --- pregunta de escaso contenido cuando ya se dispone de los quince contrastes dirigidos ---, sino en identificar qué pares concretos se distinguen y con qué magnitud, que es exactamente lo que entregan en conjunto Wilcoxon, Holm y $A_{12}$.

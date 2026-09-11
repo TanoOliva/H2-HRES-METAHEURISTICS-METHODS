@@ -1,0 +1,723 @@
+\chapter{Marco teórico/referencial}
+
+\section{Base Conceptual}
+
+\subsection{Hidrógeno verde: definición, producción y relevancia en la transición energética}
+
+La transición energética hacia sistemas bajos en carbono ha impulsado el interés por tecnologías capaces de integrar de manera eficiente fuentes renovables variables como la energía solar y eólica, con alternativas de almacenamiento y conversión energética de larga duración. En este contexto, el hidrógeno verde ha adquirido una relevancia creciente debido a su potencial para desacoplar temporalmente la generación y el consumo energético, facilitando la penetración de energías renovables en distintos sectores \cite{Khan2022Review}.
+
+El hidrógeno no constituye una fuente primaria de energía, sino un vector energético, ya que debe ser producido a partir de otros recursos. Su interés radica en que permite almacenar energía en forma química, transportarla y posteriormente reconvertirla en electricidad o emplearla en procesos industriales, movilidad y aplicaciones de respaldo energético. Sin embargo, el impacto ambiental del hidrógeno depende directamente de la ruta de producción utilizada. Históricamente, una parte importante del hidrógeno se ha producido a partir de combustibles fósiles, mientras que su producción mediante electrólisis con energías renovables representa la vía de menor emisión de carbono \cite{Khan2022Review}.
+
+Frente a ello, el hidrógeno verde se define como el hidrógeno producido mediante procesos de baja o nula emisión de carbono, principalmente a través de la electrólisis del agua alimentada con electricidad renovable. Esta ruta tecnológica resulta particularmente atractiva porque permite utilizar excedentes de generación solar y eólica para producir hidrógeno sin emisiones directas relevantes durante el proceso de producción, contribuyendo así a la descarbonización del sistema energético \cite{Khan2022Review}.
+
+Desde una perspectiva sistémica, el valor del hidrógeno verde no reside únicamente en su producción, sino en su capacidad para resolver una de las principales limitaciones de las energías renovables: su intermitencia. La variabilidad de la radiación solar y de la velocidad del viento afecta la continuidad del suministro eléctrico y puede comprometer tanto la confiabilidad operativa como la viabilidad económica de sistemas energéticos renovables. En este escenario, el hidrógeno aparece como una opción de almacenamiento de mayor horizonte temporal que otras tecnologías, especialmente útil cuando se requiere almacenar excedentes energéticos durante períodos prolongados o cuando las baterías resultan insuficientes para cubrir necesidades de autonomía extendida \cite{Khan2022Review,Zhang2018SA}.
+
+Por tanto, el hidrógeno verde debe entenderse como una tecnología estratégica dentro de la transición energética, no solo por su aporte a la reducción de emisiones, sino también por su capacidad de integrarse con sistemas híbridos renovables, mejorar la flexibilidad operativa y ampliar las posibilidades de electrificación limpia en contextos aislados, descentralizados o con alta penetración renovable \cite{Khan2022Review}.
+
+\subsection{Tecnologías asociadas al hidrógeno verde en sistemas energéticos}
+
+La utilización del hidrógeno verde en sistemas energéticos requiere un conjunto de tecnologías que permitan su producción, almacenamiento y posterior reconversión en energía útil. Dentro de las configuraciones más estudiadas se encuentran el electrolizador, el tanque de almacenamiento de hidrógeno y la celda de combustible, cuya interacción permite conformar una cadena energética completa basada en hidrógeno \cite{Khan2022Review,Wang2021HybridSystem}.
+
+\subsubsection{Electrolizador}
+
+El electrolizador es el dispositivo encargado de convertir energía eléctrica en energía química mediante la descomposición del agua en hidrógeno y oxígeno. En términos funcionales, cuando existe excedente de electricidad renovable, dicho excedente puede dirigirse al electrolizador para producir hidrógeno. En la revisión de Khan et al. se presenta este componente como parte fundamental del modelado matemático de sistemas HRES-H$_2$, donde la tasa de producción de hidrógeno depende de parámetros como la corriente del electrolizador, su eficiencia y su capacidad nominal \cite{Khan2022Review}. En este trabajo, la capacidad nominal del electrolizador se considera además una variable de decisión relevante en el proceso de optimización del sistema.
+
+\subsubsection{Almacenamiento de Hidrógeno}
+
+Una vez producido, el hidrógeno debe ser almacenado para su uso posterior. Para ello se emplean tanques de hidrógeno, generalmente acompañados por procesos de compresión que permiten aumentar la densidad energética volumétrica del gas almacenado. El almacenamiento es una etapa crítica porque determina cuánta energía puede preservarse para períodos de baja generación renovable o alta demanda. Sin embargo, también introduce costos, pérdidas energéticas y restricciones operacionales asociadas a la presión, el volumen, la seguridad y la eficiencia del proceso de compresión \cite{Khan2022Review}.
+
+\subsubsection{Celda de Combustible}
+
+La etapa de reconversión está dada por la celda de combustible o fuel cell, que transforma la energía química del hidrógeno nuevamente en energía eléctrica. En la literatura revisada, este componente cumple el rol de respaldo o complemento cuando la energía producida por fuentes renovables no es suficiente para abastecer la demanda. La celda de combustible constituye así el elemento que cierra el ciclo energético del hidrógeno dentro del sistema, permitiendo recuperar parte de la energía almacenada y mejorar la continuidad del suministro \cite{Khan2022Review,Wang2021HybridSystem}. En la propuesta, la capacidad de la fuel cell también forma parte del conjunto de variables susceptibles de optimización, puesto que influye directamente en la capacidad del sistema para responder ante déficit de generación.
+
+\subsection{Sistemas híbridos de energías renovables con tecnologías de hidrógeno HRES-H$_2$}
+
+Los Hybrid Renewable Energy Systems with Hydrogen Technologies (HRES-H$_2$) corresponden a configuraciones energéticas que integran múltiples fuentes renovables con tecnologías de conversión y almacenamiento basadas en hidrógeno. Su objetivo principal es aprovechar la complementariedad entre recursos renovables y dispositivos de almacenamiento para mejorar la confiabilidad, estabilidad y eficiencia del sistema energético bajo condiciones variables de generación y demanda \cite{Khan2022Review}.
+
+En términos generales, un HRES-H$_2$ puede incorporar componentes como paneles fotovoltaicos, turbinas eólicas, baterías, electrolizadores, tanques de hidrógeno, celdas de combustible y convertidores. Entre estas configuraciones, una de las más frecuentes en la literatura es la combinación de generación solar y eólica con una cadena de hidrógeno compuesta por electrolizador, almacenamiento y fuel cell. Esta arquitectura permite que el sistema opere en diferentes modos según la disponibilidad de recurso renovable y el perfil de demanda. Cuando la generación renovable excede el consumo, el excedente puede utilizarse para producir hidrógeno; cuando la generación es insuficiente, el hidrógeno almacenado puede emplearse para suplir el déficit mediante la celda de combustible \cite{Khan2022Review,Wang2021HybridSystem}.
+
+La relevancia de estas configuraciones se debe a que permiten mitigar el carácter intermitente y no despachable de la energía solar y eólica. Los HRES-H$_2$ emergen como una solución prometedora porque integran múltiples fuentes renovables con tecnologías de almacenamiento y conversión capaces de suavizar el suministro energético, balancear desajustes entre generación y demanda y mejorar la confiabilidad operacional. Además, se destaca que estas configuraciones resultan especialmente valiosas en contextos descentralizados, zonas rurales o emplazamientos remotos donde la infraestructura convencional de red es limitada o inexistente \cite{Khan2022Review,Zhang2018SA}.
+
+No obstante, la principal ventaja de los HRES-H$_2$ también constituye una fuente de complejidad. Al combinar múltiples subsistemas con comportamientos dinámicos y no lineales, el diseño y operación de estas arquitecturas requiere modelar adecuadamente la interacción entre generación, almacenamiento, conversión y demanda. En la literatura, esta complejidad se expresa en la necesidad de definir variables de diseño, restricciones operacionales e indicadores de desempeño económico, técnico y ambiental para encontrar configuraciones adecuadas del sistema \cite{Khan2022Review}. Por ello, antes de abordar el problema de optimización propiamente tal, es necesario establecer una base conceptual clara sobre el rol funcional de cada componente y sobre la lógica de operación integrada del sistema.
+
+En consecuencia, los HRES-H$_2$ pueden entenderse como plataformas energéticas complejas pero estratégicas para la transición hacia sistemas sostenibles, ya que combinan el potencial de las energías renovables con la capacidad de almacenamiento y flexibilidad que aporta el hidrógeno. Esta base conceptual justifica la necesidad de estudiar no solo su funcionamiento tecnológico, sino también los métodos más adecuados para su diseño y optimización \cite{Khan2022Review}.
+
+\section{Problema de Optimización del Sistema WPEB}
+
+\subsection{Nomenclatura}
+
+En la Tabla~\ref{tab:nomenclatura_wpeb} se presenta la nomenclatura utilizada en la formulación matemática del sistema base WPEB.
+
+\begin{table}[H]
+\centering
+\caption{Nomenclatura del sistema base WPEB}
+\label{tab:nomenclatura_wpeb}
+\begin{tabular}{p{2.8cm} p{9.5cm} p{2.2cm}}
+\hline
+\textbf{Símbolo} & \textbf{Descripción} & \textbf{Unidad} \\
+\hline
+$W$ & Capacidad eólica instalada & MW \\
+$P$ & Capacidad fotovoltaica instalada & MW \\
+$E$ & Capacidad nominal del electrolizador & MW \\
+$B^{P}$ & Potencia nominal de la batería & MW \\
+$B^{E}$ & Capacidad energética de la batería & MWh \\
+$p_{wt}(t)$ & Potencia de una turbina eólica en el instante $t$ & MW \\
+$P_{wt}(t)$ & Potencia eólica total en el instante $t$ & MW \\
+$P_{pv}(t)$ & Potencia fotovoltaica en el instante $t$ & MW \\
+$P_{ren}(t)$ & Potencia renovable total en el instante $t$ & MW \\
+$P_{el}(t)$ & Potencia absorbida por el electrolizador en el instante $t$ & MW \\
+$P_{el}^{min}$ & Potencia mínima de operación del electrolizador & MW \\
+$P_{grid}(t)$ & Potencia vendida a la red en el instante $t$ & MW \\
+$P_{ch}(t)$ & Potencia de carga de la batería en el instante $t$ & MW \\
+$P_{dis}(t)$ & Potencia de descarga de la batería en el instante $t$ & MW \\
+$SOC(t)$ & Estado de carga de la batería en el instante $t$ & MWh \\
+$E_{wt}$ & Energía eólica anual & MWh \\
+$E_{pv}$ & Energía fotovoltaica anual & MWh \\
+$E_{ren}$ & Energía renovable anual total & MWh \\
+$E_{el}$ & Energía anual consumida por el electrolizador & MWh \\
+$E_{grid}$ & Energía anual vendida a la red & MWh \\
+$E_{use}$ & Energía útil anual del sistema & MWh \\
+$M_{H_2}$ & Masa anual de hidrógeno producida & kg \\
+$CF_{el}$ & Factor de capacidad del electrolizador & -- \\
+$AGSR$ & Tasa anual de venta de energía a la red & -- \\
+$AGSR^{max}$ & Máximo valor permitido de la tasa anual de venta a red & -- \\
+$NPC$ & Costo presente neto del sistema & USD \\
+$NPC_j$ & Costo presente neto del componente $j$ & USD \\
+$C_{ann}$ & Costo anualizado del sistema & USD/año \\
+$C_{tot}$ & Capacidad renovable total instalada & MW \\
+$C^{cap}_j$ & Costo de inversión del componente $j$ & USD \\
+$C^{rep}_j$ & Costo de reemplazo del componente $j$ & USD \\
+$C^{om}_j$ & Costo de operación y mantenimiento del componente $j$ & USD \\
+$K_j$ & Capacidad instalada del componente $j$ & según componente \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\caption{Nomenclatura del sistema base WPEB}
+\label{tab:nomenclatura_wpeb_parametros}
+\begin{tabular}{p{2.8cm} p{9.5cm} p{2.2cm}}
+\hline
+\textbf{Símbolo} & \textbf{Descripción} & \textbf{Unidad} \\
+\hline
+
+$c^{cap}_j$ & Costo unitario de inversión del componente $j$ & CNY/unidad \\
+$c^{rep}_j$ & Costo unitario de reemplazo del componente $j$ & CNY/unidad \\
+$c^{om}_j$ & Costo unitario anual de operación y mantenimiento del componente $j$ & CNY/unidad-año \\
+$CRF(i,N)$ & Factor de recuperación de capital & -- \\
+$LCOE$ & Costo nivelado de la energía & CNY/kWh \\
+$LCOH$ & Costo nivelado del hidrógeno & CNY/kg \\
+$v(t)$ & Velocidad del viento en el instante $t$ & m/s \\
+$v_{in}$ & Velocidad de arranque de la turbina eólica & m/s \\
+$v_r$ & Velocidad nominal de la turbina eólica & m/s \\
+$v_{out}$ & Velocidad de corte de la turbina eólica & m/s \\
+$P_{wt}^{r}$ & Potencia nominal de una turbina eólica & MW \\
+$N_{wt}$ & Número de turbinas eólicas & -- \\
+$G(t)$ & Irradiancia solar en el instante $t$ & kW/m$^2$ \\
+$T_{amb}(t)$ & Temperatura ambiente en el instante $t$ & $^\circ$C \\
+$T_{cell}(t)$ & Temperatura de la celda fotovoltaica en el instante $t$ & $^\circ$C \\
+$T_{NOCT}$ & Temperatura nominal de operación de la celda & $^\circ$C \\
+$f_T(t)$ & Factor de corrección térmica del sistema fotovoltaico & -- \\
+$f_{der}$ & Factor de pérdidas del sistema fotovoltaico & -- \\
+$\gamma$ & Coeficiente de temperatura de potencia del sistema fotovoltaico & 1/$^\circ$C \\
+$\eta_{el}$ & Eficiencia del electrolizador & -- \\
+$\eta_{rt}$ & Eficiencia de ciclo completo de la batería & -- \\
+$\eta_{ch}$ & Eficiencia de carga de la batería & -- \\
+$\eta_{dis}$ & Eficiencia de descarga de la batería & -- \\
+$\beta_B$ & Razón entre potencia de batería y capacidad del electrolizador & -- \\
+$\tau_B$ & Duración nominal de la batería & h \\
+$\alpha_{el}^{min}$ & Fracción mínima de carga del electrolizador & -- \\
+$\alpha_E^{max}$ & Fracción máxima del electrolizador respecto a la capacidad renovable total & -- \\
+$HHV_{H_2}$ & Poder calorífico superior del hidrógeno & kWh/kg \\
+$i$ & Tasa de descuento real & -- \\
+$N$ & Vida útil del proyecto & años \\
+$\mathcal{R}_j$ & Conjunto de años en que se reemplaza el componente $j$ & -- \\
+$t$ & Índice temporal horario & -- \\
+$T$ & Número total de horas simuladas & h \\
+$j$ & Índice de componente del sistema & -- \\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+\subsection{Modelado Matemático del Sistema Base WPEB}
+
+En esta investigación se adopta como modelo base el sistema \textit{Wind--Photovoltaic--Electrolysis--Battery} (WPEB), implementado en el notebook de referencia utilizado para la réplica computacional. Esta configuración representa un sistema híbrido renovable orientado a la producción de hidrógeno, en el cual interactúan generación eólica, generación fotovoltaica, electrólisis, almacenamiento mediante batería y exportación de excedentes a la red \cite{Li2024WPEB}.
+
+A diferencia de formulaciones HRES-H$_2$ de carácter más general, el modelo utilizado aquí se limita a los componentes efectivamente considerados en la implementación base. En consecuencia, la formulación matemática se concentra en la relación entre capacidades renovables, operación del electrolizador, apoyo de la batería y aprovechamiento de excedentes, manteniendo coherencia directa con la estructura computacional empleada en la investigación \cite{Li2024WPEB}.
+
+\subsubsection{Modelo Eólico}
+
+La potencia entregada por una turbina eólica se representa mediante una función por tramos dependiente de la velocidad del viento \cite{Li2024WPEB,Wang2021HybridSystem}:
+
+\begin{equation}
+p_{wt}(t)=
+\begin{cases}
+0, & v(t)<v_{in} \ \text{o} \ v(t)\geq v_{out} \\[4pt]
+P_{wt}^{r}\left(\dfrac{v(t)^3-v_{in}^3}{v_r^3-v_{in}^3}\right), & v_{in}\leq v(t)<v_r \\[10pt]
+P_{wt}^{r}, & v_r\leq v(t)<v_{out}
+\end{cases}
+\end{equation}
+
+Esta expresión distingue las regiones de no generación, incremento progresivo y operación nominal del aerogenerador \cite{Li2024WPEB,Wang2021HybridSystem}.
+
+Si el parque eólico está compuesto por \(N_{wt}\) turbinas, la potencia total queda dada por:
+
+\begin{equation}
+P_{wt}(t)=N_{wt}\,p_{wt}(t)
+\end{equation}
+
+De este modo, la producción horaria del subsistema eólico se obtiene a partir de la contribución individual de cada turbina \cite{Li2024WPEB}.
+
+En la implementación adoptada, el número de turbinas se aproxima mediante:
+
+\begin{equation}
+N_{wt}=\mathrm{round}\left(\frac{W}{P_{wt}^{r}}\right)
+\end{equation}
+
+Con ello, la capacidad eólica instalada \(W\) se traduce en un número entero de unidades de generación.
+
+Además, la potencia total no puede superar la capacidad instalada:
+
+\begin{equation}
+P_{wt}(t)\leq W
+\end{equation}
+
+Esta cota garantiza consistencia entre el dimensionamiento del parque y la potencia efectivamente disponible.
+
+\subsubsection{Modelo Fotovoltaico}
+
+La producción fotovoltaica depende de la irradiancia, de la temperatura ambiente y de las pérdidas del sistema. Para aproximar este comportamiento, primero se estima la temperatura de la celda mediante una relación tipo NOCT \cite{Li2024WPEB,Khan2022Review}:
+
+\begin{equation}
+T_{cell}(t)=T_{amb}(t)+\left(\frac{T_{NOCT}-20}{0.8}\right)G(t)
+\end{equation}
+
+Así se obtiene una aproximación de la temperatura de operación del módulo bajo las condiciones ambientales del instante \(t\).
+
+Luego se define un factor de corrección térmica:
+
+\begin{equation}
+f_T(t)=1+\gamma\left(T_{cell}(t)-25\right)
+\end{equation}
+
+Este término corrige el rendimiento del sistema fotovoltaico respecto de las condiciones estándar \cite{Li2024WPEB}.
+
+La producción relativa del subsistema se expresa como:
+
+\begin{equation}
+r_{pv}(t)=G(t)\,f_{der}\,\max\left(f_T(t),0\right)
+\end{equation}
+
+Aquí se combinan la disponibilidad del recurso solar, el factor de pérdidas y el efecto térmico.
+
+Finalmente, la potencia fotovoltaica instantánea se calcula como:
+
+\begin{equation}
+P_{pv}(t)=P\cdot \mathrm{clip}\left(r_{pv}(t),0,1\right)
+\end{equation}
+
+Con esta formulación, la producción queda limitada al rango físicamente realizable del sistema \cite{Li2024WPEB}.
+
+En particular, debe cumplirse:
+
+\begin{equation}
+P_{pv}(t)\leq P
+\end{equation}
+
+lo que impide que la generación supere la capacidad nominal instalada.
+
+\subsubsection{Generación Renovable Total}
+
+La potencia renovable total del sistema se obtiene sumando las contribuciones eólica y fotovoltaica:
+
+\begin{equation}
+P_{ren}(t)=P_{wt}(t)+P_{pv}(t)
+\end{equation}
+
+Esta magnitud representa la disponibilidad instantánea de energía renovable para alimentar al electrolizador, cargar la batería o exportar excedentes \cite{Li2024WPEB}.
+
+La energía eólica anual se calcula como:
+
+\begin{equation}
+E_{wt}=\sum_{t=1}^{T}P_{wt}(t)
+\end{equation}
+
+mientras que la energía fotovoltaica anual se obtiene mediante:
+
+\begin{equation}
+E_{pv}=\sum_{t=1}^{T}P_{pv}(t)
+\end{equation}
+
+Ambas expresiones agregan la producción horaria de cada tecnología a lo largo del horizonte de simulación \cite{Li2024WPEB}.
+
+Por tanto, la energía renovable anual total queda dada por:
+
+\begin{equation}
+E_{ren}=E_{wt}+E_{pv}
+\end{equation}
+
+De forma equivalente, también puede escribirse como:
+
+\begin{equation}
+E_{ren}=\sum_{t=1}^{T}P_{ren}(t)
+\end{equation}
+
+En ambos casos se cuantifica la energía renovable total disponible en el sistema durante el año analizado.
+
+\subsubsection{Modelo del Electrolizador}
+
+El electrolizador es el componente encargado de transformar la electricidad renovable en hidrógeno. Su potencia absorbida en cada instante se encuentra limitada tanto por la generación disponible como por su capacidad nominal \cite{Li2024WPEB,Khan2022Review}:
+
+\begin{equation}
+P_{el}(t)=\min\left(P_{ren}(t),E\right)
+\end{equation}
+
+Esta asignación representa la potencia inicialmente destinada al proceso de electrólisis.
+
+No obstante, el modelo considera una carga mínima de operación:
+
+\begin{equation}
+P_{el}^{min}=\alpha_{el}^{min}E
+\end{equation}
+
+Dicho umbral establece el nivel mínimo a partir del cual el electrolizador puede mantenerse operando de manera técnicamente aceptable \cite{Li2024WPEB}.
+
+Si la potencia disponible no alcanza ese umbral y la batería no logra completarlo, el equipo se apaga, lo que se expresa como:
+
+\begin{equation}
+P_{el}(t)=0
+\end{equation}
+
+De este modo, la lógica operativa del modelo evita estados intermedios de funcionamiento no viables \cite{Li2024WPEB}.
+
+La energía anual consumida por el electrolizador se obtiene agregando su operación horaria:
+
+\begin{equation}
+E_{el}=\sum_{t=1}^{T}P_{el}(t)
+\end{equation}
+
+Esta cantidad representa la fracción de la generación renovable que efectivamente se destina a producir hidrógeno.
+
+La masa anual de hidrógeno producida se estima mediante:
+
+\begin{equation}
+M_{H_2}=\frac{E_{el}\cdot 1000\cdot \eta_{el}}{HHV_{H_2}}
+\end{equation}
+
+La relación anterior conecta la energía consumida por el electrolizador con la producción de hidrógeno, considerando la eficiencia del proceso y el contenido energético del vector \cite{Li2024WPEB}.
+
+Por su parte, el factor de capacidad del electrolizador se define como:
+
+\begin{equation}
+CF_{el}=\frac{E_{el}}{E\cdot T}
+\end{equation}
+
+Este indicador resulta útil para evaluar el grado de utilización anual del equipo respecto de su potencial máximo de operación \cite{Li2024WPEB}.
+
+\subsubsection{Modelo de la Batería}
+
+En el sistema base WPEB, la batería no constituye una variable de decisión independiente. Su tamaño se define como una proporción de la capacidad del electrolizador \cite{Li2024WPEB}.
+
+La potencia nominal de la batería se calcula como:
+
+\begin{equation}
+B^{P}=\beta_B E
+\end{equation}
+
+Así, el tamaño del subsistema de almacenamiento queda directamente condicionado por la decisión adoptada para el electrolizador.
+
+Su capacidad energética se expresa como:
+
+\begin{equation}
+B^{E}=B^{P}\tau_B
+\end{equation}
+
+La batería queda entonces definida por su potencia nominal y por su duración equivalente.
+
+El estado de carga debe mantenerse dentro del rango físico admisible:
+
+\begin{equation}
+0\leq SOC(t)\leq B^{E}
+\end{equation}
+
+Esta restricción impide sobrecargas o descargas imposibles desde el punto de vista operativo \cite{Li2024WPEB}.
+
+A partir de la eficiencia de ciclo completo \(\eta_{rt}\), se adoptan las eficiencias de carga y descarga:
+
+\begin{equation}
+\eta_{ch}=\eta_{dis}=\sqrt{\eta_{rt}}
+\end{equation}
+
+Con esta hipótesis, las pérdidas del almacenamiento se distribuyen simétricamente entre ambos procesos.
+
+Durante los periodos con excedente renovable, la potencia de carga está acotada por:
+
+\begin{equation}
+0\leq P_{ch}(t)\leq B^{P}
+\end{equation}
+
+La evolución del estado de carga durante la carga se expresa como:
+
+\begin{equation}
+SOC(t+1)=SOC(t)+P_{ch}(t)\eta_{ch}
+\end{equation}
+
+Esto refleja el incremento de energía almacenada una vez consideradas las pérdidas del proceso de carga \cite{Li2024WPEB}.
+
+Durante los periodos de apoyo al electrolizador, la descarga debe satisfacer:
+
+\begin{equation}
+0\leq P_{dis}(t)\leq B^{P}
+\end{equation}
+
+y la dinámica correspondiente queda dada por:
+
+\begin{equation}
+SOC(t+1)=SOC(t)-\frac{P_{dis}(t)}{\eta_{dis}}
+\end{equation}
+
+En este caso, la energía útil extraída del almacenamiento incorpora las pérdidas asociadas a la descarga \cite{Li2024WPEB}.
+
+\subsubsection{Despacho Horario del Sistema}
+
+La operación horaria del sistema sigue una lógica secuencial. En primer lugar, la energía renovable disponible se asigna al electrolizador. Si éste no alcanza su carga mínima, la batería puede descargarse para sostener la operación. Cuando existe excedente renovable una vez abastecido el electrolizador, dicho excedente se utiliza para cargar la batería. Finalmente, si aún sobra energía, ésta se vende a la red \cite{Li2024WPEB}.
+
+En consecuencia, la potencia exportada se calcula como:
+
+\begin{equation}
+P_{grid}(t)=\max\left(P_{ren}(t)-P_{el}(t)-P_{ch}(t),\,0\right)
+\end{equation}
+
+Esta expresión cuantifica la parte de la energía renovable que no es absorbida ni por la electrólisis ni por el almacenamiento.
+
+La energía anual vendida a la red se obtiene mediante:
+
+\begin{equation}
+E_{grid}=\sum_{t=1}^{T}P_{grid}(t)
+\end{equation}
+
+Así se acumula la exportación horaria de excedentes a lo largo de todo el horizonte temporal.
+
+\subsection{Variables de Decisión}
+
+De acuerdo con la implementación base del sistema WPEB, las variables de decisión principales se definen como \cite{Li2024WPEB}:
+
+\begin{equation}
+\mathbf{x}=
+\left[
+W,\,
+P,\,
+E
+\right]^T
+\end{equation}
+
+El vector de decisión contiene la capacidad eólica instalada, la capacidad fotovoltaica instalada y la capacidad nominal del electrolizador.
+
+A partir de estas variables, las capacidades de la batería se generan de forma dependiente:
+
+\begin{equation}
+B^{P}=\beta_B E
+\end{equation}
+
+\begin{equation}
+B^{E}=B^{P}\tau_B
+\end{equation}
+
+Por tanto, el problema de optimización no ajusta de manera independiente el tamaño de la batería, sino que lo deriva del tamaño seleccionado para el electrolizador \cite{Li2024WPEB}.
+
+\subsection{Restricciones del Problema}
+
+\subsubsection{Restricción de Capacidad Renovable Total}
+
+El sistema base WPEB impone una capacidad renovable total fija, de manera que la distribución entre recurso eólico y fotovoltaico debe satisfacer:
+
+\begin{equation}
+W+P=C_{tot}
+\end{equation}
+
+Esta igualdad obliga al modelo a buscar la mejor combinación entre ambas tecnologías manteniendo constante la capacidad total instalada \cite{Li2024WPEB}.
+
+En el caso base considerado:
+
+\begin{equation}
+C_{tot}=200\ \text{MW}
+\end{equation}
+
+Este valor corresponde a la configuración base empleada en la simulación del sistema \cite{Li2024WPEB}.
+
+\subsubsection{Restricción de Tamaño del Electrolizador}
+
+La capacidad del electrolizador debe ser positiva y estar acotada por una fracción máxima de la capacidad renovable total:
+
+\begin{equation}
+0<E\leq \alpha_E^{max}(W+P)
+\end{equation}
+
+Con ello se evita un sobredimensionamiento del proceso de electrólisis respecto de la infraestructura renovable disponible \cite{Li2024WPEB}.
+
+\subsubsection{Restricciones de la Batería}
+
+Dado que la batería depende del tamaño del electrolizador, se mantienen las relaciones:
+
+\begin{equation}
+B^{P}=\beta_B E
+\end{equation}
+
+\begin{equation}
+B^{E}=B^{P}\tau_B
+\end{equation}
+
+Estas expresiones fijan, respectivamente, la potencia nominal y la capacidad energética del sistema de almacenamiento.
+
+Asimismo, el estado de carga debe satisfacer:
+
+\begin{equation}
+0\leq SOC(t)\leq B^{E}, \qquad \forall t
+\end{equation}
+
+de modo que la operación de la batería permanezca siempre dentro de límites físicamente admisibles \cite{Li2024WPEB}.
+
+\subsubsection{Restricción de Operación Mínima del Electrolizador}
+
+El electrolizador sólo puede estar apagado o funcionar por encima de su carga mínima técnica:
+
+\begin{equation}
+P_{el}(t)\in \{0\}\cup\left[P_{el}^{min},E\right], \qquad \forall t
+\end{equation}
+
+Esta condición resume la lógica discreta de operación adoptada en el modelo \cite{Li2024WPEB}.
+
+Recordando además que:
+
+\begin{equation}
+P_{el}^{min}=\alpha_{el}^{min}E
+\end{equation}
+
+la carga mínima queda determinada como una fracción de la capacidad nominal instalada.
+
+\subsubsection{Restricción sobre la Fracción de Energía Vendida a la Red}
+
+La factibilidad global del sistema se evalúa mediante el indicador \textit{Annual Grid Sales Rate}:
+
+\begin{equation}
+AGSR=\frac{E_{grid}}{E_{ren}}
+\end{equation}
+
+Esta razón mide la fracción de la energía renovable anual total que no es aprovechada internamente y termina siendo exportada \cite{Li2024WPEB}.
+
+Para que una solución sea admisible, debe cumplirse:
+
+\begin{equation}
+AGSR\leq AGSR^{max}
+\end{equation}
+
+De esta manera, se limita el nivel de excedentes no absorbidos por la electrólisis ni por el almacenamiento.
+
+\subsection{Funciones Objetivo}
+
+\subsubsection{Costo Presente Neto}
+
+La evaluación económica del sistema se basa en el costo presente neto total \cite{Li2024WPEB,Khan2022Review}:
+
+\begin{equation}
+NPC=NPC_{wt}+NPC_{pv}+NPC_{el}+NPC_{bat}
+\end{equation}
+
+Así, el costo global se descompone en los aportes de los principales componentes del sistema.
+
+Para un componente genérico \(j\), se considera:
+
+\begin{equation}
+NPC_j=C^{cap}_j+C^{rep}_j+C^{om}_j
+\end{equation}
+
+lo que permite reunir en una sola magnitud los costos de inversión, reemplazo y operación y mantenimiento.
+
+El costo de inversión se calcula como:
+
+\begin{equation}
+C^{cap}_j=K_jc^{cap}_j
+\end{equation}
+
+mientras que el costo de reemplazo se expresa como:
+
+\begin{equation}
+C^{rep}_j=\sum_{m\in\mathcal{R}_j}\frac{K_jc^{rep}_j}{(1+i)^m}
+\end{equation}
+
+y el costo de operación y mantenimiento queda dado por:
+
+\begin{equation}
+C^{om}_j=\sum_{y=1}^{N}\frac{K_jc^{om}_j}{(1+i)^y}
+\end{equation}
+
+Con este esquema, todos los costos relevantes se expresan en valor presente y pueden compararse dentro de un marco económico homogéneo \cite{Li2024WPEB,Khan2022Review}.
+
+\subsubsection{Costo Anualizado}
+
+El costo anual equivalente del sistema se obtiene mediante el factor de recuperación de capital:
+
+\begin{equation}
+CRF(i,N)=\frac{i(1+i)^N}{(1+i)^N-1}
+\end{equation}
+
+A partir de él, el costo anualizado se define como:
+
+\begin{equation}
+C_{ann}=CRF(i,N)\cdot NPC
+\end{equation}
+
+Esta transformación permite expresar el costo total del proyecto como una magnitud anual comparable con la energía producida o utilizada \cite{Li2024WPEB,Khan2022Review}.
+
+\subsubsection{Costo Nivelado de la Energía}
+
+La función objetivo principal del modelo es el costo nivelado de la energía:
+
+\begin{equation}
+LCOE=\frac{C_{ann}}{E_{use}\cdot 1000}
+\end{equation}
+
+Esta métrica relaciona el costo anualizado del sistema con la energía útil anual total \cite{Li2024WPEB,Khan2022Review}.
+
+En la formulación adoptada, dicha energía útil se define como:
+
+\begin{equation}
+E_{use}=E_{el}+E_{grid}
+\end{equation}
+
+Por tanto, se considera tanto la energía destinada a electrólisis como la energía vendida a la red \cite{Li2024WPEB}.
+
+\subsubsection{Costo Nivelado del Hidrógeno}
+
+Como indicador complementario, también se calcula el costo nivelado del hidrógeno:
+
+\begin{equation}
+LCOH=\frac{C_{ann}}{M_{H_2}}
+\end{equation}
+
+Este indicador permite evaluar la competitividad económica de la producción de hidrógeno asociada a cada configuración factible del sistema \cite{Li2024WPEB}.
+
+\subsection{Formulación General del Problema de Optimización}
+
+A partir de los elementos anteriores, el problema de optimización del sistema base WPEB se formula como \cite{Li2024WPEB}:
+
+\begin{equation}
+\min_{\mathbf{x}} \quad LCOE(W,P,E)
+\end{equation}
+
+El objetivo consiste en identificar la combinación de capacidades renovables y de electrólisis que minimiza el costo nivelado de la energía.
+
+% resto de ecuaciones sin cambios
+
+En conjunto, el problema consiste en encontrar la combinación óptima de capacidad eólica, capacidad fotovoltaica y capacidad del electrolizador que minimice el costo nivelado de la energía, manteniendo la coherencia física del sistema, la factibilidad del despacho horario y un nivel acotado de venta de excedentes a la red \cite{Li2024WPEB}.
+
+\subsection{Comentario sobre el Alcance del Modelo}
+
+Conviene señalar que esta formulación reproduce específicamente el modelo implementado en el caso base WPEB utilizado en esta investigación. Por ello, aunque el sistema puede enmarcarse conceptualmente dentro de los HRES-H$_2$, no representa una cadena completa de hidrógeno con modelado detallado de todos los subsistemas usuales, tales como almacenamiento gaseoso explícito, compresión, celda de combustible o convertidor como variables independientes de optimización \cite{Li2024WPEB,Khan2022Review}.
+
+Más bien, se trata de una formulación enfocada en la interacción entre generación renovable, electrólisis, batería auxiliar y exportación de excedentes. Esta delimitación es deliberada: al reproducir fielmente el alcance del modelo publicado se preserva la posibilidad de verificar la implementación contra indicadores conocidos, condición necesaria para que el banco de pruebas comparativo entre optimizadores mida el desempeño de los algoritmos y no los artefactos de un modelo no validado \cite{Li2024WPEB}.
+
+\section{Optimización metaheurística}
+
+\subsection{Definición y taxonomía}
+
+Una metaheurística es una estrategia de alto nivel que coordina heurísticas subordinadas para explorar el espacio de soluciones de un problema de optimización, sin garantizar optimalidad pero ofreciendo soluciones de calidad aceptable con un esfuerzo computacional acotado. Su interés en el dimensionamiento de sistemas HRES-H$_2$ proviene de tres características del problema: la no linealidad introducida por las curvas de conversión y por la dinámica de la batería, la ausencia de derivadas explotables --- la función objetivo es el resultado de una simulación secuencial y no una expresión analítica --- y la no convexidad de la región factible \cite{Khan2022Review}.
+
+Las metaheurísticas se clasifican habitualmente según el número de soluciones que mantienen simultáneamente. Las de \textbf{trayectoria} operan sobre una única solución que transforman iterativamente, como el recocido simulado aplicado a este mismo dominio por Zhang et al. \cite{Zhang2018SA}. Las de \textbf{población} mantienen un conjunto de soluciones que evoluciona de forma conjunta, y se subdividen a su vez en \textbf{algoritmos evolutivos}, que imitan mecanismos de selección natural, herencia y mutación, y \textbf{algoritmos de inteligencia de enjambre}, que reproducen el comportamiento colectivo emergente de grupos de organismos. Este trabajo se centra en las de población, por ser las predominantes en la literatura de dimensionamiento energético y por admitir de forma natural la paralelización de las evaluaciones.
+
+\subsection{La tensión entre exploración y explotación}
+
+Toda metaheurística resuelve, de forma explícita o implícita, un compromiso entre \textbf{exploración} --- muestrear regiones del espacio aún no visitadas, para evitar quedar atrapado en óptimos locales --- y \textbf{explotación} --- refinar la búsqueda en el entorno de las mejores soluciones conocidas, para converger con precisión. Una exploración excesiva degenera en muestreo aleatorio; una explotación excesiva conduce a convergencia prematura.
+
+El mecanismo habitual para gestionar este compromiso consiste en un parámetro de control que decae a lo largo de las iteraciones, desplazando progresivamente el comportamiento del algoritmo desde la exploración hacia la explotación. Los cinco algoritmos comparados en este trabajo implementan variantes de esta idea, lo que hace especialmente informativo contrastar su desempeño bajo un presupuesto de evaluaciones idéntico.
+
+\subsection{El teorema de la no existencia de almuerzo gratis}
+
+El resultado de Wolpert y Macready \cite{Wolpert1997NFL} establece que, promediado sobre el conjunto de todos los problemas de optimización posibles, el desempeño de dos algoritmos cualesquiera es idéntico. Su consecuencia práctica es determinante para el diseño de esta investigación: \textbf{no existe una metaheurística universalmente superior}, y cualquier afirmación sobre la superioridad de un algoritmo debe estar acotada a una clase de problemas y sustentada en evidencia empírica.
+
+Este teorema justifica, por un lado, que la selección de un optimizador para un problema concreto requiera comparación experimental y no argumentos de autoridad o de popularidad; y por otro, que la línea base de búsqueda aleatoria sea un elemento imprescindible del banco de pruebas: si un algoritmo no supera al muestreo no informado en un problema dado, es que no está explotando ninguna estructura de ese problema.
+
+\subsection{Grey Wolf Optimizer (GWO)}
+
+Propuesto por Mirjalili et al. \cite{Mirjalili2014GWO}, el GWO reproduce la jerarquía social y la estrategia de caza de las manadas de lobos grises. La población se organiza según la calidad de sus soluciones: los tres mejores individuos reciben las denominaciones $\alpha$, $\beta$ y $\delta$, y el resto de la manada ajusta su posición en función de los tres.
+
+Para cada individuo se calculan los coeficientes
+\begin{equation}
+\mathbf{A} = 2a\,\mathbf{r}_1 - a, \qquad \mathbf{C} = 2\,\mathbf{r}_2,
+\end{equation}
+donde $\mathbf{r}_1$ y $\mathbf{r}_2$ son vectores aleatorios uniformes en $[0,1]$ y $a$ decae linealmente de 2 a 0 a lo largo de las iteraciones. La distancia a cada líder y la posición candidata correspondiente se obtienen mediante
+\begin{equation}
+\mathbf{D}_j = \left| \mathbf{C} \cdot \mathbf{X}_j - \mathbf{X} \right|, \qquad
+\mathbf{X}'_j = \mathbf{X}_j - \mathbf{A} \cdot \mathbf{D}_j, \qquad j \in \{\alpha, \beta, \delta\},
+\end{equation}
+y la nueva posición del individuo es el promedio de las tres. Cuando $|\mathbf{A}| > 1$ el individuo se aleja del líder, favoreciendo la exploración; cuando $|\mathbf{A}| < 1$ converge hacia él. El decaimiento de $a$ desplaza progresivamente el equilibrio hacia la explotación.
+
+\subsection{Particle Swarm Optimization (PSO)}
+
+Introducido por Kennedy y Eberhart \cite{Kennedy1995PSO}, el PSO modela el desplazamiento de un enjambre en el que cada partícula combina su propia experiencia con la del colectivo. Cada partícula mantiene una posición y una velocidad, y actualiza esta última en función de su mejor posición histórica personal $\mathbf{p}_i$ y de la mejor posición global $\mathbf{g}$.
+
+Este trabajo emplea la formulación con \textbf{factor de constricción} de Clerc y Kennedy \cite{Clerc2002Constriction}, que garantiza la convergencia del enjambre sin necesidad de recortar arbitrariamente las velocidades:
+\begin{equation}
+\mathbf{v}_i \leftarrow \chi \left[ \mathbf{v}_i + c_1 \mathbf{r}_1 \odot (\mathbf{p}_i - \mathbf{x}_i) + c_2 \mathbf{r}_2 \odot (\mathbf{g} - \mathbf{x}_i) \right], \qquad
+\mathbf{x}_i \leftarrow \mathbf{x}_i + \mathbf{v}_i,
+\end{equation}
+con $\chi = 0{,}729$ y $c_1 = c_2 = 1{,}49445$, valores que satisfacen las condiciones de estabilidad derivadas analíticamente por los autores. Se añade además una limitación de la velocidad al 20\,\% del rango de cada variable, práctica habitual para evitar desplazamientos que excedan repetidamente los límites del dominio.
+
+\subsection{Algoritmo genético de codificación real (GA)}
+
+Los algoritmos genéticos \cite{Goldberg1989GA} evolucionan una población mediante selección, cruce y mutación. En problemas de variables continuas, la codificación real evita las discontinuidades que introduce la representación binaria y permite operadores que respetan la topología del espacio.
+
+La implementación empleada combina cuatro componentes. La \textbf{selección por torneo} de tamaño tres extrae tres individuos al azar y propaga el mejor, mecanismo que regula la presión selectiva sin requerir el escalado de aptitudes. El \textbf{cruce BLX-}$\alpha$ de Eshelman y Schaffer \cite{Eshelman1993BLX} genera descendencia muestreando uniformemente en un intervalo que extiende el rango definido por ambos progenitores en una fracción $\alpha$ a cada lado, con $\alpha = 0{,}5$; esta extensión permite explorar más allá del segmento que une a los padres y contrarresta la pérdida de diversidad. La \textbf{mutación gaussiana} perturba cada gen con probabilidad 0,1 mediante ruido de desviación típica igual al 10\,\% del rango de la variable. El \textbf{elitismo} preserva los dos mejores individuos entre generaciones, garantizando que la calidad de la mejor solución nunca retroceda.
+
+\subsection{Spotted Hyena Optimizer (SHO)}
+
+El SHO, propuesto por Dhiman y Kumar \cite{Dhiman2017SHO}, se inspira en la caza cooperativa de la hiena manchada. Estructuralmente guarda semejanza con el GWO, del que difiere en dos aspectos: emplea un único individuo líder en lugar de tres, y su parámetro de control $h$ decae de 5,0 a 0, con coeficientes
+\begin{equation}
+\mathbf{B} = 2\,\mathbf{r}_1, \qquad \mathbf{E} = 2h\,\mathbf{r}_2 - h.
+\end{equation}
+
+La formulación original incorpora además una fase de \textit{formación de agrupaciones}, en la que un subconjunto de individuos con aptitud comparable a la del líder contribuye al desplazamiento colectivo. Esa fase \textbf{no se replica} en la implementación de este trabajo, por dos motivos: la descripción publicada no permite fijar de forma inequívoca el criterio de pertenencia a la agrupación, y la implementación de referencia de los propios autores tampoco la incluye. Esta desviación se declara explícitamente, y debe tenerse presente al interpretar el desempeño de SHO en los resultados. La aplicación de este algoritmo al ámbito energético, así como el estudio de sus criterios de terminación y tamaño de población, ha sido abordada por Vega et al. \cite{Vega2022SHO}.
+
+\subsection{Whale Optimization Algorithm (WOA)}
+
+El WOA de Mirjalili y Lewis \cite{Mirjalili2016WOA} reproduce la estrategia de caza en red de burbujas de la ballena jorobada. En cada iteración, cada individuo escoge con probabilidad 0,5 entre dos mecanismos de actualización.
+
+El mecanismo de \textbf{encierro} replica la estructura del GWO: si $|A| < 1$ el individuo converge hacia la mejor solución conocida, y si $|A| \geq 1$ lo hace hacia un individuo aleatorio de la población, lo que introduce exploración. El mecanismo de \textbf{espiral logarítmica} desplaza al individuo mediante
+\begin{equation}
+\mathbf{X}(t+1) = \left| \mathbf{X}^{*} - \mathbf{X}(t) \right| \cdot e^{bl} \cdot \cos(2\pi l) + \mathbf{X}^{*},
+\end{equation}
+con $b = 1{,}0$ y $l$ uniforme en $[-1, 1]$. En la implementación empleada, los escalares $A$, $C$, $l$ y la probabilidad de selección se sortean una vez por individuo y no por componente, siguiendo la formulación original. Su aplicación a sistemas híbridos con almacenamiento de hidrógeno ha sido explorada por Sun et al. \cite{Sun2022WOA}.
+
+\subsection{Búsqueda aleatoria como línea base}
+
+La búsqueda aleatoria muestrea configuraciones uniformemente sobre el dominio admisible y retiene la mejor encontrada, sin memoria ni mecanismo de aprendizaje alguno. No es un competidor serio en términos de diseño algorítmico, y esa es precisamente su utilidad: establece el desempeño atribuible exclusivamente al presupuesto de evaluaciones y a la geometría del problema.
+
+Un algoritmo que no supera esta referencia no está explotando ninguna estructura del espacio de búsqueda, por sofisticada que sea su metáfora de inspiración. Su omisión es una carencia frecuente en la literatura de aplicación, y es la que permite que se publiquen comparaciones donde el ordenamiento relativo entre metaheurísticas se interpreta como evidencia de eficacia absoluta \cite{Arcuri2014Hitchhiker}.
+
+\subsection{Tratamiento de restricciones en metaheurísticas}
+
+Las metaheurísticas de población se formulan para optimización sin restricciones, por lo que su aplicación a problemas restringidos exige un mecanismo adicional. Las estrategias habituales son tres. La \textbf{penalización} incorpora la violación de restricciones a la función objetivo mediante un término aditivo; es sencilla y general, pero su eficacia depende críticamente de la calibración del peso: un valor excesivo aplana el paisaje y uno insuficiente permite que soluciones infactibles dominen la población. La \textbf{reparación} transforma toda solución infactible en una factible cercana, lo que preserva la totalidad del presupuesto de evaluaciones pero exige un operador específico del problema. El \textbf{rechazo} descarta las soluciones infactibles, opción viable únicamente cuando la región factible ocupa una fracción sustancial del dominio.
+
+La estrategia adoptada en este trabajo es mixta y se detalla en el capítulo de diseño experimental: proyección al reticulado admisible para las restricciones verificables \textit{a priori}, y penalización proporcional al exceso para la única restricción que requiere simular el año completo antes de poder evaluarse.
+
+\subsection{Evaluación empírica de metaheurísticas}
+
+Dado que las metaheurísticas son algoritmos estocásticos, una única ejecución no constituye evidencia. Dos ejecuciones del mismo algoritmo sobre el mismo problema con semillas distintas pueden producir resultados apreciablemente diferentes, y reportar únicamente el mejor de ellos --- práctica todavía frecuente --- sesga sistemáticamente la comparación a favor de los algoritmos con mayor varianza.
+
+La metodología establecida para la comparación de algoritmos evolutivos y de enjambre \cite{Derrac2011Tutorial,Arcuri2014Hitchhiker} exige cuatro elementos: un número suficiente de ejecuciones independientes con semillas distintas, un presupuesto computacional idéntico para todos los competidores, contrastes de hipótesis no paramétricos con corrección por comparaciones múltiples, y el reporte de tamaños de efecto que cuantifiquen la magnitud práctica de las diferencias detectadas. Estos cuatro requisitos estructuran el protocolo experimental de esta tesis.
+
+\section{Brechas y oportunidades de investigación}
+
+La revisión precedente permite identificar cuatro brechas en la literatura de optimización de sistemas HRES-H$_2$, que este trabajo aborda de forma directa.
+
+\textbf{Ausencia de líneas base no informadas.} Los estudios que aplican metaheurísticas al dimensionamiento energético comparan habitualmente varios algoritmos bioinspirados entre sí, pero rara vez incluyen una búsqueda aleatoria como referencia. Sin ella no es posible determinar si el algoritmo propuesto aporta algo sobre el muestreo uniforme, ni si el problema abordado tiene la dificultad que se le supone.
+
+\textbf{Reporte de ejecuciones únicas sin dispersión.} Es frecuente encontrar resultados presentados como un único valor de función objetivo por algoritmo, sin indicación del número de ejecuciones, de la desviación entre ellas ni de las semillas empleadas. Esta práctica impide distinguir una diferencia sistemática de una fluctuación muestral y compromete la reproducibilidad.
+
+\textbf{Ausencia de contrastes de significancia y de tamaños de efecto.} Cuando se reportan varias ejecuciones, la comparación suele limitarse al valor medio. La ausencia de contrastes de hipótesis con corrección por comparaciones múltiples conduce a proclamar superioridades que los datos no sustentan, y la ausencia de tamaños de efecto impide juzgar si una diferencia estadísticamente detectable tiene relevancia práctica.
+
+\textbf{Confusión entre instancias de optimización distintas.} Al comparar resultados propios con los de la literatura, o al evaluar el efecto de ampliar el espacio de diseño, es habitual contrastar valores de función objetivo que provienen de formulaciones con distintas variables de decisión, distintas restricciones o distintas políticas de operación. La mejora atribuida al método de búsqueda incorpora entonces, de forma inseparable, el efecto de haber cambiado el problema.

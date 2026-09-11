@@ -1,0 +1,35 @@
+\chapter{Descripción del problema}
+
+El diseño y dimensionamiento de sistemas híbridos de energías renovables con producción de hidrógeno verde constituye un problema de optimización complejo que involucra múltiples variables de decisión: la capacidad instalada de generación eólica y solar, el tamaño del sistema de almacenamiento electroquímico y la capacidad de los dispositivos asociados al hidrógeno, particularmente el electrolizador \cite{Khan2022Review}.
+
+El problema consiste en determinar la configuración de estos componentes que optimiza un criterio económico --- habitualmente el costo nivelado de la energía o del hidrógeno --- respetando simultáneamente restricciones técnicas de operación, límites regulatorios sobre la interacción con la red y el balance energético horario del sistema. La dificultad no proviene del número de variables, que suele ser moderado, sino de tres características estructurales que se describen a continuación.
+
+\section{Naturaleza de la dificultad computacional}
+
+\subsection{Evaluación costosa y sin forma analítica}
+
+La función objetivo no admite expresión cerrada. Determinar el costo nivelado de una configuración candidata exige simular la operación del sistema durante un año completo con resolución horaria, porque tanto la producción de hidrógeno como la energía vendida a la red dependen del despacho hora a hora y no de magnitudes agregadas.
+
+Esta simulación es \textbf{intrínsecamente secuencial}: el estado de carga de la batería en cada hora depende del estado en la hora precedente, lo que impide vectorizar el bucle de despacho. Cada evaluación requiere por tanto 8.784 iteraciones encadenadas, con un costo medido de aproximadamente 5,5 milisegundos (2,3 segundos para las 420 configuraciones del barrido base). La consecuencia práctica es que el número de evaluaciones de la función objetivo, y no el tiempo por iteración del algoritmo, constituye el recurso computacional escaso.
+
+La ausencia de forma analítica implica además que no se dispone de derivadas, lo que excluye los métodos de optimización basados en gradiente y sitúa el problema en el dominio de la optimización de caja negra.
+
+\subsection{Región factible reducida y no convexa}
+
+Las restricciones del problema no acotan simplemente el dominio, sino que definen una región factible de geometría irregular. En la instancia base estudiada en este trabajo, el barrido exhaustivo de las 420 configuraciones de la malla revela que \textbf{solo 81 de ellas (19,3\,\%) satisfacen la restricción de fracción máxima de energía vendida a la red}. Cuatro de cada cinco configuraciones evaluadas se descartan por infactibilidad.
+
+Más relevante aún es que dicha restricción \textbf{no puede verificarse antes de simular}: la fracción anual de energía vendida a la red es un resultado agregado de las 8.784 horas de despacho. El algoritmo de optimización incurre en el costo completo de una evaluación antes de descubrir que el candidato es inadmisible, lo que penaliza a las estrategias de búsqueda que exploran de forma poco dirigida.
+
+\subsection{Crecimiento combinatorio del espacio de diseño}
+
+La instancia base del problema, con dos grados de libertad efectivos, contiene 420 configuraciones y puede enumerarse por completo en 2,3 segundos. Sin embargo, basta incorporar como variables de diseño la potencia y la duración del almacenamiento electroquímico --- dos dimensiones adicionales con 11 y 3 niveles respectivamente --- para que el dominio se eleve a \textbf{14.883 configuraciones}, un factor de 35.
+
+La enumeración exhaustiva de ese dominio ampliado requeriría del orden de 80 segundos, tiempo aún manejable pero que ilustra la tendencia: cada nueva variable de diseño multiplica el costo de la enumeración por su número de niveles. Incorporar la capacidad renovable total, un perfil de demanda de hidrógeno, la compresión o una pila de combustible ---extensiones naturales del modelo--- sitúa rápidamente el problema fuera del alcance de cualquier método exhaustivo. Es precisamente en ese régimen donde las metaheurísticas resultan necesarias, y donde importa saber cuál de ellas emplear.
+
+\section{El problema metodológico subyacente}
+
+A la dificultad computacional del dimensionamiento se superpone un problema de método. La literatura de aplicación recurre de forma sistemática a metaheurísticas bioinspiradas, pero lo hace con frecuencia bajo protocolos experimentales que no permiten sostener las conclusiones que se extraen de ellos: ejecuciones únicas sin reporte de dispersión, ausencia de líneas base no informadas y comparaciones de medias sin contrastes de significancia ni tamaños de efecto \cite{Derrac2011Tutorial,Arcuri2014Hitchhiker}.
+
+El resultado es una acumulación de afirmaciones sobre superioridad algorítmica que, tomadas en conjunto, resultan mutuamente incompatibles y difíciles de verificar. Un profesional que deba escoger un optimizador para un problema de dimensionamiento concreto no encuentra en esa literatura una base sólida para decidir.
+
+Este trabajo aborda ambos problemas de forma conjunta. Sobre el problema computacional, formula una instancia de optimización con un espacio de diseño ampliado y evalúa sobre ella cinco metaheurísticas de población. Sobre el problema metodológico, adopta un protocolo experimental que incluye línea base, presupuesto equiparado, ejecuciones múltiples pareadas, contrastes con corrección por comparaciones múltiples, tamaños de efecto y verificación de la estabilidad de los resultados frente a las decisiones de modelado.

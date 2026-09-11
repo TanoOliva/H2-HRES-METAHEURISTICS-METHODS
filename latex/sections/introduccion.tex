@@ -1,0 +1,31 @@
+\chapter{Introducción}
+
+La creciente preocupación por el cambio climático y la necesidad de reducir las emisiones de gases de efecto invernadero han impulsado una transición global hacia sistemas energéticos basados en fuentes renovables. En este contexto, tecnologías como la energía solar fotovoltaica y la energía eólica han adquirido un rol protagónico debido a su disponibilidad, sostenibilidad y rápida expansión a nivel mundial.
+
+No obstante, la naturaleza intermitente y variable de estos recursos plantea desafíos significativos en términos de estabilidad, confiabilidad y gestión de la energía. Para abordar estas limitaciones han surgido los sistemas híbridos de energías renovables, que integran múltiples fuentes de generación junto con sistemas de almacenamiento. Entre las alternativas disponibles, el hidrógeno verde ha ganado especial interés como vector energético, debido a su capacidad de almacenamiento estacional, su alta densidad energética másica y su versatilidad de uso, que permite descarbonizar sectores en los que la electrificación directa resulta inviable \cite{Irena2020GreenHydrogen}.
+
+Los sistemas híbridos que combinan generación eólica, solar, almacenamiento electroquímico y tecnologías de hidrógeno permiten mejorar la flexibilidad operativa y el aprovechamiento del recurso renovable \cite{Wang2021HybridSystem,Naderipour2021HybridClean}. Sin embargo, su dimensionamiento óptimo constituye un problema complejo, debido a la interacción entre múltiples componentes, la variabilidad temporal de los recursos y la presencia de restricciones técnicas, económicas y regulatorias acopladas entre sí.
+
+En este contexto, los métodos de optimización basados en metaheurísticas se han consolidado como la herramienta predominante para abordar problemas no lineales, no convexos y de alta dimensionalidad como el dimensionamiento de sistemas HRES-H$_2$ \cite{Khan2022Review}. Su adopción, sin embargo, presenta un patrón metodológico problemático: los estudios de aplicación tienden a comparar varios algoritmos bioinspirados entre sí, con frecuencia sin incluir una línea base no informada, sin reportar la dispersión entre ejecuciones independientes y sin contrastes de significancia estadística. Bajo esas condiciones no es posible distinguir si el algoritmo propuesto aporta valor real o si el resultado publicado refleja simplemente una inicialización afortunada.
+
+Esta carencia adquiere relevancia particular a la luz del teorema de la no existencia de almuerzo gratis \cite{Wolpert1997NFL}, según el cual ninguna metaheurística es universalmente superior. Si la superioridad de un algoritmo solo puede establecerse empíricamente y para una clase acotada de problemas, entonces el rigor del protocolo experimental no es un detalle accesorio del trabajo: es la condición que determina si sus conclusiones son válidas.
+
+\section{Contribuciones del trabajo}
+
+Esta tesis aborda el dimensionamiento de un sistema híbrido eólico-fotovoltaico con electrólisis y almacenamiento electroquímico, y realiza cuatro contribuciones:
+
+\begin{enumerate}
+    \item \textbf{Una réplica verificada} del modelo WPEB propuesto por Li et al. \cite{Li2024WPEB}, contrastada contra diez indicadores publicados, de los cuales nueve quedan dentro de tolerancias fijadas \textit{a priori}. El proceso de verificación permitió además detectar dos inconsistencias en el artículo original.
+
+    \item \textbf{Una instancia de optimización discreta} formulada sobre esa base verificada, en la que la potencia y la duración del almacenamiento electroquímico dejan de ser parámetros derivados para convertirse en variables de diseño, ampliando el dominio admisible de 420 a 14.883 configuraciones.
+
+    \item \textbf{Un banco de pruebas comparativo} entre cinco metaheurísticas de población y una línea base aleatoria, bajo presupuesto idéntico de evaluaciones, 30 semillas pareadas y un protocolo estadístico que combina contrastes de Wilcoxon, corrección de Holm--Bonferroni y tamaños de efecto de Vargha--Delaney.
+
+    \item \textbf{Un análisis de robustez} que demuestra que el ordenamiento entre algoritmos no es una propiedad del algoritmo sino de la pareja algoritmo--formulación, al invertirse parcialmente ante el cambio de una única decisión de modelado.
+\end{enumerate}
+
+\section{Estructura del documento}
+
+El Capítulo 2 delimita el problema de dimensionamiento y caracteriza cuantitativamente su dificultad computacional. El Capítulo 3 enuncia el objetivo general y los objetivos específicos. El Capítulo 4 desarrolla el marco teórico en tres bloques: los fundamentos del hidrógeno verde y de los sistemas HRES-H$_2$, la formulación matemática completa del modelo WPEB, y los fundamentos de la optimización metaheurística junto con las brechas de investigación identificadas.
+
+El Capítulo 5 describe la metodología, el entorno computacional, las fuentes de datos y las decisiones de modelado justificadas por evidencia empírica. El Capítulo 6 define el diseño experimental, distinguiendo de forma explícita las dos instancias de optimización empleadas y detallando los protocolos experimental y estadístico. El Capítulo 7 presenta y discute los resultados. El Capítulo 8 recoge las conclusiones, el aporte del trabajo a la Ingeniería Informática, sus limitaciones y las líneas de trabajo futuro.

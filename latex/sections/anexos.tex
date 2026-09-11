@@ -1,0 +1,70 @@
+\appendix
+\chapter{Identidad visual de los algoritmos}
+
+Las figuras comparativas de este documento emplean una codificación visual consistente: cada algoritmo mantiene el mismo color y el mismo marcador en todas las representaciones, de modo que el lector pueda seguir un competidor concreto a través de las distintas figuras sin recurrir a la leyenda en cada caso.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/fig04_identidad_visual.png}
+\caption{Correspondencia entre algoritmo, color y marcador empleada de forma consistente en todas las figuras comparativas.}
+\label{fig:identidad_visual}
+\end{figure}
+
+La forma del marcador actúa como codificación primaria y el color como refuerzo secundario. Esta decisión responde a una limitación verificada: al extender la paleta a seis categorías, la separación cromática mínima entre pares desciende por debajo del umbral que garantiza distinguibilidad en contextos de visión cromática reducida. Confiar exclusivamente en el color habría hecho ilegibles los diagramas de dispersión para una fracción de los lectores.
+
+\chapter{Plan de trabajo del proyecto}
+
+El trabajo recogido en esta tesis corresponde a la ejecución completa del primer paquete de trabajo de un proyecto de investigación de mayor alcance, cuya estructura se documenta aquí para situar el aporte realizado.
+
+\section{WP1: Evaluación de metaheurísticas para HRES-H$_2$}
+
+Su propósito es evaluar la aplicabilidad, flexibilidad y limitaciones de las metaheurísticas de población aplicadas a configuraciones HRES-H$_2$, identificando las características críticas del problema y las limitaciones de los enfoques existentes.
+
+\begin{itemize}
+    \item \textbf{Tarea 1.1:} revisión del estado del arte sobre modelos HRES-H$_2$ y análisis de su complejidad computacional. \textit{Completada}, véase el marco teórico.
+    \item \textbf{Tarea 1.2:} revisión del estado del arte sobre metaheurísticas modernas basadas en población. \textit{Completada}, con la incorporación de GWO \cite{Mirjalili2014GWO}, PSO \cite{Kennedy1995PSO}, GA \cite{Goldberg1989GA}, SHO \cite{Dhiman2017SHO} y WOA \cite{Mirjalili2016WOA}.
+    \item \textbf{Tarea 1.3:} análisis de enfoques híbridos de optimización basados en población y componentes de aprendizaje. \textit{Parcialmente completada}; la integración efectiva de componentes de aprendizaje se traslada al WP2.
+    \item \textbf{Tarea 1.4:} implementación, experimentación y evaluación de impacto y robustez de los enfoques seleccionados. \textit{Completada}, véanse los capítulos de diseño experimental y de resultados.
+\end{itemize}
+
+\section{WP2: Integración de componentes de aprendizaje basados en ANN}
+
+Orientado al diseño e integración de redes neuronales artificiales dentro de marcos de optimización híbrida, con el objetivo de reducir el número de evaluaciones costosas mediante modelos sustitutos de la función objetivo. Su pertinencia queda reforzada por los resultados de esta tesis: siendo la simulación horaria el costo dominante, un modelo sustituto suficientemente preciso permitiría ampliar el presupuesto efectivo de búsqueda en órdenes de magnitud.
+
+\section{WP3: Extensión ambiental y multiobjetivo}
+
+Aborda la incorporación de métricas de sostenibilidad al proceso de optimización, complementando los criterios técnicos y económicos con indicadores ambientales bajo una formulación multiobjetivo de frente de Pareto.
+
+\section{WP4: Difusión y comunicación de resultados}
+
+Contempla la comunicación de los avances metodológicos y de los resultados obtenidos a audiencias académicas y técnicas.
+
+\chapter{Reproducibilidad del experimento}
+
+\section{Artefactos computacionales}
+
+La totalidad de los resultados reportados en esta tesis es reproducible a partir de dos archivos:
+
+\begin{itemize}
+    \item \texttt{notebooks/H2\_HRES\_trabajo.ipynb} --- cuaderno autocontenido de 64 celdas que incluye la configuración del escenario, los modelos de generación y económicos, el simulador de despacho horario, la verificación contra el artículo de referencia, el barrido exhaustivo de la instancia base, la definición de la instancia discreta, las seis implementaciones de optimizadores, el banco de pruebas comparativo, el análisis estadístico y los estudios de sensibilidad.
+    \item \texttt{notebooks/src/hourly\_2008.csv} --- serie meteorológica horaria de 8.784 registros obtenida de NASA POWER \cite{NasaPower}.
+\end{itemize}
+
+\section{Requisitos y ejecución}
+
+El cuaderno requiere Python 3.13 y cuatro bibliotecas científicas: \texttt{numpy}, \texttt{pandas}, \texttt{matplotlib} y \texttt{scipy}. No requiere conexión de red en tiempo de ejecución ni la instalación de paquetes propios del proyecto.
+
+La ejecución se controla mediante un único interruptor de configuración situado en la primera celda de código:
+
+\begin{itemize}
+    \item \texttt{MODO = "rapido"} --- 3 semillas, 8 individuos y 8 iteraciones. Aproximadamente un minuto de ejecución. Destinado a verificar que el cuaderno se ejecuta de principio a fin sin errores.
+    \item \texttt{MODO = "completo"} --- 30 semillas, 20 individuos y 30 iteraciones, equivalente a 108.000 simulaciones horarias. Aproximadamente quince minutos de ejecución. Es el modo con el que se generaron todas las cifras y figuras de este documento.
+\end{itemize}
+
+\section{Determinismo}
+
+Cada corrida se inicializa con un generador de números pseudoaleatorios propio, derivado de una semilla explícita del conjunto $\{42, 43, \ldots, 71\}$. La reproducibilidad no depende por tanto del estado global del intérprete ni del orden de ejecución de las celdas. Dos ejecuciones del cuaderno en modo completo producen resultados numéricamente idénticos.
+
+\section{Extracción de las figuras}
+
+Las nueve figuras incluidas en este documento se extraen directamente de las salidas persistidas en el cuaderno ejecutado mediante el script \texttt{scripts/extraer\_figuras.py}, lo que garantiza que las imágenes corresponden exactamente a la misma ejecución de la que provienen las cifras citadas en el texto.

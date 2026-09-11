@@ -1,0 +1,62 @@
+\documentclass[12pt, letterpaper]{report}
+
+\usepackage{pucv_inf_2024}
+
+% Holgura tipografica adicional: evita lineas desbordadas en parrafos con
+% terminos tecnicos largos y en las entradas de bibliografia con DOI.
+\emergencystretch=2em
+\hyphenpenalty=100
+\tolerance=1500
+
+% Localizacion de los rotulos que la plantilla deja en ingles.
+\renewcommand{\figurename}{Figura}
+\renewcommand{\tablename}{Tabla}
+\renewcommand{\chaptername}{Capítulo}
+\renewcommand{\appendixname}{Anexo}
+
+\title{Diseño y evaluación de arquitecturas de optimización basadas en metaheurísticas para sistemas híbridos de energías renovables con tecnologías de hidrógeno verde}
+\author{Luciano Oliva}
+\date{Marzo 2026}
+
+\addbibresource{refs/referencias.bib}
+
+\begin{document}
+
+\input{frontmatter/portada_principal}
+
+\input{sections/resumen}
+\clearpage
+\input{sections/abstract}
+
+\clearpage
+\tableofcontents
+
+\clearpage
+\listoffigures
+\addcontentsline{toc}{chapter}{Lista de Figuras}
+
+\clearpage
+\listoftables
+\addcontentsline{toc}{chapter}{Lista de Tablas}
+
+\clearpage
+\input{sections/nomenclatura}
+
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/introduccion}
+\input{sections/descripcion_problema}
+\input{sections/objetivos}
+\input{sections/marco_teorico}
+\input{sections/metodologia}
+\input{sections/diseno_experimental}
+\input{sections/resultados}
+\input{sections/conclusiones}
+
+\clearpage
+\printbibliography[title={Referencias bibliográficas}, heading=bibintoc]
+
+\input{sections/anexos}
+
+\end{document}

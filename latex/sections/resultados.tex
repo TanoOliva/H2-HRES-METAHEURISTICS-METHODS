@@ -1,0 +1,315 @@
+\chapter{Resultados y discusión}
+
+Este capítulo presenta los resultados en el mismo orden en que se construyó la evidencia: primero la verificación de que el simulador reproduce el modelo publicado, después la caracterización del dominio mediante enumeración exhaustiva, a continuación la comparación entre los seis optimizadores sobre la instancia discreta y, finalmente, los análisis de sensibilidad y de robustez que delimitan hasta dónde son generalizables las conclusiones.
+
+Todas las cifras reportadas provienen de una única ejecución completa del cuaderno computacional en modo exhaustivo, cuyos resultados quedaron persistidos junto al código.
+
+\section{Verificación frente al modelo de referencia}
+\label{sec:validacion}
+
+La verificación contrasta diez indicadores publicados por Li et al. \cite{Li2024WPEB} contra los valores que produce la implementación propia, con tolerancias fijadas \textit{a priori} según la naturaleza de cada magnitud: 8\,\% para los factores de capacidad eólico y del electrolizador, 15\,\% para el factor de capacidad fotovoltaico --- más sensible a la ubicación exacta y al modelo térmico ---, 5\,\% para la participación del CAPEX en el costo presente neto y 3\,\% para el resto.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Verificación de la réplica frente a los valores publicados por Li et al. \cite{Li2024WPEB}}
+\label{tab:validacion}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{5.4cm} l r r r l}
+\hline
+\textbf{Indicador} & \textbf{Unidad} & \textbf{Publicado} & \textbf{Réplica} & \textbf{Desvío [\%]} & \textbf{Veredicto} \\
+\hline
+CF parque eólico & fracción & 0{,}4000 & 0{,}395802 & $-1{,}05$ & OK \\
+CF parque fotovoltaico & fracción & 0{,}1900 & 0{,}187450 & $-1{,}34$ & OK \\
+CF electrolizador (W190-P10-E95) & fracción & 0{,}6240 & 0{,}588863 & $-5{,}63$ & OK \\
+LCOE W190-P10-E95-B30 & CNY/kWh & 0{,}2692 & 0{,}262386 & $-2{,}53$ & OK \\
+LCOE W120-P80-E80-B25 & CNY/kWh & 0{,}2886 & 0{,}284769 & $-1{,}33$ & OK \\
+LCOE W60-P140-E85-B27.5 & CNY/kWh & 0{,}3617 & 0{,}353046 & $-2{,}39$ & OK \\
+NPC W190-P10-E95-B30 & M CNY & 2675{,}73 & 2664{,}976426 & $-0{,}40$ & OK \\
+NPC W120-P80-E80-B25 & M CNY & 2350{,}38 & 2346{,}870712 & $-0{,}15$ & OK \\
+NPC W60-P140-E85-B27.5 & M CNY & 2114{,}53 & 2320{,}171027 & $+9{,}73$ & \textbf{REVISAR} \\
+CAPEX sobre NPC (W190) & fracción & 0{,}7330 & 0{,}720906 & $-1{,}65$ & OK \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Nueve de los diez indicadores quedan dentro de tolerancia.} El único desvío relevante corresponde al costo presente neto del caso W60-P140-E85-B27.5, con un exceso del 9,73\,\%. El análisis de esa discrepancia arroja un resultado inesperado: no se trata de un error de la réplica, sino de una \textbf{inconsistencia interna del artículo original}. Aplicando los costos unitarios que el propio artículo declara en su Tabla 4, la diferencia de costo presente neto entre las configuraciones W60-P140 y W120-P80 debería ser de aproximadamente $-26{,}7$ M CNY, mientras que el artículo reporta una diferencia de $-235{,}9$ M CNY. La réplica es coherente con los costos publicados; la cifra publicada no lo es consigo misma.
+
+\subsection{El óptimo publicado es infactible bajo su propia restricción}
+
+Un segundo hallazgo surge de la verificación del caso W190-P10-E95-B30, presentado en el artículo como configuración óptima. Al evaluarlo con la restricción de fracción anual de energía vendida a la red aplicada de forma estricta, se obtiene $\mathrm{AGSR} = 0{,}270332$, sensiblemente por encima del límite de 0,20 que el propio artículo establece. La configuración, por tanto, \textbf{no pertenece a la región factible del problema que el artículo define}.
+
+Este resultado no invalida el modelo: sugiere que la restricción se aplicó en el trabajo original de forma más laxa que la enunciada, o sobre una definición ligeramente distinta del cociente. Sí obliga, en cambio, a no emplear esa configuración como referencia de calidad, y explica por qué los óptimos hallados en este trabajo presentan una participación eólica menor que la publicada: la frontera de AGSR actúa como restricción activa y limita cuánta capacidad eólica resulta admisible.
+
+\section{Instancia base: enumeración exhaustiva del dominio}
+
+El barrido exhaustivo de la instancia base evalúa las 420 configuraciones de la malla en 2,3 segundos. De ellas, \textbf{solo 81 (19,3\,\%) satisfacen la restricción de AGSR}, lo que confirma que la región factible es una fracción minoritaria y no trivialmente conexa del dominio.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Diez mejores configuraciones factibles de la instancia base, ordenadas por LCOE}
+\label{tab:top10_base}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{rrrr rrrr}
+\hline
+\textbf{W} & \textbf{PV} & \textbf{E} & \textbf{B} & \textbf{AGSR} & \textbf{CF elz.} & \textbf{LCOE} & \textbf{LCOH} \\
+\textbf{[MW]} & \textbf{[MW]} & \textbf{[MW]} & \textbf{[MW]} & & & \textbf{[CNY/kWh]} & \textbf{[CNY/kg]} \\
+\hline
+130{,}0 & 70{,}0 & 85{,}0 & 27{,}5 & 0{,}194756 & 0{,}609199 & \textbf{0{,}285878} & 19{,}648018 \\
+140{,}0 & 60{,}0 & 90{,}0 & 27{,}5 & 0{,}191735 & 0{,}596003 & 0{,}286004 & 19{,}583922 \\
+150{,}0 & 50{,}0 & 95{,}0 & 30{,}0 & 0{,}189154 & 0{,}583875 & 0{,}287047 & 19{,}594237 \\
+160{,}0 & 40{,}0 & 100{,}0 & 30{,}0 & 0{,}188462 & 0{,}571731 & 0{,}287184 & 19{,}588418 \\
+100{,}0 & 100{,}0 & 75{,}0 & 22{,}5 & 0{,}192208 & 0{,}625734 & 0{,}291714 & 19{,}984676 \\
+110{,}0 & 90{,}0 & 80{,}0 & 25{,}0 & 0{,}181849 & 0{,}615272 & 0{,}292626 & 19{,}793093 \\
+130{,}0 & 70{,}0 & 90{,}0 & 27{,}5 & 0{,}171886 & 0{,}591536 & 0{,}293357 & 19{,}604257 \\
+120{,}0 & 80{,}0 & 85{,}0 & 27{,}5 & 0{,}175701 & 0{,}603457 & 0{,}293476 & 19{,}702603 \\
+150{,}0 & 50{,}0 & 100{,}0 & 30{,}0 & 0{,}168833 & 0{,}568436 & 0{,}294081 & 19{,}582499 \\
+140{,}0 & 60{,}0 & 95{,}0 & 30{,}0 & 0{,}169404 & 0{,}580031 & 0{,}294172 & 19{,}600874 \\
+\hline
+\end{tabular}
+\end{table}
+
+El óptimo global de la instancia base corresponde a $W = 130$ MW, $P = 70$ MW, $E = 85$ MW y $B^{P} = 27{,}5$ MW durante 1 h, con un LCOE de \textbf{0,285878 CNY/kWh}, $\mathrm{AGSR} = 0{,}194756$ y un factor de capacidad del electrolizador de 0,609199. Por tratarse de un dominio enumerable, este valor no es «el mejor encontrado» sino \textbf{el mejor que existe} sobre esa malla, lo que lo convierte en una referencia dura.
+
+Resulta significativo que las cuatro primeras configuraciones difieran entre sí en menos del 0,5\,\% de LCOE pese a cubrir un rango de 30 MW de capacidad eólica. El paisaje presenta una región de óptimos casi equivalentes situada justo bajo la frontera de AGSR, estructura que anticipa una de las conclusiones del banco de pruebas: cualquier método de búsqueda razonable alcanzará valores similares, y la diferencia entre algoritmos será pequeña en magnitud aunque pueda ser estadísticamente detectable.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig03_dominio_instancia_base.png}
+\caption{Dominio de la instancia base. Izquierda: LCOE de cada configuración en el plano capacidad eólica--electrolizador; en gris las configuraciones infactibles por exceso de AGSR y con una estrella el óptimo global. Derecha: AGSR frente a capacidad eólica por familias de tamaño de electrolizador, con la frontera de factibilidad en 0,20.}
+\label{fig:dominio_base}
+\end{figure}
+
+La Figura~\ref{fig:dominio_base} evidencia la estructura del problema: el LCOE decrece de forma monótona con la capacidad eólica, pero la AGSR crece con ella, de modo que el óptimo se sitúa necesariamente sobre la frontera de factibilidad. Es la interacción entre ambas tendencias opuestas, y no la minimización del costo por sí sola, la que determina el diseño.
+
+\section{Instancia discreta: comparación entre optimizadores}
+
+El banco de pruebas completo ejecutó las 180 corridas en 679,9 segundos (11,3 minutos). Las \textbf{180 corridas concluyeron en soluciones factibles}, sin excepción, lo que indica que la penalización proporcional cumple su función: ningún algoritmo quedó atrapado fuera de la región admisible.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Desempeño comparativo de los seis optimizadores sobre 30 semillas pareadas}
+\label{tab:ranking}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c l r r r r r c r}
+\hline
+\textbf{\#} & \textbf{Algoritmo} & \textbf{Mejor} & \textbf{Media} & \textbf{Desv.} & \textbf{Peor} & \textbf{Mediana} & \textbf{Fact.} & \textbf{Tiempo [s]} \\
+\hline
+1 & \texttt{ga}     & \textbf{0{,}281003} & 0{,}283946 & 0{,}001977 & 0{,}288172 & 0{,}283667 & 30/30 & 3{,}679 \\
+2 & \texttt{pso}    & 0{,}281004 & 0{,}283237 & \textbf{0{,}001426} & 0{,}287610 & 0{,}283806 & 30/30 & 3{,}682 \\
+3 & \texttt{gwo}    & 0{,}281040 & \textbf{0{,}283055} & 0{,}001595 & 0{,}287978 & 0{,}282960 & 30/30 & \textbf{3{,}501} \\
+4 & \texttt{sho}    & 0{,}281136 & 0{,}285680 & 0{,}004472 & 0{,}295687 & 0{,}283494 & 30/30 & 3{,}713 \\
+5 & \texttt{random} & 0{,}281502 & 0{,}285404 & 0{,}002614 & 0{,}291947 & 0{,}284788 & 30/30 & 4{,}146 \\
+6 & \texttt{woa}    & 0{,}281693 & 0{,}287829 & 0{,}004668 & 0{,}300920 & 0{,}286827 & 30/30 & 3{,}892 \\
+\hline
+\end{tabular}
+\end{table}
+
+El mejor diseño hallado en todo el experimento corresponde al algoritmo genético con la semilla 67:
+
+\begin{center}
+\fbox{\parbox{0.88\textwidth}{\centering
+$W = 142{,}5$ MW \quad $P = 57{,}5$ MW \quad $E = 90$ MW (18 módulos) \quad $B = 25$ MW / 1 h \\[4pt]
+LCOE $= 0{,}281003$ CNY/kWh \quad LCOH $= 19{,}44$ CNY/kg \quad $\mathrm{AGSR} = 0{,}1997$ \quad CF elz. $= 0{,}5995$
+}}
+\end{center}
+
+La lectura de la Tabla~\ref{tab:ranking} exige distinguir tres criterios que no coinciden entre sí. Según el \textbf{mejor valor alcanzado}, el orden es \texttt{ga}, \texttt{pso}, \texttt{gwo}, \texttt{sho}, \texttt{random} y \texttt{woa}; sin embargo, los cuatro primeros difieren entre sí en menos de 0,05\,\%, magnitud que carece de significado práctico en un indicador económico. Según la \textbf{media}, el orden se reordena y \texttt{gwo} pasa al primer lugar. Según la \textbf{consistencia}, medida por la desviación típica, \texttt{pso} es el más fiable con 0,001426, frente a los 0,004668 de \texttt{woa}, más de tres veces superior.
+
+Esta última es la métrica de mayor relevancia práctica. En un uso real, quien dimensiona un sistema ejecuta el optimizador una vez, no treinta: lo que importa no es el mejor resultado que el algoritmo podría producir en el caso más favorable, sino el resultado que cabe esperar de una ejecución cualquiera. Bajo ese criterio, \texttt{pso} y \texttt{gwo} son claramente preferibles, y \texttt{sho} y \texttt{woa} resultan desaconsejables pese a que sus mejores casos sean competitivos.
+
+\textbf{El resultado más relevante es, sin embargo, la posición de la línea base.} La búsqueda aleatoria, que no incorpora mecanismo alguno de aprendizaje ni de explotación, ocupa el quinto lugar de seis por mejor valor y el cuarto por media, superando a \texttt{woa} en ambos criterios y a \texttt{sho} en media. Dos de las cinco metaheurísticas evaluadas no están justificando su complejidad adicional en este problema.
+
+\subsection{Comportamiento de convergencia}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig05_convergencia.png}
+\caption{Convergencia por algoritmo: mediana del mejor valor alcanzado y banda intercuartil sobre 30 semillas, en función de la iteración.}
+\label{fig:convergencia}
+\end{figure}
+
+Las trayectorias de la Figura~\ref{fig:convergencia} muestran que la mayor parte de la mejora se concentra en las primeras diez iteraciones y que, a partir de la iteración veinte, las medianas se estabilizan. El comportamiento diferencial no se manifiesta tanto en la posición de la mediana como en la \textbf{amplitud de la banda intercuartil}: \texttt{pso} y \texttt{gwo} la estrechan progresivamente, señal de que las distintas semillas convergen a soluciones similares, mientras que \texttt{woa} y \texttt{sho} la mantienen ancha hasta el final del presupuesto, indicando que el resultado sigue dependiendo fuertemente de la inicialización.
+
+\subsection{Dispersión de los resultados y costo computacional}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig06_dispersion_y_tiempo.png}
+\caption{Izquierda: distribución de los valores finales de aptitud por algoritmo. Derecha: calidad de la solución frente a tiempo de ejecución, con una marca por corrida.}
+\label{fig:dispersion}
+\end{figure}
+
+El diagrama de cajas confirma lo que anticipaba la desviación típica y añade un matiz sobre la forma de las distribuciones: las de \texttt{sho} y \texttt{woa} presentan colas superiores largas, es decir, un pequeño número de corridas con resultados marcadamente peores. En el caso de \texttt{sho}, la inspección de las corridas individuales revela un patrón concreto: en varias semillas el algoritmo converge a soluciones con batería nula, alcanzando valores de aptitud en torno a 0,2919--0,2957. El optimizador queda atrapado en una región donde prescindir del almacenamiento parece localmente ventajoso, sin explorar las configuraciones intermedias que resultan globalmente superiores.
+
+El panel de la derecha muestra que no existe compensación entre calidad y tiempo. Los tiempos de ejecución se sitúan todos en la banda de 3,5 a 4,1 segundos por corrida, y la búsqueda aleatoria resulta incluso la más lenta (4,146 s de media). Este último dato, aparentemente paradójico, es consecuencia directa del diseño de la memoización: al muestrear uniformemente sobre todo el dominio, la búsqueda aleatoria genera perfiles de generación nuevos con mayor frecuencia que los algoritmos que concentran su población en regiones acotadas y reutilizan resultados ya calculados.
+
+\section{Significancia estadística de las diferencias}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Contrastes de Wilcoxon pareados con corrección de Holm--Bonferroni y tamaño de efecto $A_{12}$}
+\label{tab:wilcoxon}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l r r r r c}
+\hline
+\textbf{A} & \textbf{B} & \textbf{Mediana A} & \textbf{Mediana B} & \textbf{$p$} & \textbf{$p$ (Holm)} & \textbf{$A_{12}$} \\
+\hline
+\texttt{ga} & \texttt{gwo} & 0{,}283667 & 0{,}282960 & 0{,}044907 & 0{,}269443 & 0{,}4067 \\
+\texttt{ga} & \texttt{pso} & 0{,}283667 & 0{,}283806 & 0{,}036435 & 0{,}255045 & 0{,}3989 \\
+\texttt{ga} & \texttt{random} & 0{,}283667 & 0{,}284788 & 0{,}029326 & 0{,}234607 & 0{,}6767 \\
+\texttt{ga} & \texttt{sho} & 0{,}283667 & 0{,}283494 & 0{,}271006 & 0{,}813017 & 0{,}5456 \\
+\textbf{\texttt{ga}} & \textbf{\texttt{woa}} & 0{,}283667 & 0{,}286827 & 0{,}000079 & \textbf{0{,}001028} & \textbf{0{,}7856} \\
+\texttt{gwo} & \texttt{pso} & 0{,}282960 & 0{,}283806 & 0{,}761065 & 1{,}000000 & 0{,}4989 \\
+\textbf{\texttt{gwo}} & \textbf{\texttt{random}} & 0{,}282960 & 0{,}284788 & 0{,}000380 & \textbf{0{,}004561} & \textbf{0{,}7844} \\
+\texttt{gwo} & \texttt{sho} & 0{,}282960 & 0{,}283494 & 0{,}063556 & 0{,}317782 & 0{,}6533 \\
+\textbf{\texttt{gwo}} & \textbf{\texttt{woa}} & 0{,}282960 & 0{,}286827 & 0{,}000003 & \textbf{0{,}000041} & \textbf{0{,}8522} \\
+\textbf{\texttt{pso}} & \textbf{\texttt{random}} & 0{,}283806 & 0{,}284788 & 0{,}000667 & \textbf{0{,}007332} & \textbf{0{,}7567} \\
+\texttt{pso} & \texttt{sho} & 0{,}283806 & 0{,}283494 & 0{,}012048 & 0{,}120476 & 0{,}6011 \\
+\textbf{\texttt{pso}} & \textbf{\texttt{woa}} & 0{,}283806 & 0{,}286827 & 0{,}000005 & \textbf{0{,}000072} & \textbf{0{,}8467} \\
+\texttt{random} & \texttt{sho} & 0{,}284788 & 0{,}283494 & 0{,}871208 & 1{,}000000 & 0{,}4356 \\
+\texttt{random} & \texttt{woa} & 0{,}284788 & 0{,}286827 & 0{,}012048 & 0{,}120476 & 0{,}6456 \\
+\texttt{sho} & \texttt{woa} & 0{,}283494 & 0{,}286827 & 0{,}063556 & 0{,}317782 & 0{,}6711 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Solo 5 de los 15 pares} resultan estadísticamente distinguibles al nivel $\alpha = 0{,}05$ tras la corrección de Holm--Bonferroni. Las afirmaciones que los datos permiten sostener son, en consecuencia, acotadas:
+
+\begin{itemize}
+    \item \texttt{gwo} y \texttt{pso} \textbf{superan a la búsqueda aleatoria} con tamaños de efecto grandes ($A_{12} = 0{,}784$ y $0{,}757$). Ambos justifican su complejidad.
+    \item \texttt{ga}, \texttt{gwo} y \texttt{pso} \textbf{superan a \texttt{woa}}, con el efecto más pronunciado de todo el experimento en el par \texttt{gwo}--\texttt{woa} ($A_{12} = 0{,}852$).
+    \item \texttt{gwo} y \texttt{pso} son \textbf{indistinguibles entre sí} ($p = 0{,}761$, $A_{12} = 0{,}499$): el tamaño de efecto es prácticamente el del azar puro.
+    \item Ni \texttt{sho} ni \texttt{woa} logran diferenciarse de la búsqueda aleatoria. En el par \texttt{random}--\texttt{sho} el valor $A_{12} = 0{,}436$ apunta incluso en contra de \texttt{sho}, aunque sin significancia.
+    \item \texttt{ga} no se distingue de la búsqueda aleatoria tras la corrección ($p_{\text{Holm}} = 0{,}235$), pese a poseer el mejor valor absoluto del experimento. Es la ilustración más clara de por qué el mejor caso no debe emplearse como criterio de comparación.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{figures/fig07_heatmap_a12.png}
+\caption{Tamaño de efecto $A_{12}$ de Vargha--Delaney para los 15 pares. Valores superiores a 0,5 indican que el algoritmo de la fila obtiene con mayor frecuencia un LCOE menor que el de la columna.}
+\label{fig:a12}
+\end{figure}
+
+\section{Análisis de sensibilidad}
+
+El estudio de sensibilidad ejecuta nueve barridos completos de 420 configuraciones en 28,3 segundos, variando de forma independiente las dos restricciones operacionales que el modelo trata como parámetros exógenos.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Sensibilidad al límite de AGSR}
+\label{tab:sens_agsr}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{r r r r r r}
+\hline
+\textbf{Límite} & \textbf{Factibles} & \textbf{Fracción} & \textbf{Mejor LCOE} & \textbf{W óptimo} & \textbf{E óptimo} \\
+ & & \textbf{del dominio} & \textbf{[CNY/kWh]} & \textbf{[MW]} & \textbf{[MW]} \\
+\hline
+0{,}10 & 16  & 0{,}038095 & 0{,}326706 & 110{,}0 & 100{,}0 \\
+0{,}15 & 48  & 0{,}114286 & 0{,}301430 & 140{,}0 & 100{,}0 \\
+0{,}20 & 81  & 0{,}192857 & 0{,}285878 & 130{,}0 & 85{,}0 \\
+0{,}25 & 115 & 0{,}273810 & 0{,}268633 & 190{,}0 & 100{,}0 \\
+0{,}30 & 151 & 0{,}359524 & 0{,}254389 & 180{,}0 & 85{,}0 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Sensibilidad a la carga mínima del electrolizador}
+\label{tab:sens_carga}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{r r r r r r}
+\hline
+\textbf{Carga mín.} & \textbf{Factibles} & \textbf{Fracción} & \textbf{Mejor LCOE} & \textbf{W óptimo} & \textbf{E óptimo} \\
+ & & \textbf{del dominio} & \textbf{[CNY/kWh]} & \textbf{[MW]} & \textbf{[MW]} \\
+\hline
+0{,}20 & 82 & 0{,}195238 & 0{,}285432 & 130{,}0 & 85{,}0 \\
+0{,}30 & 81 & 0{,}192857 & 0{,}285878 & 130{,}0 & 85{,}0 \\
+0{,}40 & 75 & 0{,}178571 & 0{,}286328 & 130{,}0 & 85{,}0 \\
+0{,}50 & 55 & 0{,}130952 & 0{,}294206 & 120{,}0 & 85{,}0 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig08_sensibilidad_agsr.png}
+\caption{Sensibilidad al límite de AGSR: mejor LCOE alcanzable, capacidades óptimas y fracción factible del dominio.}
+\label{fig:sens_agsr}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig09_sensibilidad_carga_minima.png}
+\caption{Sensibilidad a la carga mínima del electrolizador, con la misma estructura de paneles.}
+\label{fig:sens_carga}
+\end{figure}
+
+Los dos parámetros presentan influencias de magnitud muy distinta. Relajar el límite de AGSR del 10\,\% al 30\,\% amplía el dominio factible de 16 a 151 configuraciones y \textbf{reduce el LCOE óptimo en 0,0723 CNY/kWh}, aproximadamente un cuarto de su valor. Elevar la carga mínima del electrolizador del 20\,\% al 50\,\% reduce el dominio en 27 configuraciones y \textbf{aumenta el LCOE óptimo en apenas 0,0088 CNY/kWh}, un orden de magnitud menos.
+
+La conclusión de política es directa: la restricción dominante no es tecnológica sino regulatoria. Cuánta energía se permite verter a la red condiciona el diseño óptimo mucho más que la flexibilidad operativa del electrolizador. Este resultado proporciona además una explicación al criterio con que el artículo de referencia fija el límite inferior de la capacidad del electrolizador: si se admite vender más a la red, se requiere menos capacidad de electrólisis para absorber el excedente renovable.
+
+\section{Robustez del ranking frente a una decisión de modelado}
+\label{sec:robustez}
+
+Los resultados anteriores corresponden a la instancia discreta con la batería tratada como variable de diseño en dos dimensiones, lo que exigió repartir su costo entre una componente por potencia y otra por energía. Cabe preguntar en qué medida el ordenamiento obtenido depende de esa decisión. Para responderlo se reprodujo el experimento completo sobre una variante en la que la duración de la batería permanece fija en una hora y la totalidad de su costo se imputa a la potencia instalada, tal como aparece en el artículo original.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Comparación de los rankings bajo las dos configuraciones de batería}
+\label{tab:robustez}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c l r r c l r r}
+\hline
+\multicolumn{4}{c}{\textbf{Batería variable} (1, 2 o 4 h)} & \multicolumn{4}{c}{\textbf{Batería fija} (1 h)} \\
+\hline
+\textbf{\#} & \textbf{Alg.} & \textbf{Media} & \textbf{Desv.} & \textbf{\#} & \textbf{Alg.} & \textbf{Media} & \textbf{Desv.} \\
+\hline
+1 & \texttt{ga}     & 0{,}283946 & 0{,}001977 & 1 & \texttt{pso}    & 0{,}282201 & 0{,}001001 \\
+2 & \texttt{pso}    & 0{,}283237 & 0{,}001426 & 2 & \texttt{gwo}    & 0{,}282174 & 0{,}000940 \\
+3 & \texttt{gwo}    & 0{,}283055 & 0{,}001595 & 3 & \texttt{woa}    & 0{,}283670 & 0{,}001966 \\
+4 & \texttt{sho}    & 0{,}285680 & 0{,}004472 & 4 & \texttt{ga}     & 0{,}283815 & 0{,}003215 \\
+5 & \texttt{random} & 0{,}285404 & 0{,}002614 & 5 & \texttt{random} & 0{,}284368 & 0{,}001568 \\
+6 & \texttt{woa}    & 0{,}287829 & 0{,}004668 & 6 & \texttt{sho}    & 0{,}284381 & 0{,}003734 \\
+\hline
+\end{tabular}
+\end{table}
+
+En ambos casos la posición del ranking se establece según el mejor valor alcanzado, criterio que no coincide necesariamente con el orden de las medias: en la variante de batería fija, por ejemplo, \texttt{gwo} presenta una media ligeramente inferior a la de \texttt{pso} pese a ocupar la segunda posición. Los tiempos de ejecución no son comparables entre ambas columnas, por haberse medido en ejecuciones distintas.
+
+El contraste es elocuente. \textbf{El ranking no es robusto frente a esta única decisión de modelado.} El algoritmo genético cae del primer al cuarto lugar, mientras que \texttt{woa} --- último en la configuración de batería variable --- asciende al tercero. Solo tres hechos se mantienen estables entre ambas variantes: \texttt{pso} y \texttt{gwo} ocupan sistemáticamente las posiciones de cabeza y son indistinguibles entre sí, la búsqueda aleatoria se sitúa en quinto lugar en ambos casos, y ningún algoritmo logra una ventaja de magnitud práctica sobre los demás.
+
+El número de pares significativos también cambia: 5 de 15 con batería variable frente a \textbf{8 de 15 con batería fija}. En esta última, además, los pares que alcanzan significancia son distintos --- por ejemplo, \texttt{ga}--\texttt{gwo} resulta significativo con $p_{\text{Holm}} = 0{,}0401$, mientras que en la variante de batería variable no lo es.
+
+La implicación metodológica excede a este caso de estudio. Un trabajo que reporte un único ranking de metaheurísticas sobre una única formulación del problema, sin verificar su estabilidad frente a las decisiones de modelado, está afirmando más de lo que sus datos respaldan. La pregunta «¿qué algoritmo es mejor?» resulta estar mal planteada: lo que se mide no es una propiedad del algoritmo, sino de la pareja algoritmo--formulación.
+
+\section{Discusión}
+
+\subsection{Por qué todos los algoritmos alcanzan valores similares}
+
+Los seis optimizadores convergen a valores de LCOE comprendidos entre 0,281003 y 0,281693, un rango del 0,25\,\%. Tres factores explican esta convergencia. El primero es la estructura del paisaje descrita en la instancia base: existe una meseta de soluciones casi equivalentes a lo largo de la frontera de AGSR, de modo que muchas configuraciones distintas producen costos prácticamente idénticos. El segundo es la dimensionalidad reducida del problema: cuatro variables, de las cuales tres son discretas con pocos niveles. El tercero es que 600 evaluaciones sobre un dominio de 14.883 configuraciones representan una cobertura del 4\,\%, suficiente en un espacio tan benigno para que incluso el muestreo uniforme alcance buenas soluciones.
+
+Esta observación no invalida el experimento; delimita su alcance. Las diferencias entre metaheurísticas se manifiestan en problemas donde el paisaje es engañoso o la dimensionalidad elevada. En un problema de estas características, la conclusión honesta es que \textbf{la elección del algoritmo importa poco, y lo que importa es la consistencia entre ejecuciones}.
+
+\subsection{Por qué la duración óptima de la batería es siempre de una hora}
+
+Las mejores soluciones de los seis algoritmos coinciden en seleccionar una duración de batería de una hora, pese a disponer de las alternativas de dos y cuatro horas. El motivo es económico y no operativo: con el reparto de costos adoptado, el 70\,\% del costo de la batería se imputa a la componente de energía, de modo que duplicar la duración incrementa sustancialmente el costo presente neto. El beneficio operativo correspondiente es marginal, porque en esta configuración la batería no cumple una función de arbitraje temporal, sino la función acotada de sostener el electrolizador por encima de su carga mínima durante períodos breves de generación insuficiente. Para esa tarea, una hora de autonomía resulta suficiente.
+
+Es precisamente este resultado el que justifica, retrospectivamente, haber introducido el reparto de costos: bajo la imputación original --- todo el costo a la potencia --- alargar la duración habría sido gratuito, y la variable de decisión carecería de contenido.
+
+\subsection{Degradación de la memoización y su origen}
+
+La memoria intermedia de perfiles de generación registró 19.631 aciertos frente a 88.369 fallos, una tasa de acierto del 18,2\,\%. La causa es identificable con precisión: la capacidad eólica se mantiene como variable continua, de modo que dos evaluaciones rara vez solicitan exactamente el mismo par de perfiles. Cada fallo obliga a recalcular las 8.784 horas de generación eólica y fotovoltaica.
+
+La mejora es directa y cuantificable: cuantizar $x_0$ a una malla de, por ejemplo, 0,5 MW reduciría el número de perfiles distintos a 401 y elevaría la tasa de acierto por encima del 95\,\% tras las primeras iteraciones, sin alterar de forma apreciable la resolución del espacio de búsqueda. Se deja consignada como optimización pendiente, relevante sobre todo si el experimento se escala a presupuestos mayores.
+
+\subsection{Síntesis de los hallazgos}
+
+La evidencia acumulada sostiene cuatro afirmaciones. Primera: la implementación reproduce el modelo publicado en nueve de diez indicadores, y las dos discrepancias detectadas son atribuibles al artículo original y no a la réplica. Segunda: sobre la instancia discreta, \texttt{pso} y \texttt{gwo} son los optimizadores preferibles, indistinguibles entre sí y significativamente superiores a la línea base aleatoria. Tercera: \texttt{woa} y \texttt{sho} no superan a la búsqueda aleatoria y presentan una dispersión entre ejecuciones sustancialmente mayor, por lo que su complejidad adicional no se justifica en este problema. Cuarta: el ordenamiento entre algoritmos depende de la formulación del problema tanto como de los algoritmos mismos, lo que exige reportar rankings acompañados de análisis de robustez.
