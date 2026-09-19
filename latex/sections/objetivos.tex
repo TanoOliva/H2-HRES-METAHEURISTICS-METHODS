@@ -4,7 +4,7 @@ En este capítulo se presentan el objetivo general y los objetivos específicos 
 
 \section{Objetivo general}
 
-Desarrollar y validar un marco metodológico para el análisis, la implementación y la evaluación comparativa de algoritmos metaheurísticos aplicados al dimensionamiento óptimo de sistemas híbridos de energías renovables que integran generación eólica, generación fotovoltaica, almacenamiento electroquímico y producción de hidrógeno verde, sustentando las conclusiones sobre desempeño algorítmico en evidencia experimental estadísticamente controlada.
+Desarrollar y validar un marco metodológico para el análisis, la implementación y la evaluación comparativa de algoritmos metaheurísticos aplicados al dimensionamiento óptimo de sistemas híbridos de energías renovables que integran generación eólica, generación fotovoltaica, almacenamiento electroquímico y producción de hidrógeno verde, sustentando las conclusiones sobre desempeño algorítmico en evidencia experimental replicada y auditable.
 
 \section{Objetivos específicos}
 
@@ -12,7 +12,7 @@ Desarrollar y validar un marco metodológico para el análisis, la implementaci�
 
 \item \textbf{Analizar} la estructura matemática de un modelo representativo de sistema híbrido de energías renovables con producción de hidrógeno, identificando sus variables de decisión, funciones objetivo, restricciones operacionales y modelos físicos de conversión energética.
 
-\item \textbf{Implementar y verificar} computacionalmente dicho modelo, contrastando sus resultados contra indicadores publicados mediante tolerancias definidas \textit{a priori}, de modo que la corrección de la implementación quede establecida antes de emplearla como banco de pruebas.
+\item \textbf{Implementar y verificar} computacionalmente dicho modelo mediante pruebas de conservación y límites, y cuantificar su grado de reproducción respecto de indicadores publicados mediante errores absolutos y relativos.
 
 \item \textbf{Evaluar críticamente} los supuestos y simplificaciones presentes en el modelo de referencia, identificando sus limitaciones en la representación de la variabilidad del recurso renovable, del comportamiento del almacenamiento y de las restricciones de interacción con la red.
 
@@ -20,10 +20,8 @@ Desarrollar y validar un marco metodológico para el análisis, la implementaci�
 
 \item \textbf{Implementar y comparar} el desempeño de un conjunto de metaheurísticas de población sobre dicha instancia, bajo un presupuesto computacional idéntico y frente a una línea base no informada, analizando la calidad de las soluciones, el comportamiento de convergencia y la consistencia entre ejecuciones independientes.
 
-\item \textbf{Establecer} la significancia estadística y la magnitud práctica de las diferencias observadas entre algoritmos, mediante contrastes no paramétricos con corrección por comparaciones múltiples y estimadores de tamaño de efecto.
+\item \textbf{Caracterizar} el desempeño relativo de los algoritmos mediante estadística descriptiva de sus ejecuciones independientes (mediana, dispersión, brecha respecto de la mejor referencia observada y tasa de éxito) frente a una línea base sin aprendizaje.
 
-\item \textbf{Determinar} la sensibilidad de las soluciones óptimas a las restricciones operacionales del sistema, y la robustez del ordenamiento entre algoritmos frente a las decisiones de modelado adoptadas.
-
-\item \textbf{Establecer} las bases para la extensión del modelo hacia una formulación multiobjetivo que incorpore criterios adicionales de desempeño energético y ambiental.
+\item \textbf{Determinar} la sensibilidad de los resultados a las restricciones operacionales, al tratamiento del año bisiesto y a la extrapolación del recurso eólico, explicitando el alcance de cada comparación.
 
 \end{enumerate}

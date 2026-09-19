@@ -1,0 +1,2 @@
+mode,hours_main,hours_sensitivity,algorithms,replicates_per_algorithm,population,iterations,requests_per_run,total_requests,main_hourly_steps_requested
+completo,8760,8784,6,30,20,30,600,108000,946080000

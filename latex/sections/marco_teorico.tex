@@ -34,7 +34,7 @@ La etapa de reconversión está dada por la celda de combustible o fuel cell, qu
 
 Los Hybrid Renewable Energy Systems with Hydrogen Technologies (HRES-H$_2$) corresponden a configuraciones energéticas que integran múltiples fuentes renovables con tecnologías de conversión y almacenamiento basadas en hidrógeno. Su objetivo principal es aprovechar la complementariedad entre recursos renovables y dispositivos de almacenamiento para mejorar la confiabilidad, estabilidad y eficiencia del sistema energético bajo condiciones variables de generación y demanda \cite{Khan2022Review}.
 
-En términos generales, un HRES-H$_2$ puede incorporar componentes como paneles fotovoltaicos, turbinas eólicas, baterías, electrolizadores, tanques de hidrógeno, celdas de combustible y convertidores. Entre estas configuraciones, una de las más frecuentes en la literatura es la combinación de generación solar y eólica con una cadena de hidrógeno compuesta por electrolizador, almacenamiento y fuel cell. Esta arquitectura permite que el sistema opere en diferentes modos según la disponibilidad de recurso renovable y el perfil de demanda. Cuando la generación renovable excede el consumo, el excedente puede utilizarse para producir hidrógeno; cuando la generación es insuficiente, el hidrógeno almacenado puede emplearse para suplir el déficit mediante la celda de combustible \cite{Khan2022Review,Wang2021HybridSystem}.
+En términos generales, un HRES-H$_2$ puede incorporar componentes como paneles fotovoltaicos, turbinas eólicas, baterías, electrolizadores, tanques de hidrógeno, celdas de combustible y convertidores. Una configuración estudiada combina generación solar y eólica con electrolizador, almacenamiento y pila de combustible. Esta arquitectura puede operar en diferentes modos según la disponibilidad del recurso y la demanda: usar excedentes para producir hidrógeno y, cuando la generación es insuficiente, reelectrificar el hidrógeno almacenado \cite{Khan2022Review,Wang2021HybridSystem}.
 
 La relevancia de estas configuraciones se debe a que permiten mitigar el carácter intermitente y no despachable de la energía solar y eólica. Los HRES-H$_2$ emergen como una solución prometedora porque integran múltiples fuentes renovables con tecnologías de almacenamiento y conversión capaces de suavizar el suministro energético, balancear desajustes entre generación y demanda y mejorar la confiabilidad operacional. Además, se destaca que estas configuraciones resultan especialmente valiosas en contextos descentralizados, zonas rurales o emplazamientos remotos donde la infraestructura convencional de red es limitada o inexistente \cite{Khan2022Review,Zhang2018SA}.
 
@@ -52,7 +52,7 @@ En la Tabla~\ref{tab:nomenclatura_wpeb} se presenta la nomenclatura utilizada en
 \centering
 \caption{Nomenclatura del sistema base WPEB}
 \label{tab:nomenclatura_wpeb}
-\begin{tabular}{p{2.8cm} p{9.5cm} p{2.2cm}}
+\begin{tabular}{@{}p{2.8cm} p{9.2cm} p{2.5cm}@{}}
 \hline
 \textbf{Símbolo} & \textbf{Descripción} & \textbf{Unidad} \\
 \hline
@@ -98,7 +98,7 @@ $K_j$ & Capacidad instalada del componente $j$ & según componente \\
 \centering
 \caption{Nomenclatura del sistema base WPEB}
 \label{tab:nomenclatura_wpeb_parametros}
-\begin{tabular}{p{2.8cm} p{9.5cm} p{2.2cm}}
+\begin{tabular}{@{}p{2.8cm} p{9.2cm} p{2.5cm}@{}}
 \hline
 \textbf{Símbolo} & \textbf{Descripción} & \textbf{Unidad} \\
 \hline
@@ -524,7 +524,7 @@ De esta manera, se limita el nivel de excedentes no absorbidos por la electróli
 La evaluación económica del sistema se basa en el costo presente neto total \cite{Li2024WPEB,Khan2022Review}:
 
 \begin{equation}
-NPC=NPC_{wt}+NPC_{pv}+NPC_{el}+NPC_{bat}
+NPC=NPC_{wt}+NPC_{pv}+NPC_{el}+NPC_{bat}+NPC_{H_2,alm}
 \end{equation}
 
 Así, el costo global se descompone en los aportes de los principales componentes del sistema.
@@ -532,10 +532,10 @@ Así, el costo global se descompone en los aportes de los principales componente
 Para un componente genérico \(j\), se considera:
 
 \begin{equation}
-NPC_j=C^{cap}_j+C^{rep}_j+C^{om}_j
+NPC_j=C^{cap}_j+C^{rep}_j+C^{om}_j-S_j
 \end{equation}
 
-lo que permite reunir en una sola magnitud los costos de inversión, reemplazo y operación y mantenimiento.
+lo que permite reunir inversión, reemplazos y operación y mantenimiento, descontando el valor residual $S_j$ al término del horizonte.
 
 El costo de inversión se calcula como:
 
@@ -578,28 +578,24 @@ Esta transformación permite expresar el costo total del proyecto como una magni
 La función objetivo principal del modelo es el costo nivelado de la energía:
 
 \begin{equation}
-LCOE=\frac{C_{ann}}{E_{use}\cdot 1000}
+LCOE=\frac{C_{ann}}{E_{use}\cdot 1000},\qquad
+E_{use}=\sum_{t=1}^{8760}(P_{el,t}+P_{grid,t})\Delta t,
+\quad \Delta t=1\ \mathrm{h}
 \end{equation}
 
 Esta métrica relaciona el costo anualizado del sistema con la energía útil anual total \cite{Li2024WPEB,Khan2022Review}.
 
-En la formulación adoptada, dicha energía útil se define como:
-
-\begin{equation}
-E_{use}=E_{el}+E_{grid}
-\end{equation}
-
-Por tanto, se considera tanto la energía destinada a electrólisis como la energía vendida a la red \cite{Li2024WPEB}.
+Por tanto, se considera tanto la energía destinada a electrólisis como la energía vendida a la red. $E_{use}$ se expresa en MWh/año y el factor 1000 convierte el denominador a kWh/año \cite{Li2024WPEB}.
 
 \subsubsection{Costo Nivelado del Hidrógeno}
 
 Como indicador complementario, también se calcula el costo nivelado del hidrógeno:
 
 \begin{equation}
-LCOH=\frac{C_{ann}}{M_{H_2}}
+LCOH_{tesis}=\frac{C_{ann}}{M_{H_2}}
 \end{equation}
 
-Este indicador permite evaluar la competitividad económica de la producción de hidrógeno asociada a cada configuración factible del sistema \cite{Li2024WPEB}.
+Este cociente asigna todo el costo anualizado del sistema al hidrógeno y no descuenta créditos por electricidad exportada. Se informa como indicador secundario y no integra la función objetivo. Dado que Li et al. remite parte de su evaluación económica a un modelo antecedente \cite{Li2023TechnoEconomic}, el valor se denomina ``LCOH según esta tesis'' y no se presenta como directamente equivalente al publicado.
 
 \subsection{Formulación General del Problema de Optimización}
 
@@ -611,56 +607,71 @@ A partir de los elementos anteriores, el problema de optimización del sistema b
 
 El objetivo consiste en identificar la combinación de capacidades renovables y de electrólisis que minimiza el costo nivelado de la energía.
 
-% resto de ecuaciones sin cambios
+Las condiciones publicadas y las reglas operacionales se organizan en cinco grupos:
+\begin{align}
+P_{ren,t}+P_{desc,t}&=P_{el,t}+P_{carga,t}+P_{grid,t}+P_{vert,t}, &&\forall t,\\
+W+P&=200,\qquad W\geq0,\quad P\geq0,\\
+0<E&\leq0{,}5(W+P),\\
+0\leq SOC_t&\leq B^E,\quad
+P_{carga,t},P_{desc,t}\leq B^P, &&\forall t,\\
+\mathrm{AGSR}&=\frac{\sum_tP_{grid,t}\Delta t}{\sum_tP_{ren,t}\Delta t}\leq0{,}20.
+\end{align}
+Además, la carga del electrolizador es nula o pertenece al intervalo entre su carga mínima y su potencia nominal. Los límites de batería y carga mínima forman parte del simulador adoptado; no deben atribuirse sin distinción a la ecuación de restricciones publicada por Li et al.
 
 En conjunto, el problema consiste en encontrar la combinación óptima de capacidad eólica, capacidad fotovoltaica y capacidad del electrolizador que minimice el costo nivelado de la energía, manteniendo la coherencia física del sistema, la factibilidad del despacho horario y un nivel acotado de venta de excedentes a la red \cite{Li2024WPEB}.
 
 \subsection{Comentario sobre el Alcance del Modelo}
 
-Conviene señalar que esta formulación reproduce específicamente el modelo implementado en el caso base WPEB utilizado en esta investigación. Por ello, aunque el sistema puede enmarcarse conceptualmente dentro de los HRES-H$_2$, no representa una cadena completa de hidrógeno con modelado detallado de todos los subsistemas usuales, tales como almacenamiento gaseoso explícito, compresión, celda de combustible o convertidor como variables independientes de optimización \cite{Li2024WPEB,Khan2022Review}.
+Conviene señalar que esta formulación reconstruye parcialmente el caso base WPEB utilizado en esta investigación. Aunque el sistema puede enmarcarse conceptualmente dentro de los HRES-H$_2$, no representa una cadena completa de hidrógeno con modelado detallado de todos los subsistemas usuales, tales como compresión, celda de combustible o convertidor como variables independientes de optimización \cite{Li2024WPEB,Khan2022Review}.
 
-Más bien, se trata de una formulación enfocada en la interacción entre generación renovable, electrólisis, batería auxiliar y exportación de excedentes. Esta delimitación es deliberada: al reproducir fielmente el alcance del modelo publicado se preserva la posibilidad de verificar la implementación contra indicadores conocidos, condición necesaria para que el banco de pruebas comparativo entre optimizadores mida el desempeño de los algoritmos y no los artefactos de un modelo no validado \cite{Li2024WPEB}.
+Se trata de una formulación enfocada en la interacción entre generación renovable, electrólisis, batería auxiliar y exportación de excedentes. La comparación con indicadores publicados permite cuantificar la correspondencia alcanzada, pero no reemplaza los datos y detalles de implementación que el artículo no informa \cite{Li2024WPEB}.
 
 \section{Optimización metaheurística}
 
 \subsection{Definición y taxonomía}
 
-Una metaheurística es una estrategia de alto nivel que coordina heurísticas subordinadas para explorar el espacio de soluciones de un problema de optimización, sin garantizar optimalidad pero ofreciendo soluciones de calidad aceptable con un esfuerzo computacional acotado. Su interés en el dimensionamiento de sistemas HRES-H$_2$ proviene de tres características del problema: la no linealidad introducida por las curvas de conversión y por la dinámica de la batería, la ausencia de derivadas explotables --- la función objetivo es el resultado de una simulación secuencial y no una expresión analítica --- y la no convexidad de la región factible \cite{Khan2022Review}.
+Una metaheurística es una estrategia de alto nivel que coordina heurísticas subordinadas para explorar el espacio de soluciones de un problema de optimización, sin garantizar optimalidad pero ofreciendo soluciones de calidad aceptable con un esfuerzo computacional acotado. Su interés en el dimensionamiento de sistemas HRES-H$_2$ proviene de tres características del problema: la no linealidad introducida por las curvas de conversión y por la dinámica de la batería, la ausencia de derivadas explotables, ya que la función objetivo es el resultado de una simulación secuencial y no de una expresión analítica, y la no convexidad de la región factible \cite{Khan2022Review}.
 
-Las metaheurísticas se clasifican habitualmente según el número de soluciones que mantienen simultáneamente. Las de \textbf{trayectoria} operan sobre una única solución que transforman iterativamente, como el recocido simulado aplicado a este mismo dominio por Zhang et al. \cite{Zhang2018SA}. Las de \textbf{población} mantienen un conjunto de soluciones que evoluciona de forma conjunta, y se subdividen a su vez en \textbf{algoritmos evolutivos}, que imitan mecanismos de selección natural, herencia y mutación, y \textbf{algoritmos de inteligencia de enjambre}, que reproducen el comportamiento colectivo emergente de grupos de organismos. Este trabajo se centra en las de población, por ser las predominantes en la literatura de dimensionamiento energético y por admitir de forma natural la paralelización de las evaluaciones.
+Las metaheurísticas se clasifican habitualmente según el número de soluciones que mantienen simultáneamente. Las de \textbf{trayectoria} operan sobre una única solución que transforman iterativamente, como el recocido simulado aplicado a este mismo dominio por Zhang et al. \cite{Zhang2018SA}. Las de \textbf{población} mantienen un conjunto de soluciones que evoluciona de forma conjunta, y se subdividen a su vez en \textbf{algoritmos evolutivos}, que imitan mecanismos de selección natural, herencia y mutación, y \textbf{algoritmos de inteligencia de enjambre}, que reproducen el comportamiento colectivo emergente de grupos de organismos. Este trabajo se centra en las de población para comparar mecanismos evolutivos y de enjambre dentro de una interfaz común; la selección no pretende representar exhaustivamente toda la literatura.
 
 \subsection{La tensión entre exploración y explotación}
 
-Toda metaheurística resuelve, de forma explícita o implícita, un compromiso entre \textbf{exploración} --- muestrear regiones del espacio aún no visitadas, para evitar quedar atrapado en óptimos locales --- y \textbf{explotación} --- refinar la búsqueda en el entorno de las mejores soluciones conocidas, para converger con precisión. Una exploración excesiva degenera en muestreo aleatorio; una explotación excesiva conduce a convergencia prematura.
+Toda metaheurística resuelve, de forma explícita o implícita, un compromiso entre \textbf{exploración}: muestrear regiones del espacio aún no visitadas para evitar quedar atrapado en óptimos locales; y \textbf{explotación}: refinar la búsqueda en el entorno de las mejores soluciones conocidas para converger con precisión. Una exploración excesiva degenera en muestreo aleatorio; una explotación excesiva conduce a convergencia prematura.
 
-El mecanismo habitual para gestionar este compromiso consiste en un parámetro de control que decae a lo largo de las iteraciones, desplazando progresivamente el comportamiento del algoritmo desde la exploración hacia la explotación. Los cinco algoritmos comparados en este trabajo implementan variantes de esta idea, lo que hace especialmente informativo contrastar su desempeño bajo un presupuesto de evaluaciones idéntico.
+Algunos métodos gestionan este compromiso mediante un parámetro decreciente, como $a$ en GWO y WOA o $h$ en SHO. PSO lo regula mediante las atracciones personal y social, mientras que GA lo hace mediante selección, recombinación, mutación y elitismo. Estas diferencias motivan una comparación bajo un presupuesto de evaluaciones idéntico.
 
 \subsection{El teorema de la no existencia de almuerzo gratis}
 
 El resultado de Wolpert y Macready \cite{Wolpert1997NFL} establece que, promediado sobre el conjunto de todos los problemas de optimización posibles, el desempeño de dos algoritmos cualesquiera es idéntico. Su consecuencia práctica es determinante para el diseño de esta investigación: \textbf{no existe una metaheurística universalmente superior}, y cualquier afirmación sobre la superioridad de un algoritmo debe estar acotada a una clase de problemas y sustentada en evidencia empírica.
 
-Este teorema justifica, por un lado, que la selección de un optimizador para un problema concreto requiera comparación experimental y no argumentos de autoridad o de popularidad; y por otro, que la línea base de búsqueda aleatoria sea un elemento imprescindible del banco de pruebas: si un algoritmo no supera al muestreo no informado en un problema dado, es que no está explotando ninguna estructura de ese problema.
+Este teorema justifica que la selección de un optimizador requiera comparación experimental y que se incluya una búsqueda aleatoria. Si un método no presenta una ventaja detectable frente al muestreo no informado bajo un presupuesto dado, sus resultados no justifican afirmar superioridad para esa instancia; ello no demuestra ausencia de utilidad en otros problemas.
 
 \subsection{Grey Wolf Optimizer (GWO)}
 
 Propuesto por Mirjalili et al. \cite{Mirjalili2014GWO}, el GWO reproduce la jerarquía social y la estrategia de caza de las manadas de lobos grises. La población se organiza según la calidad de sus soluciones: los tres mejores individuos reciben las denominaciones $\alpha$, $\beta$ y $\delta$, y el resto de la manada ajusta su posición en función de los tres.
 
-Para cada individuo se calculan los coeficientes
+Para cada individuo y cada líder $j\in\{\alpha,\beta,\delta\}$ se generan vectores aleatorios independientes $\mathbf r_{1,j},\mathbf r_{2,j}\sim U([0,1]^d)$ y
 \begin{equation}
-\mathbf{A} = 2a\,\mathbf{r}_1 - a, \qquad \mathbf{C} = 2\,\mathbf{r}_2,
+\mathbf A_j=2a\mathbf r_{1,j}-a,\qquad
+\mathbf C_j=2\mathbf r_{2,j}.
 \end{equation}
-donde $\mathbf{r}_1$ y $\mathbf{r}_2$ son vectores aleatorios uniformes en $[0,1]$ y $a$ decae linealmente de 2 a 0 a lo largo de las iteraciones. La distancia a cada líder y la posición candidata correspondiente se obtienen mediante
+La distancia y la posición candidata inducida por cada líder son
 \begin{equation}
-\mathbf{D}_j = \left| \mathbf{C} \cdot \mathbf{X}_j - \mathbf{X} \right|, \qquad
-\mathbf{X}'_j = \mathbf{X}_j - \mathbf{A} \cdot \mathbf{D}_j, \qquad j \in \{\alpha, \beta, \delta\},
+\mathbf D_j=\left|\mathbf C_j\odot\mathbf X_j-\mathbf X\right|,
+\qquad
+\mathbf X'_j=\mathbf X_j-\mathbf A_j\odot\mathbf D_j,
 \end{equation}
-y la nueva posición del individuo es el promedio de las tres. Cuando $|\mathbf{A}| > 1$ el individuo se aleja del líder, favoreciendo la exploración; cuando $|\mathbf{A}| < 1$ converge hacia él. El decaimiento de $a$ desplaza progresivamente el equilibrio hacia la explotación.
+y la actualización final es
+\begin{equation}
+\mathbf X(t+1)=\frac{\mathbf X'_{\alpha}+\mathbf X'_{\beta}+\mathbf X'_{\delta}}{3}.
+\end{equation}
+Aquí $\odot$ y el valor absoluto se aplican componente a componente. El parámetro $a$ decrece linealmente de 2 a 0. Por tanto, la interpretación de $|A|<1$ o $|A|>1$ corresponde a los componentes de $\mathbf A_j$, no a una desigualdad escalar sobre el vector completo \cite{Mirjalili2014GWO}.
 
 \subsection{Particle Swarm Optimization (PSO)}
 
 Introducido por Kennedy y Eberhart \cite{Kennedy1995PSO}, el PSO modela el desplazamiento de un enjambre en el que cada partícula combina su propia experiencia con la del colectivo. Cada partícula mantiene una posición y una velocidad, y actualiza esta última en función de su mejor posición histórica personal $\mathbf{p}_i$ y de la mejor posición global $\mathbf{g}$.
 
-Este trabajo emplea la formulación con \textbf{factor de constricción} de Clerc y Kennedy \cite{Clerc2002Constriction}, que garantiza la convergencia del enjambre sin necesidad de recortar arbitrariamente las velocidades:
+Este trabajo emplea la formulación con \textbf{factor de constricción} de Clerc y Kennedy \cite{Clerc2002Constriction}, diseñada para controlar la estabilidad de la dinámica del enjambre:
 \begin{equation}
 \mathbf{v}_i \leftarrow \chi \left[ \mathbf{v}_i + c_1 \mathbf{r}_1 \odot (\mathbf{p}_i - \mathbf{x}_i) + c_2 \mathbf{r}_2 \odot (\mathbf{g} - \mathbf{x}_i) \right], \qquad
 \mathbf{x}_i \leftarrow \mathbf{x}_i + \mathbf{v}_i,
@@ -675,49 +686,67 @@ La implementación empleada combina cuatro componentes. La \textbf{selección po
 
 \subsection{Spotted Hyena Optimizer (SHO)}
 
-El SHO, propuesto por Dhiman y Kumar \cite{Dhiman2017SHO}, se inspira en la caza cooperativa de la hiena manchada. Estructuralmente guarda semejanza con el GWO, del que difiere en dos aspectos: emplea un único individuo líder en lugar de tres, y su parámetro de control $h$ decae de 5,0 a 0, con coeficientes
+El SHO, propuesto por Dhiman y Kumar \cite{Dhiman2017SHO}, se inspira en la caza cooperativa de la hiena manchada. La mejor solución $\mathbf P_h$ representa la presa. Los coeficientes de encierro son
 \begin{equation}
 \mathbf{B} = 2\,\mathbf{r}_1, \qquad \mathbf{E} = 2h\,\mathbf{r}_2 - h.
 \end{equation}
-
-La formulación original incorpora además una fase de \textit{formación de agrupaciones}, en la que un subconjunto de individuos con aptitud comparable a la del líder contribuye al desplazamiento colectivo. Esa fase \textbf{no se replica} en la implementación de este trabajo, por dos motivos: la descripción publicada no permite fijar de forma inequívoca el criterio de pertenencia a la agrupación, y la implementación de referencia de los propios autores tampoco la incluye. Esta desviación se declara explícitamente, y debe tenerse presente al interpretar el desempeño de SHO en los resultados. La aplicación de este algoritmo al ámbito energético, así como el estudio de sus criterios de terminación y tamaño de población, ha sido abordada por Vega et al. \cite{Vega2022SHO}.
+donde $\mathbf r_1$ y $\mathbf r_2$ son vectores uniformes en $[0,1]^d$ y $h$ decrece linealmente de 5 a 0. Para una hiena $k$,
+\begin{equation}
+\mathbf D_{h,k}=\left|\mathbf B_k\odot\mathbf P_h-\mathbf P_k\right|,
+\qquad
+\mathbf P'_k=\mathbf P_h-\mathbf E_k\odot\mathbf D_{h,k}.
+\end{equation}
+La fase distintiva forma un grupo de confianza $\mathcal G$ de $N$ soluciones y actualiza mediante
+\begin{equation}
+\mathbf C_h=\sum_{k\in\mathcal G}\mathbf P'_k,
+\qquad
+\mathbf P(t+1)=\frac{\mathbf C_h}{N}.
+\end{equation}
+El artículo original denomina \texttt{count\_nos} al criterio de pertenencia, pero no proporciona una definición operacional inequívoca. Esta tesis normaliza la distancia de cada agente a $\mathbf P_h$, sortea un radio $M\sim U(0{,}5,1)$ y reúne los agentes dentro de él, incluyendo siempre la mejor solución. Esta decisión reproduce las fases de búsqueda, encierro, agrupación y ataque, pero se declara como una operacionalización propia de una ambigüedad publicada, no como un detalle proporcionado por los autores.
 
 \subsection{Whale Optimization Algorithm (WOA)}
 
-El WOA de Mirjalili y Lewis \cite{Mirjalili2016WOA} reproduce la estrategia de caza en red de burbujas de la ballena jorobada. En cada iteración, cada individuo escoge con probabilidad 0,5 entre dos mecanismos de actualización.
-
-El mecanismo de \textbf{encierro} replica la estructura del GWO: si $|A| < 1$ el individuo converge hacia la mejor solución conocida, y si $|A| \geq 1$ lo hace hacia un individuo aleatorio de la población, lo que introduce exploración. El mecanismo de \textbf{espiral logarítmica} desplaza al individuo mediante
+El WOA de Mirjalili y Lewis \cite{Mirjalili2016WOA} reproduce la estrategia de alimentación mediante red de burbujas de la ballena jorobada. Sus coeficientes vectoriales son
 \begin{equation}
-\mathbf{X}(t+1) = \left| \mathbf{X}^{*} - \mathbf{X}(t) \right| \cdot e^{bl} \cdot \cos(2\pi l) + \mathbf{X}^{*},
+\mathbf A=2a\mathbf r_1-a,\qquad \mathbf C=2\mathbf r_2,
 \end{equation}
-con $b = 1{,}0$ y $l$ uniforme en $[-1, 1]$. En la implementación empleada, los escalares $A$, $C$, $l$ y la probabilidad de selección se sortean una vez por individuo y no por componente, siguiendo la formulación original. Su aplicación a sistemas híbridos con almacenamiento de hidrógeno ha sido explorada por Sun et al. \cite{Sun2022WOA}.
+con $\mathbf r_1,\mathbf r_2\sim U([0,1]^d)$ y $a$ decreciente de 2 a 0. Si $p<0{,}5$ y $\max_j|A_j|<1$, el individuo encierra la mejor posición $\mathbf X^*$:
+\begin{equation}
+\mathbf D=|\mathbf C\odot\mathbf X^*-\mathbf X|,
+\qquad \mathbf X(t+1)=\mathbf X^*-\mathbf A\odot\mathbf D.
+\end{equation}
+Si $p<0{,}5$ y $\max_j|A_j|\geq1$, se reemplaza $\mathbf X^*$ por una ballena aleatoria $\mathbf X_{rand}$, lo que constituye la rama exploratoria. Finalmente, para $p\geq0{,}5$ se aplica la espiral logarítmica
+\begin{equation}
+\mathbf{X}(t+1) = \left| \mathbf{X}^{*} - \mathbf{X}(t) \right| e^{bl}\cos(2\pi l) + \mathbf{X}^{*},
+\end{equation}
+con $b=1$, $l\sim U(-1,1)$ y $p\sim U(0,1)$ sorteados por individuo. Todas las operaciones con vectores son componente a componente.
 
 \subsection{Búsqueda aleatoria como línea base}
 
 La búsqueda aleatoria muestrea configuraciones uniformemente sobre el dominio admisible y retiene la mejor encontrada, sin memoria ni mecanismo de aprendizaje alguno. No es un competidor serio en términos de diseño algorítmico, y esa es precisamente su utilidad: establece el desempeño atribuible exclusivamente al presupuesto de evaluaciones y a la geometría del problema.
 
-Un algoritmo que no supera esta referencia no está explotando ninguna estructura del espacio de búsqueda, por sofisticada que sea su metáfora de inspiración. Su omisión es una carencia frecuente en la literatura de aplicación, y es la que permite que se publiquen comparaciones donde el ordenamiento relativo entre metaheurísticas se interpreta como evidencia de eficacia absoluta \cite{Arcuri2014Hitchhiker}.
+Si un algoritmo no muestra una ventaja detectable frente a esta referencia bajo el presupuesto ensayado, sus resultados no justifican atribuirle una mejora para esa instancia. Esta conclusión es local al experimento y no demuestra que el método carezca de utilidad en otros problemas \cite{Arcuri2014Hitchhiker}.
 
 \subsection{Tratamiento de restricciones en metaheurísticas}
 
 Las metaheurísticas de población se formulan para optimización sin restricciones, por lo que su aplicación a problemas restringidos exige un mecanismo adicional. Las estrategias habituales son tres. La \textbf{penalización} incorpora la violación de restricciones a la función objetivo mediante un término aditivo; es sencilla y general, pero su eficacia depende críticamente de la calibración del peso: un valor excesivo aplana el paisaje y uno insuficiente permite que soluciones infactibles dominen la población. La \textbf{reparación} transforma toda solución infactible en una factible cercana, lo que preserva la totalidad del presupuesto de evaluaciones pero exige un operador específico del problema. El \textbf{rechazo} descarta las soluciones infactibles, opción viable únicamente cuando la región factible ocupa una fracción sustancial del dominio.
 
-La estrategia adoptada en este trabajo es mixta y se detalla en el capítulo de diseño experimental: proyección al reticulado admisible para las restricciones verificables \textit{a priori}, y penalización proporcional al exceso para la única restricción que requiere simular el año completo antes de poder evaluarse.
+La estrategia adoptada combina proyección para los límites representacionales con reglas de factibilidad. Una solución factible domina a cualquier solución infactible; entre infactibles se minimiza la suma normalizada de violaciones y entre factibles se compara únicamente el LCOE. Este criterio evita calibrar un coeficiente de penalización y se detalla en el capítulo de diseño experimental.
 
 \subsection{Evaluación empírica de metaheurísticas}
 
-Dado que las metaheurísticas son algoritmos estocásticos, una única ejecución no constituye evidencia. Dos ejecuciones del mismo algoritmo sobre el mismo problema con semillas distintas pueden producir resultados apreciablemente diferentes, y reportar únicamente el mejor de ellos --- práctica todavía frecuente --- sesga sistemáticamente la comparación a favor de los algoritmos con mayor varianza.
+Dado que las metaheurísticas son algoritmos estocásticos, una única ejecución no caracteriza su distribución de resultados. Dos ejecuciones del mismo algoritmo sobre el mismo problema con semillas distintas pueden diferir, y seleccionar únicamente la mejor puede sesgar la comparación a favor de los algoritmos con mayor varianza.
 
 La metodología establecida para la comparación de algoritmos evolutivos y de enjambre \cite{Derrac2011Tutorial,Arcuri2014Hitchhiker} exige cuatro elementos: un número suficiente de ejecuciones independientes con semillas distintas, un presupuesto computacional idéntico para todos los competidores, contrastes de hipótesis no paramétricos con corrección por comparaciones múltiples, y el reporte de tamaños de efecto que cuantifiquen la magnitud práctica de las diferencias detectadas. Estos cuatro requisitos estructuran el protocolo experimental de esta tesis.
 
 \section{Brechas y oportunidades de investigación}
 
-La revisión precedente permite identificar cuatro brechas en la literatura de optimización de sistemas HRES-H$_2$, que este trabajo aborda de forma directa.
+La revisión precedente motiva cuatro riesgos metodológicos que este trabajo controla de forma directa. No se estima aquí su prevalencia en toda la literatura de HRES-H$_2$.
 
-\textbf{Ausencia de líneas base no informadas.} Los estudios que aplican metaheurísticas al dimensionamiento energético comparan habitualmente varios algoritmos bioinspirados entre sí, pero rara vez incluyen una búsqueda aleatoria como referencia. Sin ella no es posible determinar si el algoritmo propuesto aporta algo sobre el muestreo uniforme, ni si el problema abordado tiene la dificultad que se le supone.
+\textbf{Ausencia de una línea base no informada.} Una comparación limitada a algoritmos bioinspirados no permite determinar si el método aporta algo sobre el muestreo uniforme bajo el mismo presupuesto.
 
-\textbf{Reporte de ejecuciones únicas sin dispersión.} Es frecuente encontrar resultados presentados como un único valor de función objetivo por algoritmo, sin indicación del número de ejecuciones, de la desviación entre ellas ni de las semillas empleadas. Esta práctica impide distinguir una diferencia sistemática de una fluctuación muestral y compromete la reproducibilidad.
+\textbf{Reporte de una ejecución sin dispersión.} Un único valor por algoritmo impide distinguir una diferencia sistemática de una fluctuación muestral y compromete la reproducibilidad.
 
-\textbf{Ausencia de contrastes de significancia y de tamaños de efecto.} Cuando se reportan varias ejecuciones, la comparación suele limitarse al valor medio. La ausencia de contrastes de hipótesis con corrección por comparaciones múltiples conduce a proclamar superioridades que los datos no sustentan, y la ausencia de tamaños de efecto impide juzgar si una diferencia estadísticamente detectable tiene relevancia práctica.
+\textbf{Ausencia de contrastes y tamaños de efecto.} Una comparación limitada al valor medio no controla la variación muestral ni el error por comparaciones múltiples; sin tamaños de efecto tampoco permite juzgar la importancia práctica.
 
-\textbf{Confusión entre instancias de optimización distintas.} Al comparar resultados propios con los de la literatura, o al evaluar el efecto de ampliar el espacio de diseño, es habitual contrastar valores de función objetivo que provienen de formulaciones con distintas variables de decisión, distintas restricciones o distintas políticas de operación. La mejora atribuida al método de búsqueda incorpora entonces, de forma inseparable, el efecto de haber cambiado el problema.
+\textbf{Confusión entre instancias de optimización distintas.} Si se contrastan valores provenientes de diferentes variables, restricciones o políticas de operación, la mejora atribuida al método de búsqueda incorpora de forma inseparable el efecto de haber cambiado el problema.

@@ -1,0 +1,7 @@
+codigo,nombre,familia,hiperparametros,fuente
+gwo,Grey Wolf Optimizer,enjambre jerarquico,"a decae 2 -> 0; lideres alfa, beta, delta",Mirjalili et al. (2014)
+pso,Particle Swarm Optimization,enjambre,chi=0.729; c1=c2=1.49445; |v| <= 20% del rango,Clerc & Kennedy (2002)
+ga,Genetic Algorithm,evolutivo,torneo k=3; BLX-0.5 p=0.9; mutacion p=0.1 sigma=10%; elite=2,real-coded GA estandar
+sho,Spotted Hyena Optimizer,enjambre jerarquico,h decae 5.0 -> 0; grupo de confianza y ataque promedio,Dhiman & Kumar (2017)
+woa,Whale Optimization Algorithm,enjambre,encierro/espiral 50/50; b=1.0; a decae 2 -> 0,Mirjalili & Lewis (2016)
+random,Random Search,linea base,muestreo uniforme sobre el dominio mixto,--

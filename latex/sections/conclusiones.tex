@@ -2,98 +2,45 @@
 
 \section{Cumplimiento de los objetivos}
 
-El trabajo desarrollado permite evaluar el grado de cumplimiento de cada uno de los objetivos específicos planteados.
+La estructura matemática del sistema WPEB se formuló conectando capacidades, conversión horaria, despacho, almacenamiento, indicadores económicos y cinco grupos de restricciones. La auditoría del software incorporó verificaciones de conservación, límites y factibilidad, con un residuo máximo observado de \texttt{\MaxBalanceResidual} MW. Con ello se cumplen los objetivos de análisis e implementación del modelo.
 
-El \textbf{análisis de la estructura matemática} del modelo WPEB (objetivo 1) se materializó en la formulación completa recogida en el marco teórico, que identifica las variables de decisión, las cinco restricciones operacionales, los modelos de conversión eólica y fotovoltaica, la dinámica del almacenamiento y los cuatro indicadores económicos del sistema.
+La comparación con Li et al. \cite{Li2024WPEB} no permite declarar una réplica exacta: permite sostener una \textbf{reproducción parcial y trazable}. Se informaron errores absolutos y relativos, se conservaron las discrepancias preliminares y se separaron las sensibilidades de 8.784 horas y de altura del viento. Las coordenadas aproximadas son una fuente plausible de incertidumbre junto con la versión de datos, las pérdidas y el despacho, no una causa demostrada ni una explicación única.
 
-La \textbf{implementación y verificación} del modelo (objetivo 2) se completó con un resultado de nueve indicadores dentro de tolerancia sobre diez contrastados. El proceso de verificación aportó además dos hallazgos no previstos: la tabla de costos del artículo de referencia resulta internamente inconsistente en uno de sus casos de comparación, y la configuración que dicho artículo presenta como óptima es infactible bajo la restricción de venta a red que él mismo establece, con un valor de 0,270 frente a un límite declarado de 0,20.
+La extensión se formuló correctamente como una instancia mixta continua--discreta: $W$ es continuo; el electrolizador, la potencia de batería y su duración pertenecen a catálogos discretos. El caso de batería nula se canonizó y las restricciones se trataron mediante dominancia por factibilidad, sin un coeficiente de penalización ajustable.
 
-La \textbf{evaluación crítica de los supuestos} (objetivo 3) condujo a tres decisiones de modelado documentadas con evidencia empírica: la adopción de la serie de viento medida a 50 m frente a su extrapolación a altura de buje, la corrección de la interpretación de la irradiancia --- cuyo efecto sobre el factor de capacidad fotovoltaico fue de dos órdenes de magnitud --- y el reparto del costo de la batería entre componentes de potencia y de energía.
+La evaluación comparativa empleó \TotalDesignRequests{} solicitudes de diseños anuales, 30 ejecuciones independientes por algoritmo y una línea base aleatoria. El objetivo comparativo se cumplió mediante medianas, IQR, brechas respecto de la mejor referencia observada y tasas de éxito frente a esa línea base, sin recurrir a emparejamientos que el diseño aleatorio no justifica.
 
-La \textbf{formulación de la instancia discreta} (objetivo 4) amplió el dominio admisible de 420 a 14.883 configuraciones, incorporando la potencia y la duración del almacenamiento como variables de diseño, con una estrategia mixta de proyección y penalización proporcional para el tratamiento de restricciones.
+El objetivo de sensibilidad se cumplió para el límite de AGSR, la carga mínima del electrolizador, el año bisiesto y la altura del viento. La formulación multiobjetivo permanece como trabajo futuro: el simulador calcula NPC y $\mathrm{LCOH}_{\mathrm{tesis}}$, pero el único objetivo optimizado en esta tesis es LCOE.
 
-La \textbf{comparación entre metaheurísticas} (objetivo 5) se ejecutó sobre 108.000 simulaciones horarias, con las 180 corridas concluyendo en soluciones factibles. La \textbf{significancia estadística} (objetivo 6) se estableció mediante contrastes de Wilcoxon con corrección de Holm--Bonferroni y tamaños de efecto $A_{12}$, identificando cinco pares distinguibles de quince. El \textbf{análisis de sensibilidad y robustez} (objetivo 7) cuantificó la influencia de las dos restricciones operacionales y demostró la inestabilidad del ranking frente a una decisión de modelado.
+\section{Conclusiones técnicas y metodológicas}
 
-El objetivo 8, relativo al \textbf{establecimiento de bases para una formulación multiobjetivo}, se cumple parcialmente: el simulador calcula ya los indicadores necesarios y la arquitectura del software admite la sustitución de la función de aptitud, pero la formulación multiobjetivo propiamente dicha queda como línea de trabajo futuro.
+La mejor referencia de malla alcanzó un LCOE de \ReferenceBestLCOE{} CNY/kWh tras evaluar \ReferenceEvaluated{} diseños. El mejor valor observado fue \BestObservedLCOE{} CNY/kWh, asociado a $W=\BestObservedWind$ MW, $P=\BestObservedPV$ MW, $E=\BestObservedElectrolyzer$ MW y una batería de \BestObservedBattery{} MW durante \BestObservedDuration{} h. Ninguna de estas cifras demuestra optimalidad global continua: la primera está limitada a una malla de 0,5 MW y la segunda al conjunto de búsquedas ejecutadas.
 
-\section{Conclusiones sobre el problema de dimensionamiento}
+La comparación de algoritmos no debe reducirse a cuál obtuvo el menor valor aislado. La evidencia relevante está en la distribución de las 30 ejecuciones: mediana, IQR, brecha respecto de la mejor referencia observada y probabilidad de quedar dentro de umbrales prácticos bajo este presupuesto.
 
-El dimensionamiento óptimo del sistema estudiado está gobernado por una restricción regulatoria y no tecnológica. El límite sobre la fracción anual de energía vendida a la red determina la ubicación del óptimo con una influencia un orden de magnitud superior a la de la carga mínima del electrolizador: relajarlo del 10\,\% al 30\,\% reduce el costo nivelado óptimo en 0,0723 CNY/kWh, mientras que variar la carga mínima entre el 20\,\% y el 50\,\% lo altera en 0,0088 CNY/kWh. El óptimo se sitúa siempre sobre la frontera de esa restricción, porque el costo nivelado decrece con la capacidad eólica mientras la fracción vendida a la red crece con ella.
+Los resultados tampoco autorizan afirmar que una metaheurística sea superior en general. Solo describen el comportamiento de estas implementaciones, hiperparámetros, operadores de reparación, simulador e instancia. La búsqueda aleatoria cumple una función de control: cuando un método no muestra una ventaja detectable frente a ella, la conclusión se restringe al protocolo ensayado y no se transforma en una descalificación universal del algoritmo.
 
-El paisaje de optimización presenta una meseta de soluciones prácticamente equivalentes a lo largo de dicha frontera. Las cuatro mejores configuraciones de la instancia base difieren en menos del 0,5\,\% de costo nivelado pese a cubrir un rango de 30 MW de capacidad eólica. Esta característica tiene una consecuencia directa sobre la elección del optimizador, que se aborda a continuación.
-
-\section{Conclusiones sobre el desempeño de las metaheurísticas}
-
-Sobre la instancia discreta estudiada, la evidencia sostiene cuatro conclusiones.
-
-\textbf{Primera: las diferencias entre algoritmos son estadísticamente detectables pero prácticamente marginales.} Los seis optimizadores alcanzan valores comprendidos en un rango del 0,25\,\%, y solo cinco de quince pares resultan distinguibles tras la corrección por comparaciones múltiples. En un problema con la estructura descrita, la elección del algoritmo importa considerablemente menos de lo que sugiere la literatura.
-
-\textbf{Segunda: la consistencia es un criterio más informativo que el mejor valor alcanzado.} El algoritmo genético obtuvo el mejor resultado absoluto del experimento y, sin embargo, no se distingue estadísticamente de la búsqueda aleatoria. PSO y GWO, con desviaciones típicas de 0,001426 y 0,001595, son las opciones defendibles para un uso real, en el que el optimizador se ejecuta una sola vez y lo que importa es el resultado esperable de una ejecución cualquiera, no el mejor de treinta.
-
-\textbf{Tercera: dos de las cinco metaheurísticas no superan a la búsqueda aleatoria.} WOA queda por debajo de la línea base en mejor valor, en media y en consistencia, con una desviación típica más de tres veces superior a la de PSO. SHO no se distingue estadísticamente de ella y presenta un modo de fallo identificable, consistente en converger a configuraciones sin almacenamiento. Ninguno de los dos justifica su complejidad adicional en este problema.
-
-\textbf{Cuarta: el ordenamiento entre algoritmos no es una propiedad de los algoritmos.} Al fijar la duración de la batería en una hora e imputar su costo íntegramente a la potencia, el algoritmo genético desciende del primer al cuarto lugar y WOA asciende del sexto al tercero, mientras el número de pares significativos pasa de cinco a ocho. Lo que se mide al comparar metaheurísticas es el comportamiento de la pareja algoritmo--formulación, y un ranking reportado sin análisis de robustez afirma más de lo que sus datos respaldan.
+La reproducción evidenció dos límites de la fuente. Primero, faltan coordenadas y detalles suficientes para atribuir inequívocamente las discrepancias. Segundo, los dos valores de LCOH publicados para W190 son incompatibles. Por estas razones, el LCOH calculado se presenta como indicador definido por esta tesis y cualquier exceso de AGSR se expresa condicionado a la reconstrucción.
 
 \section{Aporte a la Ingeniería Informática}
 
-La contribución de este trabajo a la disciplina se articula en cuatro ejes.
+El aporte principal es un flujo auditable de software científico: configuración explícita, un simulador común, conteo uniforme de solicitudes, flujos aleatorios separados, pruebas deterministas de operadores, exportación automática de resultados y generación de tablas y figuras sin transcripción manual. Estas decisiones permiten rastrear cada afirmación cuantitativa hasta una ejecución concreta.
 
-\subsection{Aporte metodológico}
-
-El trabajo propone y aplica un protocolo reproducible para la comparación empírica de metaheurísticas sobre problemas de ingeniería con evaluación costosa, construido sobre cinco requisitos: equiparación del presupuesto de evaluaciones como unidad de comparación, inclusión obligatoria de una línea base no informada, diseño pareado por semilla que permite descontar el efecto de la inicialización, contrastes no paramétricos con control de la tasa de error por familia, y verificación de la estabilidad del ordenamiento frente a las decisiones de modelado.
-
-Ninguno de estos elementos es original por separado; su valor reside en su aplicación conjunta y sistemática a un problema de ingeniería real, y en la demostración de que su omisión conduce a conclusiones distintas. El protocolo es transferible a cualquier problema de dimensionamiento o de optimización de caja negra con evaluación costosa, y no depende del dominio energético.
-
-\subsection{Aporte empírico}
-
-El hallazgo central es de signo negativo, y ese es precisamente su valor. En un problema representativo del dominio, dos metaheurísticas ampliamente citadas y aplicadas no superan a un muestreo uniforme del espacio de búsqueda. Este resultado no contradice la teoría --- es de hecho lo que anticipa el teorema de la no existencia de almuerzo gratis \cite{Wolpert1997NFL} --- pero contradice una práctica extendida: la adopción de algoritmos bioinspirados por su popularidad o por la elegancia de su metáfora, sin verificar que aporten algo sobre una referencia trivial.
-
-Los resultados negativos están sistemáticamente subrepresentados en la literatura de metaheurísticas, sesgo que dificulta la acumulación de conocimiento fiable sobre qué algoritmos funcionan y en qué condiciones. Reportar este hallazgo, en lugar de seleccionar la configuración experimental que hubiera favorecido una conclusión positiva, constituye una contribución en sí misma.
-
-\subsection{Aporte a la replicabilidad}
-
-La réplica verificada de un artículo indexado, con nueve de diez indicadores dentro de tolerancia, aporta a la comunidad un modelo cuya corrección está establecida y no supuesta. Durante el proceso se detectaron dos problemas en el artículo original: una inconsistencia interna en su tabla de costos, y la infactibilidad de su configuración óptima respecto de su propia restricción operacional.
-
-El caso ilustra además un punto metodológico de alcance general. El error de interpretación de la irradiancia detectado durante la verificación no producía excepciones ni resultados manifiestamente absurdos: el simulador entregaba costos nivelados plausibles mientras la producción fotovoltaica era prácticamente nula. Solo el contraste cuantitativo sistemático contra indicadores publicados permitió descubrirlo. En software científico, la ausencia de errores visibles no constituye evidencia de corrección.
-
-\subsection{Aporte en ingeniería de software científico}
-
-Las decisiones de arquitectura adoptadas --- configuración inmutable con validación en construcción, separación entre la definición de la instancia y la estrategia de búsqueda mediante una clase base con contrato explícito, registro extensible de optimizadores, memoización de perfiles de generación y ejecución conmutable entre dos escalas de presupuesto --- son las que hacen el experimento auditable y reproducible.
-
-La decisión de mantener el artefacto computacional autocontenido, sin dependencias de una estructura de paquetes propia, permite que la totalidad de los resultados de esta tesis sea reproducible a partir de dos archivos. Esta propiedad, habitualmente sacrificada en favor de la modularidad, resulta especialmente valiosa en el contexto de un trabajo académico destinado a ser verificado por terceros.
+El segundo aporte es metodológico. El protocolo combina una referencia determinista acotada, una línea base sin aprendizaje, estadística no paramétrica y tamaños de efecto. Su valor no reside en presentar una familia de algoritmos como ganadora, sino en establecer qué afirmaciones están respaldadas y cuáles excederían la evidencia disponible.
 
 \section{Limitaciones}
 
-Los resultados deben interpretarse dentro de los siguientes límites, declarados de forma explícita.
-
 \begin{itemize}
-    \item \textbf{Alcance del sistema modelado.} El sistema WPEB no incluye pila de combustible ni reelectrificación del hidrógeno, por lo que no constituye una cadena HRES-H$_2$ completa. El almacenamiento de hidrógeno se fija en 10.000 kg y no es variable de decisión.
-
-    \item \textbf{Formulación monoobjetivo.} Se optimiza exclusivamente el costo nivelado de la energía. El costo nivelado del hidrógeno y el costo presente neto se reportan pero no intervienen en la función de aptitud, y no se consideran criterios ambientales ni de confiabilidad.
-
-    \item \textbf{Capacidad renovable total fija.} La suma de capacidad eólica y fotovoltaica permanece fija en 200 MW, restricción heredada del modelo de referencia que impide explorar el compromiso entre tamaño total del sistema y costo unitario.
-
-    \item \textbf{Un único año meteorológico.} Los resultados se basan en el año 2008. No se evalúa la variabilidad interanual del recurso ni la robustez de las soluciones frente a años meteorológicos distintos.
-
-    \item \textbf{Ausencia de demanda explícita de hidrógeno.} Se asume que la totalidad del hidrógeno producido encuentra colocación, sin perfil de demanda ni restricciones de logística o de precio.
-
-    \item \textbf{Hiperparámetros sin ajuste fino.} Los algoritmos emplean los valores canónicos de sus publicaciones originales. Un ajuste específico para este problema podría modificar el ordenamiento, si bien tal ajuste requeriría un presupuesto computacional propio que debería contabilizarse en la comparación.
-
-    \item \textbf{Escala del problema.} Con 600 evaluaciones sobre 14.883 configuraciones, el dominio resulta lo bastante pequeño para que la búsqueda aleatoria sea competitiva. Las conclusiones sobre desempeño relativo no son extrapolables a instancias de mayor dimensionalidad sin verificación adicional.
-
-    \item \textbf{Coordenadas aproximadas del emplazamiento.} El artículo de referencia no publica la latitud y longitud exactas, por lo que el recurso meteorológico empleado es una aproximación razonable pero no idéntica al del estudio original.
+    \item \textbf{Sitio y recurso.} Se utiliza una coordenada aproximada y un único año meteorológico. No se estudia variabilidad interanual ni incertidumbre espacial.
+    \item \textbf{Alcance del sistema.} No se modelan pila de combustible, recompresión, reelectrificación ni un perfil de demanda de hidrógeno; su almacenamiento permanece fijo.
+    \item \textbf{Formulación económica.} LCOE es el único objetivo. NPC y $\mathrm{LCOH}_{\mathrm{tesis}}$ son indicadores secundarios y no se consideran impactos ambientales o de confiabilidad.
+    \item \textbf{Dominio de diseño.} La capacidad renovable total permanece fija en 200 MW y $W$ se representa como capacidad agregada continua, no como un número instalable de turbinas.
+    \item \textbf{Comparación algorítmica.} Los hiperparámetros no se ajustan para esta instancia. Un ajuste posterior a la observación de resultados habría introducido sesgo; un estudio de ajuste requeriría un presupuesto independiente.
+    \item \textbf{SHO.} Las fases canónicas se implementan, pero la operacionalización de \texttt{count\_nos} exige una regla de agrupación declarada porque la publicación no la especifica inequívocamente.
 \end{itemize}
 
 \section{Trabajo futuro}
 
-Las líneas de continuación se ordenan por su proximidad a lo ya desarrollado.
+La primera extensión debe evaluar múltiples años y coordenadas para separar desempeño algorítmico de ajuste a una realización meteorológica. La segunda consiste en liberar la capacidad renovable total e incorporar almacenamiento y demanda de hidrógeno, compresión y, si corresponde, reelectrificación.
 
-\textbf{Escalado de la instancia.} La limitación más relevante de este trabajo es que el problema resulta demasiado sencillo para discriminar entre optimizadores. Liberar la capacidad renovable total, incorporar el dimensionamiento del almacenamiento de hidrógeno y añadir una etapa de compresión elevaría la dimensionalidad hasta un régimen donde la enumeración deje de ser viable y donde las diferencias entre metaheurísticas puedan manifestarse con magnitud práctica.
-
-\textbf{Formulación multiobjetivo.} La extensión natural consiste en optimizar simultáneamente el costo nivelado de la energía, el costo nivelado del hidrógeno y un indicador de emisiones evitadas, mediante algoritmos de frente de Pareto como NSGA-II o MOPSO. El simulador ya calcula los indicadores necesarios y la arquitectura del software admite la sustitución de la función de aptitud sin modificaciones estructurales.
-
-\textbf{Hibridación con componentes de aprendizaje.} La integración de redes neuronales artificiales como modelos sustitutos de la función objetivo permitiría reducir el número de simulaciones horarias requeridas, aprovechando que el costo dominante del problema es precisamente la evaluación. Esta línea resulta particularmente pertinente una vez escalada la instancia.
-
-\textbf{Optimización de la memoización.} La cuantización de la capacidad eólica a una malla fina elevaría la tasa de acierto de la memoria intermedia del 18,2\,\% actual a valores superiores al 95\,\%, reduciendo sustancialmente el tiempo de experimentación sin alterar apreciablemente la resolución del espacio de búsqueda.
-
-\textbf{Robustez frente a la variabilidad del recurso.} Evaluar las soluciones óptimas sobre múltiples años meteorológicos permitiría distinguir los diseños genuinamente robustos de aquellos ajustados a las particularidades de un año concreto, incorporando la incertidumbre del recurso al propio proceso de optimización.
+Una formulación multiobjetivo podrá estudiar compromisos entre LCOE, un LCOH con asignación económica plenamente documentada, confiabilidad e impactos ambientales. Finalmente, los modelos sustitutos podrían reducir el costo de la simulación anual, pero su error deberá incluirse en el protocolo de validación y en el presupuesto total de entrenamiento.

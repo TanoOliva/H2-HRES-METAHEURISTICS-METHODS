@@ -9,6 +9,7 @@ $miktexBin = Join-Path $env:LOCALAPPDATA "Programs\MiKTeX\miktex\bin\x64"
 
 $pdflatex = Get-Command pdflatex -ErrorAction SilentlyContinue
 $biber = Get-Command biber -ErrorAction SilentlyContinue
+$python = Get-Command python -ErrorAction SilentlyContinue
 
 if (-not $pdflatex) {
     $pdflatexPath = Join-Path $miktexBin "pdflatex.exe"
@@ -32,12 +33,26 @@ if (-not $biber) {
     throw "No se encontro biber. Instala MiKTeX o agrega MiKTeX al PATH."
 }
 
+if (-not $python) {
+    throw "No se encontro Python. Se necesita para generar tablas y figuras desde el notebook."
+}
+
 if (-not (Test-Path $buildDir)) {
     New-Item -ItemType Directory -Path $buildDir | Out-Null
 }
 
 if (-not (Test-Path $pdfDir)) {
     New-Item -ItemType Directory -Path $pdfDir | Out-Null
+}
+
+& $python (Join-Path $workspaceRoot "scripts\generar_tablas_latex.py")
+if ($LASTEXITCODE -ne 0) {
+    throw "Fallo la generacion automatica de tablas LaTeX."
+}
+
+& $python (Join-Path $workspaceRoot "scripts\extraer_figuras.py")
+if ($LASTEXITCODE -ne 0) {
+    throw "Fallo la extraccion automatica de figuras."
 }
 
 Push-Location $root

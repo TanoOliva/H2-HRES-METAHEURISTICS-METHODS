@@ -1,130 +1,150 @@
 \chapter{Diseño experimental}
 
-Este capítulo define con precisión qué se optimiza, sobre qué dominio, bajo qué presupuesto computacional y con qué criterios se decide si una diferencia observada entre dos algoritmos es real o atribuible al azar. La separación respecto del capítulo de metodología es deliberada: allí se describió \textit{cómo se construyó el simulador}; aquí se describe \textit{cómo se experimenta con él}.
+Este capítulo define la función objetivo, el dominio, las restricciones y el protocolo de comparación. El simulador horario es común a todos los métodos; lo único que cambia entre competidores es el operador de búsqueda. Esta separación evita atribuir al algoritmo diferencias causadas por modelos energéticos distintos.
 
-\section{Dos instancias de optimización, no una}
+\section{Instancias de optimización}
 \label{sec:dos_instancias}
 
-Una fuente recurrente de confusión en la literatura de dimensionamiento consiste en comparar valores de función objetivo que provienen de problemas distintos. Para evitarla, este trabajo distingue explícitamente dos instancias de optimización que comparten el simulador horario y la estructura de costos, pero que difieren en su conjunto de variables de decisión, en su política de despacho y, por tanto, en su región factible.
+Se estudian dos instancias relacionadas, pero no intercambiables. La \textbf{instancia base} reproduce la estructura de dimensionamiento descrita por Li et al. \cite{Li2024WPEB}: $W$ y $E$ son los grados de libertad efectivos, $P=200-W$ y la batería se deriva como el 30\,\% de la capacidad del electrolizador, redondeada a módulos de 2,5 MW. Se evalúa una malla de 420 configuraciones; por ello solo puede hablarse de óptimo global \emph{sobre esa malla}.
 
-La \textbf{instancia base} reproduce el problema tal como lo plantea el artículo de referencia \cite{Li2024WPEB}: dos grados de libertad efectivos (el reparto eólica--fotovoltaica y el tamaño del electrolizador), con la batería determinada como una cantidad derivada del electrolizador y una duración nominal fija de una hora. Su dominio es lo bastante pequeño para enumerarse por completo, lo que le confiere un papel particular: no es un competidor de las metaheurísticas, sino una \textbf{referencia de corrección}, porque en ella el óptimo global se conoce con certeza en lugar de estimarse.
-
-La \textbf{instancia discreta} es la formulación propia de este trabajo y constituye el problema que resuelven las metaheurísticas. En ella el almacenamiento electroquímico deja de ser un parámetro derivado y pasa a ser objeto de diseño en dos dimensiones independientes --- potencia y duración ---, lo que eleva la cardinalidad del dominio en casi dos órdenes de magnitud y lo vuelve inabordable por enumeración dentro del presupuesto experimental fijado.
+La \textbf{instancia mixta continua--discreta} constituye la extensión de esta tesis. La capacidad eólica $W$ permanece continua, mientras que el número de módulos de electrólisis, la potencia de batería y su duración pertenecen a catálogos discretos. Como el dominio contiene una variable continua, no posee una cardinalidad finita y 600 evaluaciones no representan un porcentaje definido de cobertura.
 
 \begin{table}[H]
 \centering
 \footnotesize
 \caption{Diferencias formales entre las dos instancias de optimización}
 \label{tab:dos_instancias}
-\renewcommand{\arraystretch}{1.25}
-\begin{tabular}{p{3.3cm} p{5.4cm} p{5.4cm}}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{3.2cm} p{5.3cm} p{5.5cm}}
 \hline
- & \textbf{Instancia base} & \textbf{Instancia discreta} \\
+ & \textbf{Instancia base} & \textbf{Instancia mixta} \\
 \hline
-Variables de decisión & $W$, $E$ \quad (con $P = 200 - W$) & $W$, $n_E$, $B^{P}$, índice de duración \\
-Batería & Derivada: $B^{P} = \lceil 0{,}30\,E / 2{,}5 \rceil \cdot 2{,}5$, duración fija de 1 h & Libre: $B^{P} \in [0, 50]$ MW en pasos de 5 MW; duración $\in \{1, 2, 4\}$ h \\
-Política de despacho & \texttt{TOP\_UP}: la batería completa la carga mínima y revierte la descarga si no la alcanza & \texttt{THRESHOLD}: la batería solo se descarga si con ello se supera el umbral de carga mínima \\
-Cardinalidad del dominio & 420 configuraciones ($21 \times 20$) & 14.883 configuraciones ($41 \times 11 \times 11 \times 3$) \\
-Método de resolución & Barrido exhaustivo & Seis optimizadores, 600 evaluaciones cada uno \\
-Naturaleza del óptimo & Óptimo global exacto sobre la malla & Mejor solución hallada dentro del presupuesto \\
+Variables & $W$, $E$, con $P=200-W$ & $W$, $n_E$, $B^P$, índice de duración \\
+Naturaleza & Malla finita & Una variable continua y tres coordenadas discretizadas \\
+Batería & $B^P=\lceil0{,}30E/2{,}5\rceil\,2{,}5$, duración 1 h & $B^P\in\{0,5,\ldots,50\}$ MW y $h_B\in\{1,2,4\}$ h \\
+Despacho & \texttt{TOP\_UP} & \texttt{THRESHOLD} \\
+Resolución & Enumeración de 420 puntos & Seis optimizadores y referencia determinista de malla \\
+Resultado & Mejor punto de la malla base & Mejor solución hallada bajo el presupuesto \\
 \hline
 \end{tabular}
 \end{table}
 
-\subsection{Advertencia metodológica sobre la comparación entre instancias}
+Los mejores valores de ambas instancias no permiten medir una mejora producida por las metaheurísticas, porque también cambian el espacio de batería y la política de despacho. Los algoritmos se comparan exclusivamente dentro de la instancia mixta.
 
-Los mejores valores obtenidos en ambas instancias --- 0,285878 CNY/kWh en la base y 0,281003 CNY/kWh en la discreta --- \textbf{no constituyen una comparación directa entre el barrido exhaustivo y las metaheurísticas}. La diferencia de $-1{,}71\,\%$ agrega dos efectos que el diseño experimental no permite separar: el cambio de política de despacho (de \texttt{TOP\_UP} a \texttt{THRESHOLD}) y la ampliación del espacio de diseño de la batería. Interpretar esa brecha como una mejora aportada por las metaheurísticas sería un error de atribución.
+\section{Espacio de decisión}
 
-En consecuencia, las metaheurísticas se comparan entre sí, y contra la línea base aleatoria, exclusivamente dentro de la instancia discreta. La instancia base cumple dos funciones distintas: verificar que el simulador reproduce el modelo publicado y caracterizar la geometría del dominio factible.
-
-\section{Espacio de decisión y codificación}
-
-Los seis optimizadores operan sobre un vector real $\mathbf{x} \in \mathbb{R}^4$ acotado por caja, que una función de decodificación proyecta sobre el reticulado admisible antes de cada simulación. Esta separación entre \textit{representación interna continua} y \textit{solución evaluable discreta} permite que los operadores de búsqueda de cada algoritmo trabajen sin modificaciones respecto de su formulación canónica, mientras el simulador recibe siempre configuraciones físicamente realizables.
+Los optimizadores manipulan $\mathbf{x}\in\mathbb{R}^4$. Antes de simular, el vector se recorta a sus límites y se decodifica según la Tabla~\ref{tab:espacio_decision}.
 
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{Variables de decisión de la instancia discreta y su proyección al dominio admisible}
+\caption{Variables de decisión de la instancia mixta continua--discreta}
 \label{tab:espacio_decision}
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{c p{3.7cm} c c p{5.0cm}}
+\begin{tabular}{c p{3.7cm} c c p{5.2cm}}
 \hline
-\textbf{Índice} & \textbf{Variable} & \textbf{Lím. inf.} & \textbf{Lím. sup.} & \textbf{Proyección aplicada} \\
+\textbf{Índice} & \textbf{Variable} & \textbf{Lím. inf.} & \textbf{Lím. sup.} & \textbf{Decodificación} \\
 \hline
-$x_0$ & Capacidad eólica $W$ [MW] & 0{,}0 & 200{,}0 & Continua; la fotovoltaica se obtiene por complemento, $P = 200 - W$ \\
-$x_1$ & Módulos de electrólisis $n_E$ & 10 & 20 & Entero más cercano; $E = 5\,n_E$ MW \\
-$x_2$ & Potencia de batería $B^{P}$ [MW] & 0{,}0 & 50{,}0 & Múltiplo de 5 MW más cercano \\
-$x_3$ & Índice de duración de batería & 0 & 2 & Índice del catálogo $\{1{,}0;\ 2{,}0;\ 4{,}0\}$ h \\
+$x_0$ & Capacidad eólica $W$ [MW] & 0 & 200 & Continua; $P=200-W$ \\
+$x_1$ & Módulos de electrólisis $n_E$ & 10 & 20 & Entero más cercano; $E=5n_E$ MW \\
+$x_2$ & Potencia de batería $B^P$ [MW] & 0 & 50 & Múltiplo de 5 MW más cercano \\
+$x_3$ & Índice de duración & 0 & 2 & Catálogo $\{1,2,4\}$ h si $B^P>0$ \\
 \hline
 \end{tabular}
 \end{table}
 
-La capacidad eólica permanece continua de forma deliberada: el artículo de referencia no impone una granularidad sobre el reparto renovable, y discretizarla habría restringido artificialmente el dominio. Su consecuencia computacional se analiza en la discusión de resultados, dado que degrada la eficacia de la memoización de perfiles de generación. Discretizando la capacidad eólica en pasos de 5 MW únicamente a efectos de conteo, el dominio admisible contiene $41 \times 11 \times 11 \times 3 = 14.883$ configuraciones, frente a las 600 evaluaciones disponibles por ejecución: cada corrida explora aproximadamente el 4\,\% del espacio.
+Cuando $B^P=0$, la duración se fija en cero: las tres etiquetas de duración describirían el mismo diseño físico y no deben contarse como alternativas distintas. De este modo, los 363 catálogos brutos por valor de $W$ se reducen a 341 diseños discretos efectivos.
 
-\section{Función objetivo y tratamiento de restricciones}
-
-El problema se formula como una minimización monoobjetivo del costo nivelado de la energía, expresado en CNY/kWh. El costo presente neto y el costo nivelado del hidrógeno se calculan y se reportan para cada solución, pero no intervienen en la función de aptitud; la extensión multiobjetivo se discute como línea futura en el capítulo de conclusiones.
-
-Las restricciones se tratan mediante una estrategia mixta de \textbf{proyección y penalización}. Aquellas que pueden verificarse sin simular --- no negatividad de las capacidades, capacidad renovable total igual a 200 MW, tamaño del electrolizador acotado por $E \leq 0{,}5\,(W+P)$ y pertenencia de las variables discretas a su catálogo --- se resuelven por proyección o, cuando la violación no es reparable, provocan el rechazo inmediato del candidato sin incurrir en el costo de la simulación anual.
-
-La restricción sobre la fracción anual de energía vendida a la red (AGSR) es de naturaleza distinta: solo puede evaluarse \textit{después} de simular las 8.784 horas, por lo que se trata mediante una penalización proporcional al exceso, que preserva información direccional y orienta la búsqueda hacia la región factible en lugar de aplanar el paisaje:
-
+La potencia eólica se modela como capacidad agregada continua. Si $p_{wt,t}^{pu}$ es la curva de potencia de una turbina normalizada por su potencia nominal, entonces
 \begin{equation}
-f(\mathbf{x}) =
-\begin{cases}
-\mathrm{LCOE}(\mathbf{x}), & \text{si la solución es factible,} \\[4pt]
-10^{6}, & \text{si viola una restricción de capacidad,} \\[4pt]
-10^{6} + 10^{3} \cdot \max\!\left(\mathrm{AGSR}(\mathbf{x}) - 0{,}20,\ 0\right), & \text{si } \mathrm{AGSR}(\mathbf{x}) > 0{,}20.
-\end{cases}
+P_{wt,t}=W\,p_{wt,t}^{pu}.
+\end{equation}
+No se redondea $W$ a un número entero de turbinas. Esta idealización debe interpretarse como planificación de capacidad agregada, no como selección final de equipos.
+
+\section{Función objetivo e indicadores}
+
+El problema es monoobjetivo:
+\begin{equation}
+\min_{\mathbf{x}}\quad \mathrm{LCOE}(\mathbf{x})
+=\frac{C_{ann}(\mathbf{x})}{1000\,E_{use}(\mathbf{x})},
+\qquad
+E_{use}=\sum_{t=1}^{8760}\left(P_{E,t}+P_{grid,t}\right)\Delta t,
+\quad \Delta t=1\ \mathrm{h}.
 \label{eq:funcion_objetivo}
 \end{equation}
+El factor 1000 convierte MWh en kWh. El NPC y el LCOH se calculan como indicadores secundarios y no intervienen en el orden de aptitud. En particular,
+\begin{equation}
+\mathrm{LCOH}_{tesis}=\frac{C_{ann}}{M_{H_2}},
+\end{equation}
+asigna el costo anualizado total a la producción de hidrógeno, sin acreditar la electricidad exportada. Por esta diferencia de asignación y por la información incompleta del artículo antecedente \cite{Li2023TechnoEconomic}, se denomina ``LCOH según esta tesis'' y no se trata como una reproducción directa del LCOH publicado.
 
-La magnitud de la penalización base, seis órdenes por encima de cualquier valor factible de LCOE, garantiza que ninguna solución infactible pueda competir con una factible, mientras que el término proporcional ordena entre sí a las infactibles según su distancia a la frontera. Esta última propiedad es relevante en las primeras iteraciones, cuando buena parte de la población puede encontrarse fuera de la región admisible.
+\section{Cinco grupos de restricciones}
 
-\section{Protocolo experimental}
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Restricciones, procedencia y mecanismo de cumplimiento}
+\label{tab:restricciones}
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{@{}p{0.6cm} p{4.3cm} p{2.2cm} p{2.2cm} p{3.0cm}@{}}
+\hline
+\textbf{ID} & \textbf{Formulación} & \textbf{Unidad} & \textbf{Procedencia} & \textbf{Tratamiento} \\
+\hline
+C1 & $P_{ren,t}+P_{desc,t}=P_{E,t}+P_{carga,t}+P_{grid,t}+P_{vert,t}$ & MW, cada hora & Balance de Li et al. y simulador & Ecuación de estado; residuo auditado \\
+C2 & $W+P=200$, $W\geq0$, $P\geq0$ & MW & Li et al. & Parametrización $P=200-W$ y recorte \\
+C3 & $0<E\leq0{,}5(W+P)$ & MW & Li et al. & Límites y decodificación \\
+C4 & $0\leq SOC_t\leq B^E$, $P_{carga,t},P_{desc,t}\leq B^P$ y carga del electrolizador nula o superior al mínimo & MWh y MW & Modelo operacional de esta tesis & Despacho horario y verificación posterior \\
+C5 & $\mathrm{AGSR}=E_{grid}/E_{ren}\leq0{,}20$ & fracción anual & Li et al. & Verificación tras la simulación \\
+\hline
+\end{tabular}
+\end{table}
 
-El principio rector del banco de pruebas es la \textbf{equiparación del presupuesto de evaluaciones}. Comparar metaheurísticas por tiempo de reloj penaliza a las implementaciones menos optimizadas y premia detalles ajenos al algoritmo; comparar por número de iteraciones favorece a los algoritmos con poblaciones mayores. En un problema donde el costo dominante es la evaluación de la función objetivo --- una simulación horaria completa ---, el número de evaluaciones constituye la unidad de comparación justa \cite{Derrac2011Tutorial}.
+La factibilidad se compara mediante las reglas de Deb. Toda solución factible domina a una infactible; entre dos infactibles se prefiere la menor suma de violaciones normalizadas, y entre dos factibles se minimiza LCOE. Esto elimina el peso arbitrario $10^6$ empleado en la versión preliminar. El residuo máximo de C1 y las violaciones de C2--C5 se almacenan por separado.
 
-Los seis optimizadores reciben en consecuencia un presupuesto idéntico de 20 individuos por 30 iteraciones, es decir, 600 evaluaciones por ejecución. Cada algoritmo se ejecuta 30 veces con las semillas 42 a 71, de modo que la semilla $s$ produce condiciones iniciales comparables entre algoritmos y habilita un \textbf{diseño pareado por bloques}: el efecto de una semilla particularmente favorable o desfavorable afecta a todos los competidores por igual y puede descontarse en el análisis estadístico. El experimento completo comprende $6 \times 30 \times 600 = 108.000$ simulaciones horarias.
+\section{Selección y configuración de los algoritmos}
 
-Cada optimizador recibe un generador \texttt{numpy.random.Generator} inicializado con su propia semilla, de forma que la reproducibilidad no depende del estado global del intérprete. Los seis comparten además una única instancia de la función objetivo y, con ella, la misma memoria intermedia de perfiles de generación, lo que evita que las diferencias de tiempo medido reflejen distintos grados de aprovechamiento del caché.
-
-La Tabla~\ref{tab:hiperparametros} resume los hiperparámetros empleados. Todos corresponden a los valores canónicos recomendados en las publicaciones originales de cada algoritmo; no se realizó ajuste fino de hiperparámetros, decisión que se discute entre las limitaciones del trabajo.
+La selección busca diversidad de mecanismos, no representatividad exhaustiva de toda la literatura. PSO y GA actúan como referencias consolidadas; GWO combina tres líderes; WOA alterna cerco, exploración aleatoria y espiral; SHO incorpora una agrupación dinámica; y la búsqueda aleatoria establece cuánto puede lograrse sin aprendizaje. WOA cuenta además con aplicaciones publicadas en sistemas renovables con hidrógeno \cite{Sun2022WOA}, mientras que SHO dispone de estudios específicos sobre tamaño de población y terminación \cite{Vega2022SHO}; estas referencias motivan su inclusión, no garantizan su desempeño en la presente instancia.
 
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{Configuración de los seis optimizadores comparados}
+\caption{Justificación y configuración de los métodos comparados}
 \label{tab:hiperparametros}
-\renewcommand{\arraystretch}{1.25}
-\begin{tabular}{l p{3.1cm} p{2.4cm} p{5.9cm}}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{p{1.4cm} p{3.1cm} p{4.4cm} p{5.0cm}}
 \hline
-\textbf{Código} & \textbf{Algoritmo} & \textbf{Familia} & \textbf{Hiperparámetros} \\
+\textbf{Código} & \textbf{Papel experimental} & \textbf{Mecanismo distintivo} & \textbf{Configuración} \\
 \hline
-\texttt{gwo} & Grey Wolf Optimizer & Enjambre jerárquico & $a$ decae linealmente de 2 a 0; líderes $\alpha$, $\beta$, $\delta$ \\
-\texttt{pso} & Particle Swarm Optimization & Enjambre & $\chi = 0{,}729$; $c_1 = c_2 = 1{,}49445$; $|v| \leq 20\,\%$ del rango \\
-\texttt{ga} & Algoritmo genético de codificación real & Evolutivo & Torneo $k=3$; cruce BLX-0,5 con $p_c = 0{,}9$; mutación gaussiana $p_m = 0{,}1$ con $\sigma$ igual al 10\,\% del rango; elitismo de 2 individuos \\
-\texttt{sho} & Spotted Hyena Optimizer & Enjambre jerárquico & $h$ decae de 5,0 a 0; líder único \\
-\texttt{woa} & Whale Optimization Algorithm & Enjambre & Encierro y espiral con probabilidad 50/50; $b = 1{,}0$; $a$ decae de 2 a 0 \\
-\texttt{random} & Búsqueda aleatoria & Línea base & Muestreo uniforme directo sobre la malla discreta \\
+\texttt{gwo} & Enjambre jerárquico & Tres líderes independientes & $a:2\rightarrow0$; $\alpha$, $\beta$, $\delta$ \\
+\texttt{pso} & Referencia de enjambre & Memoria personal y social & $\chi=0{,}729$; $c_1=c_2=1{,}49445$; velocidad al 20\,\% \\
+\texttt{ga} & Referencia evolutiva & Selección, recombinación y mutación & Torneo 3; BLX-0,5; $p_c=0{,}9$; $p_m=0{,}1$; élite 2 \\
+\texttt{sho} & Enjambre con agrupación & Grupo de confianza y ataque promedio & $h:5\rightarrow0$; radio normalizado $M\sim U(0{,}5,1)$ \\
+\texttt{woa} & Enjambre alternante & Cerco, búsqueda aleatoria y espiral & $a:2\rightarrow0$; $b=1$; ramas 50/50 \\
+\texttt{random} & Línea base sin aprendizaje & Muestreo uniforme & Mismo presupuesto de solicitudes \\
 \hline
 \end{tabular}
 \end{table}
 
-La inclusión de la búsqueda aleatoria no es accesoria. Un banco de pruebas que solo enfrenta metaheurísticas entre sí puede establecer un ordenamiento relativo, pero es incapaz de responder la pregunta previa y más importante: si alguno de los competidores aporta algo sobre el muestreo no informado del dominio. Sin esa referencia, un ranking carece de interpretación absoluta \cite{Arcuri2014Hitchhiker}.
+No se ajustaron hiperparámetros después de observar los resultados. La regla de vecindad usada para operacionalizar \texttt{count\_nos} en SHO se declara porque el artículo original no la define inequívocamente: se normalizan las distancias a la mejor hiena, se sortea un radio en $[0{,}5,1]$ y se incluyen las soluciones dentro de él, siempre con al menos la mejor. Por ello la implementación sigue las fases y ecuaciones publicadas, pero no se presenta esa regla particular como información proporcionada por los autores \cite{Dhiman2017SHO}.
 
-\section{Protocolo de análisis estadístico}
+\section{Presupuesto, referencia y reproducibilidad}
 
-Los valores finales de aptitud de una metaheurística no siguen una distribución normal ni presentan varianzas homogéneas entre algoritmos, por lo que el análisis se apoya en contrastes no paramétricos, siguiendo la práctica recomendada para la comparación de algoritmos evolutivos y de inteligencia de enjambre \cite{Derrac2011Tutorial}.
+Cada método recibe 600 solicitudes de función objetivo por ejecución, incluida la población inicial: 20 individuos durante 30 iteraciones. Las propuestas repetidas cuentan contra el presupuesto; se informan además diseños únicos, duplicados, llamadas reales al simulador y tiempo. Se realizan 30 ejecuciones independientes por método, para un total de 108.000 evaluaciones de diseños anuales. Los identificadores 42--71 generan flujos separados mediante la pareja algoritmo--réplica; no constituyen bloques pareados.
 
-Para cada uno de los $\binom{6}{2} = 15$ pares de algoritmos se aplica el \textbf{contraste de rangos con signo de Wilcoxon} \cite{Wilcoxon1945} sobre las 30 diferencias pareadas por semilla. Dado que quince contrastes simultáneos sobre la misma familia de hipótesis inflan la probabilidad de obtener al menos un falso positivo, los valores $p$ se corrigen mediante el \textbf{procedimiento secuencialmente rechazante de Holm} \cite{Holm1979}, que controla la tasa de error por familia sin la pérdida de potencia estadística de la corrección de Bonferroni simple.
+Como referencia determinista se evalúan los 341 catálogos discretos efectivos sobre $W=0,0{,}5,\ldots,200$ MW: 136.741 diseños. El menor LCOE obtenido se denomina \textbf{mejor referencia de malla}; la expresión ``óptimo global continuo'' no se utiliza.
 
-La significancia estadística indica que una diferencia probablemente no es nula, pero no informa sobre su magnitud. Se reporta por ello el tamaño de efecto $A_{12}$ de Vargha y Delaney \cite{Vargha2000A12}, que estima la probabilidad de que una ejecución del primer algoritmo produzca un resultado mejor que una del segundo. Con la convención de minimización empleada en la implementación, $A_{12} > 0{,}5$ indica que el algoritmo de la fila obtiene con mayor frecuencia un LCOE menor; los umbrales convencionales sitúan en 0,56, 0,64 y 0,71 las fronteras de efecto pequeño, medio y grande \cite{Arcuri2014Hitchhiker}.
+Las implementaciones de GWO, SHO y WOA se someten previamente a pruebas deterministas de límites, presupuesto y dirección de minimización sobre Sphere y Rastrigin. El simulador exige además 8.760 registros en el caso principal, 8.784 en la sensibilidad y un residuo de balance inferior a $10^{-8}$ MW.
 
-\subsection{Sobre la ausencia de un contraste ómnibus}
+\section{Análisis comparativo}
 
-Podría esperarse la aplicación previa de un contraste de Friedman seguido de un análisis \textit{post hoc} de Nemenyi. Se ha optado por prescindir de él por dos razones.
+El análisis usa mediana, rango intercuartílico, mejor y peor valor, brecha respecto de la mejor referencia observada y probabilidades empíricas de quedar a menos de 0,1\,\%, 0,5\,\% y 1\,\% de ella. La desviación típica se conserva como descriptor, pero no se interpreta aisladamente como consistencia.
 
-La primera es de adecuación del instrumento: el contraste de Friedman está concebido para comparar $k$ algoritmos sobre $N$ \textit{problemas distintos}, tratando cada problema como un bloque. El diseño de este trabajo enfrenta seis algoritmos sobre un \textit{único} problema replicado con 30 semillas, escenario para el cual los contrastes pareados directos con corrección por familia constituyen el instrumento apropiado \cite{Derrac2011Tutorial}.
+Las 30 ejecuciones por algoritmo se tratan como muestras independientes: aunque los identificadores de réplica sean comunes, cada pareja algoritmo--réplica genera un flujo pseudoaleatorio distinto. Esta comparación describe una única instancia energética y no establece superioridad general entre algoritmos.
 
-La segunda es de valor informativo: el interés no reside en la hipótesis global de que al menos un algoritmo difiere de los demás --- pregunta de escaso contenido cuando ya se dispone de los quince contrastes dirigidos ---, sino en identificar qué pares concretos se distinguen y con qué magnitud, que es exactamente lo que entregan en conjunto Wilcoxon, Holm y $A_{12}$.
+\section{Protocolo de reproducción de Li et al.}
+
+El artículo declara un año de 8.760 horas, aunque 2008 fue bisiesto \cite{Li2024WPEB}. La reproducción principal elimina exactamente las 24 marcas del 29 de febrero; la serie íntegra de 8.784 horas se evalúa por separado. Se mantienen las coordenadas aproximadas $(41{,}70;110{,}43)$ sin calibrarlas contra las salidas publicadas.
+
+Para W190--P10--E95--B30, W120--P80--E80--B25 y W60--P140--E85--B27,5 se reportan recurso, generación, hidrógeno, NPC, LCOE, LCOH según esta tesis y AGSR. Cada magnitud comparable incluye diferencia absoluta y error relativo; las etiquetas ``estrecha'' ($\leq5$\,\%), ``parcial'' ($5$--$25$\,\%) y ``no reproducida'' ($>25$\,\%) son descripciones, no criterios de aceptación pre-registrados.
+
+La serie de viento a 50 m define el caso principal y la extrapolada a 105 m constituye una sensibilidad. Las coordenadas, la versión del recurso, el año bisiesto, las pérdidas, la carga auxiliar y el despacho se reconocen como fuentes conjuntas de incertidumbre. Ninguna discrepancia se atribuye de manera exclusiva al artículo. Asimismo, cualquier exceso de AGSR se redacta como resultado condicionado a los datos y al despacho reconstruidos.

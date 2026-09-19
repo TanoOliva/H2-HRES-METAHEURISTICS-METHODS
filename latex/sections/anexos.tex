@@ -10,7 +10,7 @@ Las figuras comparativas de este documento emplean una codificación visual cons
 \label{fig:identidad_visual}
 \end{figure}
 
-La forma del marcador actúa como codificación primaria y el color como refuerzo secundario. Esta decisión responde a una limitación verificada: al extender la paleta a seis categorías, la separación cromática mínima entre pares desciende por debajo del umbral que garantiza distinguibilidad en contextos de visión cromática reducida. Confiar exclusivamente en el color habría hecho ilegibles los diagramas de dispersión para una fracción de los lectores.
+La forma del marcador actúa como codificación primaria y el color como refuerzo secundario. Esta redundancia evita que la identificación de seis series dependa exclusivamente de la percepción cromática y mantiene la lectura al imprimir en escala de grises.
 
 \chapter{Plan de trabajo del proyecto}
 
@@ -24,7 +24,7 @@ Su propósito es evaluar la aplicabilidad, flexibilidad y limitaciones de las me
     \item \textbf{Tarea 1.1:} revisión del estado del arte sobre modelos HRES-H$_2$ y análisis de su complejidad computacional. \textit{Completada}, véase el marco teórico.
     \item \textbf{Tarea 1.2:} revisión del estado del arte sobre metaheurísticas modernas basadas en población. \textit{Completada}, con la incorporación de GWO \cite{Mirjalili2014GWO}, PSO \cite{Kennedy1995PSO}, GA \cite{Goldberg1989GA}, SHO \cite{Dhiman2017SHO} y WOA \cite{Mirjalili2016WOA}.
     \item \textbf{Tarea 1.3:} análisis de enfoques híbridos de optimización basados en población y componentes de aprendizaje. \textit{Parcialmente completada}; la integración efectiva de componentes de aprendizaje se traslada al WP2.
-    \item \textbf{Tarea 1.4:} implementación, experimentación y evaluación de impacto y robustez de los enfoques seleccionados. \textit{Completada}, véanse los capítulos de diseño experimental y de resultados.
+    \item \textbf{Tarea 1.4:} implementación, experimentación y evaluación de los enfoques seleccionados. \textit{Completada} para la instancia y sensibilidades declaradas; véanse los capítulos de diseño experimental y de resultados.
 \end{itemize}
 
 \section{WP2: Integración de componentes de aprendizaje basados en ANN}
@@ -43,22 +43,26 @@ Contempla la comunicación de los avances metodológicos y de los resultados obt
 
 \section{Artefactos computacionales}
 
-La totalidad de los resultados reportados en esta tesis es reproducible a partir de dos archivos:
+La totalidad de los resultados reportados en esta tesis se regenera a partir de los siguientes artefactos:
 
 \begin{itemize}
-    \item \texttt{notebooks/H2\_HRES\_trabajo.ipynb} --- cuaderno autocontenido de 64 celdas que incluye la configuración del escenario, los modelos de generación y económicos, el simulador de despacho horario, la verificación contra el artículo de referencia, el barrido exhaustivo de la instancia base, la definición de la instancia discreta, las seis implementaciones de optimizadores, el banco de pruebas comparativo, el análisis estadístico y los estudios de sensibilidad.
-    \item \texttt{notebooks/src/hourly\_2008.csv} --- serie meteorológica horaria de 8.784 registros obtenida de NASA POWER \cite{NasaPower}.
+    \item \texttt{notebooks/H2\_HRES\_trabajo.ipynb} --- cuaderno autocontenido de 68 celdas que incluye configuración, modelos físicos y económicos, pruebas de conservación, reproducción parcial, instancia mixta, referencia de malla, seis optimizadores, análisis estadístico y sensibilidades.
+    \item \texttt{notebooks/src/hourly\_2008.csv} --- serie meteorológica de 8.784 registros obtenida de NASA POWER \cite{NasaPower}; el caso principal excluye las 24 horas del 29 de febrero.
+    \item \texttt{notebooks/src/data\_provenance.csv} --- procedencia disponible del archivo horario y declaración explícita de que la versión de API no quedó registrada.
+    \item \texttt{scripts/execute\_notebook.py} --- ejecutor reproducible de los modos rápido y completo.
+    \item \texttt{notebooks/results/} --- tablas CSV de validación, corridas, semillas, referencia, estadística y sensibilidades exportadas por el cuaderno.
+    \item \texttt{scripts/generar\_tablas\_latex.py} y \texttt{scripts/extraer\_figuras.py} --- generación automática de tablas y figuras para el documento.
 \end{itemize}
 
 \section{Requisitos y ejecución}
 
-El cuaderno requiere Python 3.13 y cuatro bibliotecas científicas: \texttt{numpy}, \texttt{pandas}, \texttt{matplotlib} y \texttt{scipy}. No requiere conexión de red en tiempo de ejecución ni la instalación de paquetes propios del proyecto.
+El cuaderno requiere Python 3.13, \texttt{numpy}, \texttt{pandas}, \texttt{matplotlib}, \texttt{scipy}, \texttt{nbformat} y \texttt{nbclient}. No requiere conexión de red en tiempo de ejecución ni la instalación de paquetes propios del proyecto.
 
-La ejecución se controla mediante un único interruptor de configuración situado en la primera celda de código:
+La ejecución se controla mediante el argumento \texttt{--mode} del script o el interruptor equivalente situado en la primera celda de código:
 
 \begin{itemize}
     \item \texttt{MODO = "rapido"} --- 3 semillas, 8 individuos y 8 iteraciones. Aproximadamente un minuto de ejecución. Destinado a verificar que el cuaderno se ejecuta de principio a fin sin errores.
-    \item \texttt{MODO = "completo"} --- 30 semillas, 20 individuos y 30 iteraciones, equivalente a 108.000 simulaciones horarias. Aproximadamente quince minutos de ejecución. Es el modo con el que se generaron todas las cifras y figuras de este documento.
+    \item \texttt{MODO = "completo"} --- 30 semillas, 20 individuos y 30 iteraciones: 108.000 solicitudes de evaluación de diseños anuales. El tiempo depende del equipo empleado. Es el modo con el que se generaron las cifras y figuras de este documento.
 \end{itemize}
 
 \section{Determinismo}

@@ -1,0 +1,301 @@
+% Archivo generado. No editar manualmente.
+\newcommand{\HoursMain}{8.760}
+\newcommand{\HoursSensitivity}{8.784}
+\newcommand{\TotalDesignRequests}{108.000}
+\newcommand{\RequestedHourlySteps}{946.080.000}
+\newcommand{\BaseEvaluated}{420}
+\newcommand{\BaseFeasible}{81}
+\newcommand{\BaseFeasiblePct}{19,3}
+\newcommand{\BaseBestLCOE}{0,287172}
+\newcommand{\BaseBestWind}{130}
+\newcommand{\BaseBestElectrolyzer}{85}
+\newcommand{\ReferenceEvaluated}{136.741}
+\newcommand{\ReferenceFeasible}{51.739}
+\newcommand{\ReferenceBestLCOE}{0,283827}
+\newcommand{\BestObservedAlgorithm}{GA}
+\newcommand{\BestObservedLCOE}{0,283688}
+\newcommand{\BestObservedWind}{141,70}
+\newcommand{\BestObservedPV}{58,30}
+\newcommand{\BestObservedElectrolyzer}{90}
+\newcommand{\BestObservedBattery}{20}
+\newcommand{\BestObservedDuration}{1}
+\newcommand{\BestObservedLCOH}{19,63}
+\newcommand{\BestObservedAGSR}{0,2000}
+\newcommand{\BestHorizonDeltaPct}{-0,463}
+\newcommand{\KruskalH}{38,292}
+\newcommand{\KruskalP}{3.3e-07}
+\newcommand{\SignificantPairs}{4}
+\newcommand{\TotalPairs}{15}
+\newcommand{\MaxBalanceResidual}{0.00e+00}
+\newcommand{\TopMedianAlgorithm}{SHO}
+\newcommand{\BottomMedianAlgorithm}{RANDOM}
+\newcommand{\RandomMedianRank}{6}
+\newcommand{\BetterThanRandomAlgorithms}{GWO, PSO, SHO y WOA}
+\newcommand{\WorseThanRandomAlgorithms}{ninguno}
+\newcommand{\NoDifferenceFromRandomAlgorithms}{GA}
+
+\newcommand{\TablaValidacionAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Reproducción cuantitativa frente a Li et al. con 8.760 horas}
+\label{tab:validacion_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{p{3.2cm} p{1.4cm} r r r r p{2.5cm}}
+\hline
+\textbf{Indicador} & \textbf{Unidad} & \textbf{Publ.} & \textbf{Reprod.} & \textbf{$\Delta$ abs.} & \textbf{Error [\%]} & \textbf{Lectura} \\
+\hline
+Viento medio a 50 m & m/s & 7,5600 & 7,0890 & -0,4710 & -6,23 & reproducción parcial \\
+GHI anual & kWh/m2 & 1731,0000 & 1657,7231 & -73,2769 & -4,23 & reproducción estrecha \\
+CF eólico & fracción & 0,4000 & 0,3949 & -0,0051 & -1,28 & reproducción estrecha \\
+CF fotovoltaico & fracción & 0,1900 & 0,1876 & -0,0024 & -1,28 & reproducción estrecha \\
+CF electrolizador W190 & fracción & 0,6240 & 0,5878 & -0,0362 & -5,80 & reproducción parcial \\
+LCOE W190 & CNY/kWh & 0,2692 & 0,2637 & -0,0055 & -2,04 & reproducción estrecha \\
+NPC W190 & M CNY & 2675,7300 & 2664,9764 & -10,7536 & -0,40 & reproducción estrecha \\
+LCOE W120 & CNY/kWh & 0,2886 & 0,2860 & -0,0026 & -0,89 & reproducción estrecha \\
+NPC W120 & M CNY & 2350,3800 & 2346,8707 & -3,5093 & -0,15 & reproducción estrecha \\
+LCOE W60 & CNY/kWh & 0,3617 & 0,3543 & -0,0074 & -2,04 & reproducción estrecha \\
+NPC W60 & M CNY & 2114,5300 & 2320,1710 & 205,6410 & 9,73 & reproducción parcial \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaCasosAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Resultados reconstruidos de los tres casos con el horizonte principal}
+\label{tab:casos_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r r r}
+\hline
+\textbf{Caso} & \textbf{Eólica} & \textbf{FV} & \textbf{H$_2$} & \textbf{NPC} & \textbf{LCOE} & \textbf{AGSR} \\
+ & \textbf{[GWh]} & \textbf{[GWh]} & \textbf{[t/año]} & \textbf{[M CNY]} & \textbf{[CNY/kWh]} & \\
+\hline
+W190 & 657,2 & 16,4 & 8846,3 & 2665,0 & 0,263716 & 0,2699 \\
+W120 & 415,1 & 131,4 & 7873,7 & 2346,9 & 0,286026 & 0,2002 \\
+W60 & 207,5 & 230,0 & 6882,9 & 2320,2 & 0,354308 & 0,1239 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaHorizonteAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Sensibilidad al tratamiento del 29 de febrero de 2008}
+\label{tab:horizonte_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r r}
+\hline
+\textbf{Caso} & \textbf{LCOE 8.760} & \textbf{LCOE 8.784} & \textbf{$\Delta$ [\%]} & \textbf{AGSR 8.760} & \textbf{AGSR 8.784} \\
+\hline
+W190 & 0,263716 & 0,262386 & -0,504 & 0,2699 & 0,2703 \\
+W120 & 0,286026 & 0,284769 & -0,440 & 0,2002 & 0,2004 \\
+W60 & 0,354308 & 0,353046 & -0,356 & 0,1239 & 0,1236 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaAlturaVientoAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Sensibilidad de W190 a la altura de la serie eólica}
+\label{tab:altura_viento_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{p{4cm} r r r r}
+\hline
+\textbf{Serie} & \textbf{Viento [m/s]} & \textbf{CF eólico} & \textbf{LCOE} & \textbf{AGSR} \\
+\hline
+NASA POWER 50 m & 7,089 & 0,3949 & 0,263716 & 0,2699 \\
+extrapolada 105 m & 8,661 & 0,5612 & 0,186545 & 0,3691 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaEvolucionAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Evolución documentada del error relativo de LCOE}
+\label{tab:evolucion_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{p{3cm} l r p{7.2cm}}
+\hline
+\textbf{Etapa} & \textbf{Caso} & \textbf{Error [\%]} & \textbf{Cambio documentado} \\
+\hline
+preliminar & W190 & -1,31 & modelo inicial conservado como antecedente \\
+preliminar & W120 & 26,46 & modelo inicial conservado como antecedente \\
+preliminar & W60 & 95,16 & modelo inicial conservado como antecedente \\
+reconstruccion final 8760 & W190 & -2,04 & 8760 h, capacidad eolica continua y supuestos auditados \\
+reconstruccion final 8760 & W120 & -0,89 & 8760 h, capacidad eolica continua y supuestos auditados \\
+reconstruccion final 8760 & W60 & -2,04 & 8760 h, capacidad eolica continua y supuestos auditados \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaReferenciaAuto}{%
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Mejores puntos de la referencia determinista de malla}
+\label{tab:referencia_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{r r r r r r r}
+\hline
+\textbf{$W$} & \textbf{$P$} & \textbf{$E$} & \textbf{$B^P$} & \textbf{$h_B$} & \textbf{AGSR} & \textbf{LCOE} \\
+\hline
+141,5 & 58,5 & 90 & 20 & 1 & 0,1995 & 0,283827 \\
+151,5 & 48,5 & 95 & 20 & 1 & 0,1994 & 0,284084 \\
+144,0 & 56,0 & 90 & 25 & 1 & 0,1997 & 0,284123 \\
+154,5 & 45,5 & 95 & 25 & 1 & 0,1995 & 0,284127 \\
+141,0 & 59,0 & 90 & 20 & 1 & 0,1985 & 0,284189 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaRankingAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Calidad final por algoritmo en 30 ejecuciones independientes}
+\label{tab:ranking_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r r}
+\hline
+\textbf{Alg.} & \textbf{Mediana} & \textbf{IQR} & \textbf{Mejor} & \textbf{Peor} & \textbf{Brecha [\%]} \\
+\hline
+SHO & 0,284304 & 0,002291 & 0,283721 & 0,295350 & 0,217 \\
+GWO & 0,284358 & 0,001628 & 0,283704 & 0,287132 & 0,236 \\
+WOA & 0,284568 & 0,002191 & 0,283694 & 0,295344 & 0,310 \\
+GA & 0,285718 & 0,002882 & 0,283688 & 0,325011 & 0,715 \\
+PSO & 0,285781 & 0,001832 & 0,283691 & 0,287585 & 0,738 \\
+RANDOM & 0,287517 & 0,002741 & 0,284415 & 0,291127 & 1,350 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaExitoAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Probabilidad empírica de proximidad a la mejor referencia observada}
+\label{tab:exito_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r}
+\hline
+\textbf{Alg.} & \textbf{Brecha $\leq$0,1\%} & \textbf{Brecha $\leq$0,5\%} & \textbf{Brecha $\leq$1\%} \\
+\hline
+SHO & 26,7\% & 66,7\% & 76,7\% \\
+GWO & 20,0\% & 70,0\% & 90,0\% \\
+WOA & 16,7\% & 60,0\% & 86,7\% \\
+GA & 16,7\% & 40,0\% & 56,7\% \\
+PSO & 13,3\% & 36,7\% & 90,0\% \\
+RANDOM & 0,0\% & 16,7\% & 30,0\% \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaComputoAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Conteo y costo de las evaluaciones por algoritmo}
+\label{tab:computo_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r}
+\hline
+\textbf{Alg.} & \textbf{Factibles} & \textbf{Únicas (media)} & \textbf{Duplicadas (media)} & \textbf{Tiempo [s]} \\
+\hline
+SHO & 30/30 & 582,5 & 17,5 & 4,01 \\
+GWO & 30/30 & 586,5 & 13,5 & 3,93 \\
+WOA & 30/30 & 566,5 & 33,5 & 3,93 \\
+GA & 30/30 & 392,5 & 207,5 & 2,67 \\
+PSO & 30/30 & 600,0 & 0,0 & 3,99 \\
+RANDOM & 30/30 & 600,0 & 0,0 & 4,29 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaParesAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Comparaciones Mann--Whitney bilaterales, corrección de Holm y $A_{12}$}
+\label{tab:pares_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l r r r p{2.8cm}}
+\hline
+\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Significativa} \\
+\hline
+GA & GWO & 0.0838 & 0,299 & [0,167; 0,436] & no \\
+GA & PSO & 1 & 0,394 & [0,248; 0,538] & no \\
+GA & RANDOM & 0.251 & 0,669 & [0,529; 0,807] & no \\
+GA & SHO & 0.392 & 0,348 & [0,209; 0,496] & no \\
+GA & WOA & 0.844 & 0,378 & [0,237; 0,524] & no \\
+GWO & PSO & 1 & 0,608 & [0,460; 0,752] & no \\
+GWO & RANDOM & 5.95e-07 & 0,913 & [0,836; 0,970] & sí \\
+GWO & SHO & 1 & 0,499 & [0,344; 0,658] & no \\
+GWO & WOA & 1 & 0,571 & [0,420; 0,716] & no \\
+PSO & RANDOM & 3.24e-05 & 0,856 & [0,751; 0,941] & sí \\
+PSO & SHO & 1 & 0,430 & [0,281; 0,583] & no \\
+PSO & WOA & 1 & 0,497 & [0,348; 0,643] & no \\
+RANDOM & SHO & 0.000152 & 0,170 & [0,073; 0,286] & sí \\
+RANDOM & WOA & 0.000312 & 0,183 & [0,083; 0,308] & sí \\
+SHO & WOA & 1 & 0,544 & [0,389; 0,687] & no \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaSensAGSRAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Sensibilidad al límite anual de venta a red}
+\label{tab:sens_agsr_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{r r r r r r}
+\hline
+\textbf{Valor} & \textbf{Factibles} & \textbf{Fracción} & \textbf{Mejor LCOE} & \textbf{$W$ [MW]} & \textbf{$E$ [MW]} \\
+\hline
+0,10 & 16 & 0,038 & 0,328113 & 110 & 100 \\
+0,15 & 47 & 0,112 & 0,302827 & 140 & 100 \\
+0,20 & 81 & 0,193 & 0,287172 & 130 & 85 \\
+0,25 & 116 & 0,276 & 0,269440 & 180 & 95 \\
+0,30 & 151 & 0,360 & 0,255658 & 180 & 85 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaSensCargaAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Sensibilidad a la carga mínima del electrolizador}
+\label{tab:sens_carga_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{r r r r r r}
+\hline
+\textbf{Valor} & \textbf{Factibles} & \textbf{Fracción} & \textbf{Mejor LCOE} & \textbf{$W$ [MW]} & \textbf{$E$ [MW]} \\
+\hline
+0,20 & 81 & 0,193 & 0,286722 & 130 & 85 \\
+0,30 & 81 & 0,193 & 0,287172 & 130 & 85 \\
+0,40 & 75 & 0,179 & 0,287626 & 130 & 85 \\
+0,50 & 55 & 0,131 & 0,295509 & 120 & 85 \\
+\hline
+\end{tabular}
+\end{table}
+}
+

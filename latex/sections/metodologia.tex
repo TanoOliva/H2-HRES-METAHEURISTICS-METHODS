@@ -1,12 +1,12 @@
 \chapter{Metodología}
 
-El desarrollo del trabajo se organiza en cuatro etapas encadenadas, cada una de las cuales solo comienza cuando la anterior ha sido verificada. La primera corresponde a la revisión conceptual de los sistemas HRES-H$_2$ y de las metaheurísticas de población, recogida en el marco teórico. La segunda consiste en la implementación y verificación de un simulador del modelo WPEB que reproduzca el comportamiento del artículo de referencia \cite{Li2024WPEB} sobre indicadores publicados. La tercera formula, sobre esa base verificada, una instancia de optimización discreta con un espacio de diseño ampliado. La cuarta ejecuta el banco de pruebas comparativo entre optimizadores y analiza sus resultados.
+El desarrollo del trabajo se organiza en cuatro etapas. La primera corresponde a la revisión conceptual de los sistemas HRES-H$_2$ y de las metaheurísticas de población. La segunda implementa un simulador del modelo WPEB y evalúa qué indicadores del artículo de referencia pueden reproducirse bajo los datos supuestos disponibles \cite{Li2024WPEB}. La tercera formula una instancia mixta continua--discreta con un espacio de batería ampliado. La cuarta ejecuta el banco de pruebas comparativo y analiza sus resultados.
 
-Este encadenamiento responde a un principio metodológico explícito: \textbf{no se compara ningún algoritmo hasta haber demostrado que el simulador sobre el que se comparan es correcto}. Un banco de pruebas construido sobre un modelo no verificado mide las peculiaridades del error de implementación, no el desempeño de los optimizadores.
+Este encadenamiento responde a un principio metodológico explícito: antes de comparar algoritmos se comprueban conservación de energía, límites operacionales y correspondencia cuantitativa con los indicadores publicados. La comparación con Li et al. se denomina reproducción parcial, no demostración absoluta de corrección, porque la ubicación exacta y varios detalles del modelo no fueron publicados.
 
 \section{Herramientas y entorno computacional}
 
-La implementación se desarrolla íntegramente en Python 3.13 dentro de un cuaderno Jupyter autocontenido, \texttt{notebooks/H2\_HRES\_trabajo.ipynb}, compuesto por 64 celdas. La decisión de mantenerlo autocontenido --- sin importaciones de módulos propios --- responde a un requisito de reproducibilidad: el cuaderno y el archivo de datos horarios constituyen el conjunto completo necesario para reproducir cada cifra reportada en esta tesis, sin dependencias de una estructura de paquetes, de variables de entorno ni de servicios externos en tiempo de ejecución.
+La implementación se desarrolla íntegramente en Python 3.13 dentro de un cuaderno Jupyter autocontenido, \texttt{notebooks/H2\_HRES\_trabajo.ipynb}, compuesto por 68 celdas. El cuaderno y el archivo horario local contienen el modelo, las pruebas, el experimento y las salidas necesarias para reproducir las cifras, sin depender de servicios externos durante la ejecución.
 
 Las bibliotecas empleadas se limitan a cuatro dependencias científicas de uso extendido: \texttt{NumPy} para el álgebra vectorial y la generación de números pseudoaleatorios \cite{Harris2020NumPy}, \texttt{pandas} para la manipulación tabular de resultados \cite{McKinney2010Pandas}, \texttt{matplotlib} para la visualización \cite{Hunter2007Matplotlib} y \texttt{SciPy} para los contrastes estadísticos no paramétricos \cite{Virtanen2020SciPy}. Los algoritmos de optimización se implementan desde cero, sin recurrir a bibliotecas de metaheurísticas de terceros, con el fin de garantizar que los seis competidores comparten exactamente el mismo mecanismo de conteo de evaluaciones, de registro de historial y de interacción con la función objetivo.
 
@@ -15,24 +15,24 @@ Las bibliotecas empleadas se limitan a cuatro dependencias científicas de uso e
 Varias decisiones de diseño del código son parte sustantiva de la contribución informática del trabajo, en la medida en que son las que hacen auditable el experimento.
 
 \begin{itemize}
-    \item \textbf{Configuración inmutable y autovalidada.} Los once bloques de parámetros del escenario se modelan como \textit{dataclasses} con el atributo \texttt{frozen=True} y validación en \texttt{\_\_post\_init\_\_}. Una configuración inconsistente --- una eficiencia fuera del intervalo $[0,1]$, una vida útil negativa --- falla en el momento de su construcción y no en mitad de una simulación de once minutos. La inmutabilidad garantiza además que ninguna etapa del experimento puede alterar inadvertidamente los parámetros que otra etapa ya empleó.
+    \item \textbf{Configuración inmutable y autovalidada.} Los once bloques de parámetros del escenario se modelan como \textit{dataclasses} con el atributo \texttt{frozen=True} y validación en \texttt{\_\_post\_init\_\_}. Una configuración inconsistente (una eficiencia fuera del intervalo $[0,1]$, una vida útil negativa) falla en el momento de su construcción y no en mitad de una simulación de once minutos. La inmutabilidad garantiza además que ninguna etapa del experimento puede alterar inadvertidamente los parámetros que otra etapa ya empleó.
 
     \item \textbf{Separación entre instancia y optimizador.} Los seis algoritmos derivan de una clase base \texttt{Optimizer} que fija el contrato de tres métodos: \texttt{\_search} implementa la estrategia de búsqueda propia del algoritmo, \texttt{\_evaluate} contabiliza cada llamada a la función objetivo y \texttt{\_record} registra el historial de convergencia. Un registro de algoritmos permite añadir un competidor nuevo sin tocar el código de ejecución del banco de pruebas. Esta separación es la que hace posible garantizar el presupuesto idéntico de evaluaciones.
 
-    \item \textbf{Memoización de perfiles de generación.} Los perfiles horarios eólico y fotovoltaico dependen únicamente de la capacidad instalada, no del resto de la configuración. Una memoria intermedia indexada por capacidad evita recalcular 8.784 valores cada vez que reaparece una capacidad ya evaluada. Su rendimiento efectivo se analiza en la discusión de resultados.
+    \item \textbf{Memoización de perfiles de generación.} Los perfiles horarios eólico y fotovoltaico dependen únicamente de la capacidad instalada. Una memoria intermedia indexada por capacidad evita recalcular 8.760 valores cuando reaparece una capacidad ya evaluada. Las solicitudes repetidas cuentan igualmente contra el presupuesto y se informan por separado.
 
-    \item \textbf{Ejecución a dos escalas.} Un único interruptor de configuración alterna entre un modo rápido (3 semillas, 8 individuos, 8 iteraciones; aproximadamente un minuto) y el modo exhaustivo empleado para los resultados definitivos (30 semillas, 20 individuos, 30 iteraciones; aproximadamente quince minutos). El modo rápido permite verificar que el cuaderno se ejecuta de principio a fin sin errores antes de comprometer el tiempo de cómputo completo.
+    \item \textbf{Ejecución a dos escalas.} Un único interruptor de configuración alterna entre un modo rápido (3 semillas, 8 individuos y 8 iteraciones) y el modo completo empleado para los resultados definitivos (30 semillas, 20 individuos y 30 iteraciones). El primero permite verificar el flujo de extremo a extremo antes de ejecutar el presupuesto definitivo.
 
-    \item \textbf{Tipos explícitos para el dominio.} Las políticas de despacho se modelan como enumeraciones y los resultados de simulación como tuplas con nombre, de modo que las decisiones del modelo quedan expresadas en el sistema de tipos y no en constantes numéricas dispersas por el código.
+    \item \textbf{Tipos explícitos para el dominio.} Las políticas de despacho se modelan como enumeraciones y los diseños y resultados como estructuras con campos nombrados, de modo que las decisiones del modelo quedan expresadas en el sistema de tipos y no en constantes numéricas dispersas por el código.
 \end{itemize}
 
 \section{Fuente de datos y horizonte temporal}
 
 Los datos meteorológicos proceden de NASA POWER \cite{NasaPower}, para las coordenadas aproximadas de Damao Banner, Baotou, Mongolia Interior (latitud 41,70; longitud 110,43), en la zona horaria UTC+8. El artículo de referencia no publica las coordenadas exactas del emplazamiento, limitación que se discute entre los supuestos del trabajo.
 
-La serie se almacena localmente en \texttt{notebooks/src/hourly\_2008.csv} y contiene cuatro columnas: velocidad de viento a 50 m (\texttt{ws50m}), velocidad de viento extrapolada a altura de buje (\texttt{wsc\_ms}), irradiancia global horizontal (\texttt{ghi\_kwh\_m2}) y temperatura del aire a 2 m (\texttt{t2m\_c}). El almacenamiento local, frente a la descarga en tiempo de ejecución empleada en versiones anteriores del trabajo, elimina la dependencia de la disponibilidad del servicio web y garantiza que dos ejecuciones separadas en el tiempo operen exactamente sobre los mismos datos.
+La serie se almacena localmente en \texttt{notebooks/src/hourly\_2008.csv} y contiene cuatro columnas: velocidad de viento a 50 m (\texttt{ws50m}), velocidad de viento extrapolada a altura de buje (\texttt{wsc\_ms}), irradiancia global horizontal (\texttt{ghi\_kwh\_m2}) y temperatura del aire a 2 m (\texttt{t2m\_c}). El archivo \texttt{notebooks/src/data\_provenance.csv} registra coordenadas, horizonte, resolución y columnas. La versión del producto o de la API no fue conservada en el artefacto original y se declara como ``no registrada''; esta omisión limita la reproducción externa y no se completa retrospectivamente con una versión actual. El almacenamiento local garantiza, en cambio, que las ejecuciones de esta tesis operen sobre los mismos valores.
 
-El año de análisis es 2008, seleccionado por consistencia con el artículo de referencia. Por tratarse de un año bisiesto, el horizonte de simulación comprende \textbf{8.784 horas} y no las 8.760 habituales, diferencia que se propaga a todos los agregados anuales y que debe tenerse presente al contrastar cifras con la literatura.
+El año de análisis es 2008, seleccionado por consistencia con el artículo. Aunque es bisiesto, Li et al. declara reiteradamente una serie de 8.760 horas \cite{Li2024WPEB}. La reproducción principal elimina exactamente las 24 marcas del 29 de febrero, sin interpolación. La serie íntegra de 8.784 horas se conserva y se ejecuta como sensibilidad separada.
 
 \begin{figure}[H]
 \centering
@@ -41,7 +41,7 @@ El año de análisis es 2008, seleccionado por consistencia con el artículo de 
 \label{fig:recurso}
 \end{figure}
 
-El recurso del emplazamiento se caracteriza por una velocidad media de viento a 50 m de 7,10 m/s y una irradiancia global horizontal anual acumulada de 1.661 kWh/m$^2$, con temperaturas que recorren un rango de $-31{,}17$ a $33{,}11\,^\circ$C. La amplitud térmica es relevante porque afecta directamente al rendimiento fotovoltaico a través del coeficiente térmico del modelo.
+En el horizonte principal, el recurso reconstruido presenta una velocidad media a 50 m de 7,09 m/s y una irradiancia global horizontal acumulada de 1.658 kWh/m$^2$. Li et al. informa 7,56 m/s y 1.731 kWh/m$^2$; esta diferencia objetiva limita la reproducibilidad del caso antes de aplicar cualquier modelo de conversión.
 
 \section{Decisiones de modelado justificadas por evidencia}
 \label{sec:decisiones_modelado}
@@ -50,9 +50,7 @@ Tres decisiones del modelo se apartan de la lectura literal del artículo de ref
 
 \subsection{Selección de la serie de velocidad de viento}
 
-El artículo declara una altura de buje de 105 m, lo que sugeriría extrapolar la velocidad medida a 50 m mediante una ley de potencia. Al hacerlo se obtiene un factor de capacidad eólico del 56\,\%, muy alejado del 40\,\% publicado; incluso adoptando el exponente de rugosidad correspondiente a la superficie más lisa disponible, el valor resultante permanece en torno al 49\,\%. Empleando directamente la serie medida a 50 m, el factor de capacidad resulta de 0,3958 frente al 0,40 publicado, con un desvío del $-1{,}05\,\%$.
-
-Se adopta en consecuencia la serie a 50 m. La decisión se fundamenta en evidencia de ajuste y no en una interpretación del texto: es la única alternativa que reproduce el indicador publicado. Su implicación es que el modelo de generación eólica del artículo probablemente no aplica la extrapolación de altura que su tabla de parámetros sugiere.
+El artículo declara una altura de buje de 105 m, pero no publica la curva de potencia real, las pérdidas de estela ni otros descuentos necesarios para reconstruir el parque. La serie a 50 m define el escenario principal y la extrapolación a 105 m se evalúa como sensibilidad. No se selecciona una de ellas por su cercanía posterior al LCOE publicado. Por tanto, una diferencia observada no permite concluir qué transformación aplicaron los autores.
 
 \subsection{Corrección de la interpretación de la irradiancia}
 
@@ -64,7 +62,7 @@ El episodio se consigna por su valor metodológico. El error no producía excepc
 
 El artículo de referencia expresa el costo de la batería exclusivamente por unidad de potencia instalada, imputación coherente con su modelo porque en él la duración está fijada en una hora y potencia y energía resultan numéricamente equivalentes. Al convertir la duración en variable de decisión, esa imputación deja de ser válida: alargar la batería de una a cuatro horas sería gratuito, y la variable carecería de contenido económico.
 
-Se adopta por ello un reparto del costo entre una componente por potencia (30\,\%) y otra por energía (70\,\%), calibrado de modo que la suma reproduzca exactamente el costo original para una duración de una hora. Esta es \textbf{la única desviación deliberada respecto de los parámetros publicados}, es neutra frente al artículo en el punto de operación que este considera, y su efecto sobre los resultados se cuantifica en el análisis de robustez de la Sección~\ref{sec:robustez}.
+Se adopta por ello un reparto del costo entre una componente por potencia (30\,\%) y otra por energía (70\,\%), definido de modo que la suma reproduzca el costo original para una duración de una hora. Es una extensión económica introducida por esta tesis, no un parámetro publicado por Li et al.
 
 \begin{table}[H]
 \centering
@@ -86,7 +84,7 @@ Operación y mantenimiento anual & 3{,}00 & 7{,}00 & 10{,}00 \\
 
 \section{Modelos de generación y validación del recurso}
 
-La generación eólica se calcula agregando la salida de turbinas idénticas de 5 MW mediante una curva de potencia cúbica por tramos, con saturación explícita a la capacidad nominal instalada para evitar que el redondeo al número entero de turbinas produzca una potencia superior a la declarada. La generación fotovoltaica aplica un modelo de temperatura de celda basado en la temperatura nominal de operación, con corrección por coeficiente térmico, factor de pérdidas, sobredimensionamiento del generador respecto del inversor y recorte a la potencia nominal de este último.
+La generación eólica se calcula con una curva de potencia cúbica por tramos expresada por unidad de MW y escalada por la capacidad agregada continua $W$. No se redondea el número de turbinas ni se aplica un recorte posterior dependiente de ese redondeo. La generación fotovoltaica aplica un modelo de temperatura de celda basado en la temperatura nominal de operación, con corrección por coeficiente térmico, factor de pérdidas, sobredimensionamiento del generador respecto del inversor y recorte a la potencia nominal de este último.
 
 \begin{figure}[H]
 \centering
@@ -103,19 +101,19 @@ La evaluación económica sigue la estructura de costo presente neto habitual en
 
 El electrolizador, con una vida útil de 15 años, incorpora un reemplazo en el año 15; la batería, con una vida útil de 10 años, incorpora reemplazos en los años 10 y 20. El almacenamiento de hidrógeno se dimensiona en 10.000 kg fijos e ingresa al costo presente neto con su inversión y su operación, sin reemplazo ni valor residual por coincidir su vida útil con el horizonte del proyecto.
 
-El costo anualizado se obtiene multiplicando el costo presente neto por el factor de recuperación de capital. El costo nivelado de la energía divide ese costo anualizado por la energía útil anual, definida como la suma de la energía entregada al electrolizador y la vendida a la red; el costo nivelado del hidrógeno lo divide por la producción anual de hidrógeno.
+El costo anualizado se obtiene multiplicando el costo presente neto por el factor de recuperación de capital. El costo nivelado de la energía divide ese costo anualizado por la energía útil anual, definida como la suma de la energía entregada al electrolizador y la vendida a la red. El $\mathrm{LCOH}_{\mathrm{tesis}}$ divide el mismo costo anualizado por la producción anual de hidrógeno; es un indicador secundario con la asignación de costos propia ya declarada.
 
 \section{Simulación horaria y despacho}
 
-Cada configuración candidata se evalúa mediante una simulación secuencial de las 8.784 horas del año. La secuencialidad es inherente al problema y no una limitación de la implementación: el estado de carga de la batería en cada hora depende del estado en la hora anterior, lo que impide vectorizar el bucle de despacho y establece el costo computacional mínimo de una evaluación.
+Cada configuración candidata se evalúa mediante una simulación secuencial de las 8.760 horas del horizonte principal. El estado de carga de la batería en cada hora depende del estado precedente; por ello el despacho se calcula cronológicamente. La sensibilidad de 8.784 horas ejecuta el mismo algoritmo sin retirar el 29 de febrero.
 
-El despacho horario aplica una prioridad fija sobre la energía renovable disponible: primero alimentar el electrolizador, después cargar la batería con el excedente, a continuación exportar a la red y, finalmente, verter el remanente que exceda la capacidad de conexión. Las dos políticas de gestión de la carga mínima del electrolizador --- que constituyen una de las diferencias entre las dos instancias de optimización --- se detallan en el capítulo de diseño experimental.
+El despacho horario aplica una prioridad fija sobre la energía renovable disponible: primero alimentar el electrolizador, después cargar la batería con el excedente, a continuación exportar a la red y, finalmente, verter el remanente que exceda la capacidad de conexión. El modelo no permite compras de electricidad a la red; $P_{grid,t}$ representa solo exportación no negativa. La carga auxiliar de planta se fija en cero porque su magnitud no está publicada, mientras que las eficiencias del rectificador y del convertidor bidireccional se aplican explícitamente. Las dos políticas de gestión de la carga mínima del electrolizador, que constituyen una de las diferencias entre las dos instancias de optimización, se detallan en el capítulo de diseño experimental.
 
 Concluida la simulación, se calculan los agregados anuales, se verifica la restricción sobre la fracción de energía vendida a la red y se evalúan los indicadores económicos. Cuando una configuración incumple una restricción verificable antes de simular, la función de evaluación retorna un resultado infactible acompañado del motivo textual del rechazo, lo que facilita la depuración y permite auditar por qué una región del dominio quedó excluida.
 
 \section{Parámetros del escenario}
 
-Las Tablas~\ref{tab:parametros_configuracion_replica}--\ref{tab:parametros_costos_conversion_replica} recogen los parámetros empleados. Corresponden a los valores publicados por Li et al. \cite{Li2024WPEB}, con la única salvedad del reparto del costo de la batería documentado en la Tabla~\ref{tab:reparto_bateria}.
+Las Tablas~\ref{tab:parametros_configuracion_replica}--\ref{tab:parametros_costos_conversion_replica} recogen los parámetros empleados. Se usan los valores publicados por Li et al. cuando están disponibles \cite{Li2024WPEB}; las coordenadas aproximadas, la serie meteorológica, la carga auxiliar nula, las reglas de despacho y el reparto del costo de batería se identifican expresamente como supuestos de reconstrucción o extensiones de esta tesis.
 
 \begingroup
 \setlength{\tabcolsep}{3pt}
@@ -134,7 +132,8 @@ Las Tablas~\ref{tab:parametros_configuracion_replica}--\ref{tab:parametros_costo
 \textbf{Longitud} & 110,43 & Longitud aproximada del mismo emplazamiento. \\
 \textbf{Zona horaria} & UTC+8 & Zona horaria local, relevante para la complementariedad viento-solar. \\
 \textbf{Año de análisis} & 2008 & Año meteorológico empleado, por consistencia con el artículo de referencia. \\
-\textbf{Horizonte de simulación} & 8.784 h & Año bisiesto completo con resolución horaria. \\
+\textbf{Horizonte principal} & 8.760 h & Reproducción del horizonte declarado por Li et al.; se retira el 29 de febrero. \\
+\textbf{Sensibilidad temporal} & 8.784 h & Año bisiesto completo con resolución horaria. \\
 \textbf{Fuente de datos} & NASA POWER & Serie horaria de viento, irradiancia y temperatura. \\
 \hline
 \end{tabular}
@@ -170,7 +169,7 @@ Las Tablas~\ref{tab:parametros_configuracion_replica}--\ref{tab:parametros_costo
 \textbf{HHV del hidrógeno} & 39,4 kWh/kg & Poder calorífico superior empleado para el balance de masa. \\
 \textbf{Eficiencia del electrolizador} & 0,75 & Eficiencia energética; implica 52,53 kWh por kg de H$_2$. \\
 \textbf{Carga mínima del electrolizador} & 0,30 & Fracción mínima de carga para operar. \\
-\textbf{Módulo de electrólisis} & 5,0 MW & Tamaño unitario en la instancia discreta (10 a 20 módulos). \\
+\textbf{Módulo de electrólisis} & 5,0 MW & Tamaño unitario en la instancia mixta (10 a 20 módulos). \\
 \textbf{Almacenamiento de H$_2$} & 10.000 kg & Capacidad fija del tanque; no es variable de decisión. \\
 \textbf{Vida del proyecto} & 25 años & Horizonte económico. \\
 \textbf{Tasa de descuento real} & 0,0435 & Tasa empleada en el descuento de flujos. \\

@@ -6,7 +6,7 @@ No obstante, la naturaleza intermitente y variable de estos recursos plantea des
 
 Los sistemas híbridos que combinan generación eólica, solar, almacenamiento electroquímico y tecnologías de hidrógeno permiten mejorar la flexibilidad operativa y el aprovechamiento del recurso renovable \cite{Wang2021HybridSystem,Naderipour2021HybridClean}. Sin embargo, su dimensionamiento óptimo constituye un problema complejo, debido a la interacción entre múltiples componentes, la variabilidad temporal de los recursos y la presencia de restricciones técnicas, económicas y regulatorias acopladas entre sí.
 
-En este contexto, los métodos de optimización basados en metaheurísticas se han consolidado como la herramienta predominante para abordar problemas no lineales, no convexos y de alta dimensionalidad como el dimensionamiento de sistemas HRES-H$_2$ \cite{Khan2022Review}. Su adopción, sin embargo, presenta un patrón metodológico problemático: los estudios de aplicación tienden a comparar varios algoritmos bioinspirados entre sí, con frecuencia sin incluir una línea base no informada, sin reportar la dispersión entre ejecuciones independientes y sin contrastes de significancia estadística. Bajo esas condiciones no es posible distinguir si el algoritmo propuesto aporta valor real o si el resultado publicado refleja simplemente una inicialización afortunada.
+En este contexto, las metaheurísticas constituyen una familia empleada para abordar problemas no lineales y no convexos como el dimensionamiento de sistemas HRES-H$_2$ \cite{Khan2022Review}. Sin embargo, una comparación limitada a valores medios o mejores ejecuciones no permite separar desempeño sistemático de variación estocástica. Esta tesis incorpora una línea base aleatoria y múltiples ejecuciones independientes por algoritmo para delimitar lo que los datos permiten afirmar.
 
 Esta carencia adquiere relevancia particular a la luz del teorema de la no existencia de almuerzo gratis \cite{Wolpert1997NFL}, según el cual ninguna metaheurística es universalmente superior. Si la superioridad de un algoritmo solo puede establecerse empíricamente y para una clase acotada de problemas, entonces el rigor del protocolo experimental no es un detalle accesorio del trabajo: es la condición que determina si sus conclusiones son válidas.
 
@@ -15,13 +15,13 @@ Esta carencia adquiere relevancia particular a la luz del teorema de la no exist
 Esta tesis aborda el dimensionamiento de un sistema híbrido eólico-fotovoltaico con electrólisis y almacenamiento electroquímico, y realiza cuatro contribuciones:
 
 \begin{enumerate}
-    \item \textbf{Una réplica verificada} del modelo WPEB propuesto por Li et al. \cite{Li2024WPEB}, contrastada contra diez indicadores publicados, de los cuales nueve quedan dentro de tolerancias fijadas \textit{a priori}. El proceso de verificación permitió además detectar dos inconsistencias en el artículo original.
+    \item \textbf{Una reproducción parcial y trazable} del modelo WPEB de Li et al. \cite{Li2024WPEB}, con errores absolutos y relativos, comparación de los horizontes de 8.760 y 8.784 horas y declaración explícita de la incertidumbre introducida por las coordenadas y detalles de despacho no publicados.
 
-    \item \textbf{Una instancia de optimización discreta} formulada sobre esa base verificada, en la que la potencia y la duración del almacenamiento electroquímico dejan de ser parámetros derivados para convertirse en variables de diseño, ampliando el dominio admisible de 420 a 14.883 configuraciones.
+    \item \textbf{Una instancia mixta continua--discreta} en la que la capacidad eólica permanece continua y el electrolizador, la potencia de batería y su duración pertenecen a catálogos discretos. Se añade una referencia determinista de 136.741 puntos sin confundirla con el óptimo global continuo.
 
-    \item \textbf{Un banco de pruebas comparativo} entre cinco metaheurísticas de población y una línea base aleatoria, bajo presupuesto idéntico de evaluaciones, 30 semillas pareadas y un protocolo estadístico que combina contrastes de Wilcoxon, corrección de Holm--Bonferroni y tamaños de efecto de Vargha--Delaney.
+    \item \textbf{Un banco de pruebas comparativo} entre cinco metaheurísticas y una línea base aleatoria, con 600 evaluaciones y 30 ejecuciones independientes por método. El protocolo compara mediana, rango intercuartílico, brecha respecto de la mejor referencia observada y tasa de éxito frente a la línea base.
 
-    \item \textbf{Un análisis de robustez} que demuestra que el ordenamiento entre algoritmos no es una propiedad del algoritmo sino de la pareja algoritmo--formulación, al invertirse parcialmente ante el cambio de una única decisión de modelado.
+    \item \textbf{Un análisis de sensibilidad} temporal y de modelado que evita presentar un ordenamiento observado sobre una instancia como propiedad universal de los algoritmos.
 \end{enumerate}
 
 \section{Estructura del documento}

@@ -1,0 +1,7 @@
+etapa,caso,error_LCOE_pct,cambio_documentado
+preliminar,W190,-1.31,modelo inicial conservado como antecedente
+preliminar,W120,26.46,modelo inicial conservado como antecedente
+preliminar,W60,95.16,modelo inicial conservado como antecedente
+reconstruccion final 8760,W190,-2.0371017650895356,"8760 h, capacidad eolica continua y supuestos auditados"
+reconstruccion final 8760,W120,-0.891722108894351,"8760 h, capacidad eolica continua y supuestos auditados"
+reconstruccion final 8760,W60,-2.0436656459563665,"8760 h, capacidad eolica continua y supuestos auditados"

@@ -7,20 +7,21 @@ A continuación se listan los símbolos, subíndices y siglas empleados de forma
 \vspace{1em}
 \noindent\textbf{Variables de decisión y capacidades}
 
-\begin{tabular}{p{2.6cm} p{12.4cm}}
+\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
 $W$ & Capacidad instalada de generación eólica [MW] \\
 $P$ & Capacidad instalada de generación fotovoltaica [MW] \\
 $E$ & Capacidad instalada del electrolizador [MW] \\
 $n_E$ & Número de módulos de electrólisis de 5 MW \\
 $B^{P}$ & Potencia nominal del almacenamiento electroquímico [MW] \\
 $B^{E}$ & Capacidad energética del almacenamiento electroquímico [MWh] \\
+$h_B$ & Duración nominal de la batería, $B^E/B^P$ [h] \\
 $\mathbf{x}$ & Vector de variables de decisión \\
 \end{tabular}
 
 \vspace{1em}
 \noindent\textbf{Magnitudes operacionales}
 
-\begin{tabular}{p{2.6cm} p{12.4cm}}
+\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
 $v$ & Velocidad del viento [m/s] \\
 $v_{ci}$, $v_{r}$, $v_{co}$ & Velocidades de arranque, nominal y de corte de la turbina [m/s] \\
 $G$ & Irradiancia global horizontal [kW/m$^2$] \\
@@ -33,20 +34,20 @@ $SOC$ & Estado de carga del almacenamiento electroquímico [MWh] \\
 \vspace{1em}
 \noindent\textbf{Indicadores de desempeño}
 
-\begin{tabular}{p{2.6cm} p{12.4cm}}
+\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
 AGSR & Fracción anual de energía renovable vendida a la red [--] \\
 CF & Factor de capacidad de un componente [--] \\
 CRF & Factor de recuperación de capital [--] \\
 NPC & Costo presente neto [CNY] \\
 LCOE & Costo nivelado de la energía [CNY/kWh] \\
-LCOH & Costo nivelado del hidrógeno [CNY/kg] \\
+$\mathrm{LCOH}_{\mathrm{tesis}}$ & Costo nivelado del hidrógeno según la asignación económica de esta tesis [CNY/kg] \\
 HHV & Poder calorífico superior del hidrógeno [kWh/kg] \\
 \end{tabular}
 
 \vspace{1em}
 \noindent\textbf{Parámetros económicos}
 
-\begin{tabular}{p{2.6cm} p{12.4cm}}
+\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
 $i$ & Tasa de descuento real [--] \\
 $N$ & Horizonte económico del proyecto [años] \\
 $S$ & Valor residual de un componente al término del proyecto [CNY] \\
@@ -55,20 +56,17 @@ O\&M & Costos de operación y mantenimiento \\
 \end{tabular}
 
 \vspace{1em}
-\noindent\textbf{Análisis estadístico}
+\noindent\textbf{Estadística descriptiva}
 
-\begin{tabular}{p{2.6cm} p{12.4cm}}
-$p$ & Valor de probabilidad de un contraste de hipótesis \\
-$p_{\text{Holm}}$ & Valor $p$ corregido por el procedimiento de Holm \\
-$A_{12}$ & Tamaño de efecto de Vargha--Delaney \\
-$\alpha$ & Nivel de significancia \\
+\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
+IQR & Rango intercuartílico \\
 $\sigma$ & Desviación típica \\
 \end{tabular}
 
 \vspace{1em}
 \noindent\textbf{Siglas}
 
-\begin{tabular}{p{2.6cm} p{12.4cm}}
+\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
 HRES & \textit{Hybrid Renewable Energy System} --- sistema híbrido de energías renovables \\
 HRES-H$_2$ & Sistema híbrido de energías renovables con tecnologías de hidrógeno \\
 WPEB & \textit{Wind--Photovoltaic--Electrolysis--Battery} \\

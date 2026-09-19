@@ -1,0 +1,2 @@
+source,product_or_endpoint,api_version,latitude,longitude,year,resolution,stored_columns,notes
+NASA POWER,hourly point data,no registrada en el artefacto original,41.70,110.43,2008,hourly,"ws50m; wsc_ms; ghi_kwh_m2; t2m_c","wsc_ms es una extrapolacion derivada; el caso principal usa ws50m"

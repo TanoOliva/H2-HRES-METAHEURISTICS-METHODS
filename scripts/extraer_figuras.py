@@ -24,11 +24,11 @@ NOMBRES = {
     (14, 0): "fig02_curva_potencia_generacion.png",
     (26, 0): "fig03_dominio_instancia_base.png",
     (45, 0): "fig04_identidad_visual.png",
-    (51, 0): "fig05_convergencia.png",
-    (53, 0): "fig06_dispersion_y_tiempo.png",
-    (56, 0): "fig07_heatmap_a12.png",
-    (59, 0): "fig08_sensibilidad_agsr.png",
-    (59, 1): "fig09_sensibilidad_carga_minima.png",
+    (55, 0): "fig05_convergencia.png",
+    (57, 0): "fig06_dispersion_y_tiempo.png",
+    (60, 0): "fig07_heatmap_a12.png",
+    (63, 0): "fig08_sensibilidad_agsr.png",
+    (63, 1): "fig09_sensibilidad_carga_minima.png",
 }
 
 

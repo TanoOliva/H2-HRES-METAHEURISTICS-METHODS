@@ -2,8 +2,8 @@
 wpeb_data/
 data/
 
-# Resultados de corridas
-results/
+# Resultados temporales en la raíz (los CSV reproducibles de notebooks/results se conservan)
+/results/
 
 # Python
 __pycache__/
@@ -25,6 +25,9 @@ __pycache__/
 *.nbc
 *.nbi
 
+# Artefactos temporales de QA (capturas de paginas del PDF, etc.)
+tmp/
+
 # Editores
 .vscode/
 .idea/
@@ -39,11 +42,13 @@ latex/_archivo_no_usado/
 *.bcf
 *.blg
 *.lof
+*.log
 *.lot
 *.nlo
 *.run.xml
 *.synctex.gz
 *.toc
 
-# PDF compilado (regenerable con latex/compilar.ps1)
-pdf/
+# Se conserva el PDF final solicitado; los auxiliares permanecen en latex/.build/.
+!pdf/
+!pdf/main.pdf
