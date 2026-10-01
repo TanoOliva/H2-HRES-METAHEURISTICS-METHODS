@@ -1,0 +1,2 @@
+wind_step_mw,wind_values,catalogs,evaluated,feasible,elapsed_s,control_max_rel_diff_lcoe,control_max_abs_diff_agsr,optimum_wind_mw,optimum_pv_mw,optimum_electrolyzer_mw,optimum_battery_mw,optimum_battery_duration_h,optimum_agsr,optimum_lcoe_cny_per_kwh,optimum_lcoh_cny_per_kg
+0.01,20001,341,6820341,2583634,1042.7121384999482,1.3100631690576847e-14,5.773159728050814e-15,141.70000000000002,58.29999999999998,90.0,20.0,1.0,0.19998868385923801,0.28368907095020246,19.631113000789252
