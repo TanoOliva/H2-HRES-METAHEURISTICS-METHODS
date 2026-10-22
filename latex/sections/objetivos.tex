@@ -4,7 +4,7 @@ En este capítulo se presentan el objetivo general y los objetivos específicos 
 
 \section{Objetivo general}
 
-Desarrollar y validar un marco metodológico para el análisis, la implementación y la evaluación comparativa de algoritmos metaheurísticos aplicados al dimensionamiento óptimo de sistemas híbridos de energías renovables que integran generación eólica, generación fotovoltaica, almacenamiento electroquímico y producción de hidrógeno verde, sustentando las conclusiones sobre desempeño algorítmico en evidencia experimental replicada y auditable.
+Desarrollar y validar un marco metodológico para el análisis, la implementación y la evaluación comparativa de algoritmos metaheurísticos, clásicos e híbridos, aplicados al dimensionamiento óptimo de sistemas híbridos de energías renovables que integran generación eólica, generación fotovoltaica, almacenamiento electroquímico y producción de hidrógeno verde, sustentando las conclusiones sobre desempeño algorítmico en evidencia experimental replicada y auditable.
 
 \section{Objetivos específicos}
 
@@ -16,11 +16,11 @@ Desarrollar y validar un marco metodológico para el análisis, la implementaci�
 
 \item \textbf{Evaluar críticamente} los supuestos y simplificaciones presentes en el modelo de referencia, identificando sus limitaciones en la representación de la variabilidad del recurso renovable, del comportamiento del almacenamiento y de las restricciones de interacción con la red.
 
-\item \textbf{Formular} una instancia de optimización con un espacio de diseño ampliado respecto del modelo de referencia, definiendo su codificación, su función objetivo y su estrategia de tratamiento de restricciones.
+\item \textbf{Formular} un conjunto de instancias de optimización con un espacio de diseño ampliado respecto del modelo de referencia, definiendo su codificación, su función objetivo, su estrategia de tratamiento de restricciones y el óptimo exacto de cada instancia sobre el dominio discretizado.
 
-\item \textbf{Implementar y comparar} el desempeño de un conjunto de metaheurísticas de población sobre dicha instancia, bajo un presupuesto computacional idéntico y frente a una línea base no informada, analizando la calidad de las soluciones, el comportamiento de convergencia y la consistencia entre ejecuciones independientes.
+\item \textbf{Implementar y comparar} el desempeño de un conjunto de metaheurísticas de población clásicas y de tres híbridos construidos sobre ellas (un algoritmo genético memético, un enjambre de partículas con operadores genéticos y un optimizador de hienas con búsqueda local) sobre dichas instancias, bajo un presupuesto computacional idéntico y frente a una línea base no informada, analizando la calidad de las soluciones, el comportamiento de convergencia y la consistencia entre ejecuciones independientes.
 
-\item \textbf{Caracterizar} el desempeño relativo de los algoritmos mediante estadística descriptiva de sus ejecuciones independientes (mediana, dispersión, brecha respecto de la mejor referencia observada y tasa de éxito) frente a una línea base sin aprendizaje.
+\item \textbf{Caracterizar} el desempeño relativo de los algoritmos mediante estadística descriptiva de sus ejecuciones independientes (mediana, dispersión, brecha respecto del óptimo exacto y tasa de éxito) y contrastes planificados frente a la línea base sin aprendizaje y de cada híbrido frente al método del que parte.
 
 \item \textbf{Determinar} la sensibilidad de los resultados a las restricciones operacionales, al tratamiento del año bisiesto y a la extrapolación del recurso eólico, explicitando el alcance de cada comparación.
 

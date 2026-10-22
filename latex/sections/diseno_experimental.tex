@@ -1,59 +1,44 @@
 \chapter{Diseño experimental}
 
-Este capítulo define la función objetivo, el dominio, las restricciones y el protocolo de comparación. El simulador horario es común a todos los métodos; lo único que cambia entre competidores es el operador de búsqueda. Esta separación evita atribuir al algoritmo diferencias causadas por modelos energéticos distintos.
+Este capítulo define las instancias, el óptimo exacto que sirve de referencia, la configuración de los nueve algoritmos y el protocolo de comparación. El simulador horario es común a todos los métodos y a todas las instancias; lo único que cambia entre competidores es el operador de búsqueda. Esta separación evita atribuir al algoritmo diferencias causadas por modelos energéticos distintos.
 
 \section{Instancias de optimización}
-\label{sec:dos_instancias}
+\label{sec:instancias_experimento}
 
-Se estudian dos instancias relacionadas, pero no intercambiables. La \textbf{instancia base} reproduce la estructura de dimensionamiento descrita por Li et al. \cite{Li2024WPEB}: $W$ y $E$ son los grados de libertad efectivos, $P=200-W$ y la batería se deriva como el 30\,\% de la capacidad del electrolizador, redondeada a módulos de 2,5 MW. Se evalúa una malla de 420 configuraciones; por ello solo puede hablarse de óptimo global \emph{sobre esa malla}.
+El Capítulo 2 formuló el problema sobre el dominio mixto de la ecuación~\eqref{eq:dominio} y definió una instancia como la tupla $(C_{tot},\mathrm{AGSR}_{max},u,n_{min},n_{max},\Delta_B,B_{max},\{h_k\})$. Las cuatro instancias de la Tabla~\ref{tab:instancias_auto} derivan de la de referencia cambiando un aspecto cada vez, de modo que cualquier diferencia de comportamiento entre instancias tiene una causa declarada:
 
-La \textbf{instancia mixta continua--discreta} constituye la extensión de esta tesis. La capacidad eólica $W$ permanece continua, mientras que el número de módulos de electrólisis, la potencia de batería y su duración pertenecen a catálogos discretos. Como el dominio contiene una variable continua, no posee una cardinalidad finita y 600 evaluaciones no representan un porcentaje definido de cobertura.
+\begin{itemize}
+    \item \textbf{I1, instancia mixta de referencia.} $C_{tot}=200$ MW, $\mathrm{AGSR}_{max}=0{,}20$, módulos de electrólisis de 5 MW ($n_E\in\{10,\ldots,20\}$), batería de 0 a 50 MW en pasos de 5 MW y duraciones de 1, 2 y 4 h: \InstCatalogsA{} catálogos discretos por valor de $W$.
+    \item \textbf{I2, región factible estrecha.} Igual que I1 con $\mathrm{AGSR}_{max}=0{,}10$. Sólo cambia la restricción C5, que es la activa en el óptimo; la fracción factible del dominio cae de \BFAFeasiblePct\,\% a \BFBFeasiblePct\,\%.
+    \item \textbf{I3, catálogos finos.} Igual que I1 con módulos de 2,5 MW ($n_E\in\{20,\ldots,40\}$), pasos de batería de 2,5 MW y duraciones de 1, 2, 4 y 8 h: \InstCatalogsC{} catálogos sobre la misma región física, lo que multiplica por cinco las combinaciones discretas que un método debe discriminar.
+    \item \textbf{I4, escala.} $C_{tot}=300$ MW con electrolizador de hasta 150 MW ($n_E\in\{10,\ldots,30\}$) y el catálogo de batería de I1, para aislar el efecto de escala sobre $W$ y $E$: \InstCatalogsD{} catálogos.
+\end{itemize}
 
-\begin{table}[H]
-\centering
-\footnotesize
-\caption{Diferencias formales entre las dos instancias de optimización}
-\label{tab:dos_instancias}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{p{3.2cm} p{5.3cm} p{5.5cm}}
-\hline
- & \textbf{Instancia base} & \textbf{Instancia mixta} \\
-\hline
-Variables & $W$, $E$, con $P=200-W$ & $W$, $n_E$, $B^P$, índice de duración \\
-Naturaleza & Malla finita & Una variable continua y tres coordenadas discretizadas \\
-Batería & $B^P=\lceil0{,}30E/2{,}5\rceil\,2{,}5$, duración 1 h & $B^P\in\{0,5,\ldots,50\}$ MW y $h_B\in\{1,2,4\}$ h \\
-Despacho & \texttt{TOP\_UP} & \texttt{THRESHOLD} \\
-Resolución & Enumeración de 420 puntos & Seis optimizadores y referencia determinista de malla \\
-Resultado & Mejor punto de la malla base & Mejor solución hallada bajo el presupuesto \\
-\hline
-\end{tabular}
-\end{table}
-
-Los mejores valores de ambas instancias no permiten medir una mejora producida por las metaheurísticas, porque también cambian el espacio de batería y la política de despacho. Los algoritmos se comparan exclusivamente dentro de la instancia mixta.
+La \textbf{instancia base} de Li et al. \cite{Li2024WPEB}, en la que $W$ y $E$ son los grados de libertad efectivos, $P=200-W$ y la batería se deriva como el 30\,\% del electrolizador redondeado a módulos de 2,5 MW con política de despacho \texttt{TOP\_UP}, se conserva únicamente como caso de validación y para los barridos de sensibilidad. Sus 420 puntos se enumeran y su mejor valor sólo puede llamarse óptimo \emph{sobre esa malla}. Los algoritmos no se comparan sobre ella: la política de despacho (\texttt{THRESHOLD}) y el espacio de batería de las instancias mixtas son distintos, y comparar sus valores con los de la instancia base no mediría una mejora producida por las metaheurísticas.
 
 \section{Espacio de decisión}
 
-Los optimizadores manipulan $\mathbf{x}\in\mathbb{R}^4$. Antes de simular, el vector se recorta a sus límites y se decodifica según la Tabla~\ref{tab:espacio_decision}.
+Los optimizadores manipulan $\mathbf{x}\in\mathbb{R}^4$. Antes de simular, el vector se recorta a sus límites y se decodifica según la Tabla~\ref{tab:espacio_decision}; los límites y pasos dependen de la instancia.
 
 \begin{table}[H]
 \centering
 \footnotesize
-\caption{Variables de decisión de la instancia mixta continua--discreta}
+\caption{Variables de decisión y su decodificación en las instancias mixtas}
 \label{tab:espacio_decision}
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{c p{3.7cm} c c p{5.2cm}}
+\begin{tabular}{c p{3.7cm} c c p{5.6cm}}
 \hline
 \textbf{Índice} & \textbf{Variable} & \textbf{Lím. inf.} & \textbf{Lím. sup.} & \textbf{Decodificación} \\
 \hline
-$x_0$ & Capacidad eólica $W$ [MW] & 0 & 200 & Continua; $P=200-W$ \\
-$x_1$ & Módulos de electrólisis $n_E$ & 10 & 20 & Entero más cercano; $E=5n_E$ MW \\
-$x_2$ & Potencia de batería $B^P$ [MW] & 0 & 50 & Múltiplo de 5 MW más cercano \\
-$x_3$ & Índice de duración & 0 & 2 & Catálogo $\{1,2,4\}$ h si $B^P>0$ \\
+$x_0$ & Capacidad eólica $W$ [MW] & 0 & $C_{tot}$ & Continua; $P=C_{tot}-W$ \\
+$x_1$ & Módulos de electrólisis $n_E$ & $n_{min}$ & $n_{max}$ & Entero más cercano; $E=u\,n_E$ MW \\
+$x_2$ & Potencia de batería $B^P$ [MW] & 0 & $B_{max}$ & Múltiplo de $\Delta_B$ más cercano \\
+$x_3$ & Índice de duración $k$ & 0 & $K-1$ & Entero más cercano; $h_B=h_k$ si $B^P>0$ \\
 \hline
 \end{tabular}
 \end{table}
 
-Cuando $B^P=0$, la duración se fija en cero: las tres etiquetas de duración describirían el mismo diseño físico y no deben contarse como alternativas distintas. De este modo, los 363 catálogos brutos por valor de $W$ se reducen a 341 diseños discretos efectivos.
+Cuando $B^P=0$, la duración se fija en cero: las $K$ etiquetas de duración describirían el mismo diseño físico y no deben contarse como alternativas distintas. Por ello el número de catálogos efectivos por valor de $W$ es $(n_{max}-n_{min}+1)\,(1+K\,B_{max}/\Delta_B)$, que da \InstCatalogsA{}, \InstCatalogsB{}, \InstCatalogsC{} e \InstCatalogsD{} para I1 a I4. Todo vector tiene un \textbf{representante canónico}, obtenido al decodificar y volver a codificar, que la búsqueda local de los híbridos usa como punto de partida.
 
 La potencia eólica se modela como capacidad agregada continua. Si $p_{wt,t}^{pu}$ es la curva de potencia de una turbina normalizada por su potencia nominal, entonces
 \begin{equation}
@@ -63,16 +48,7 @@ No se redondea $W$ a un número entero de turbinas. Esta idealización debe inte
 
 \section{Función objetivo e indicadores}
 
-El problema es monoobjetivo:
-\begin{equation}
-\min_{\mathbf{x}}\quad \mathrm{LCOE}(\mathbf{x})
-=\frac{C_{ann}(\mathbf{x})}{1000\,E_{use}(\mathbf{x})},
-\qquad
-E_{use}=\sum_{t=1}^{8760}\left(P_{E,t}+P_{grid,t}\right)\Delta t,
-\quad \Delta t=1\ \mathrm{h}.
-\label{eq:funcion_objetivo}
-\end{equation}
-El factor 1000 convierte MWh en kWh. El NPC y el LCOH se calculan como indicadores secundarios y no intervienen en el orden de aptitud. En particular,
+El problema es monoobjetivo, ecuación~\eqref{eq:problema}: se minimiza el LCOE, cociente entre el costo anualizado y la energía útil anual (entregada al electrolizador más vendida a la red), con el factor 1000 que convierte MWh en kWh. El NPC y el LCOH se calculan como indicadores secundarios y no intervienen en el orden de aptitud. En particular,
 \begin{equation}
 \mathrm{LCOH}_{tesis}=\frac{C_{ann}}{M_{H_2}},
 \end{equation}
@@ -91,55 +67,62 @@ asigna el costo anualizado total a la producción de hidrógeno, sin acreditar l
 \textbf{ID} & \textbf{Formulación} & \textbf{Unidad} & \textbf{Procedencia} & \textbf{Tratamiento} \\
 \hline
 C1 & $P_{ren,t}+P_{desc,t}=P_{E,t}+P_{carga,t}+P_{grid,t}+P_{vert,t}$ & MW, cada hora & Balance de Li et al. y simulador & Ecuación de estado; residuo auditado \\
-C2 & $W+P=200$, $W\geq0$, $P\geq0$ & MW & Li et al. & Parametrización $P=200-W$ y recorte \\
-C3 & $0<E\leq0{,}5(W+P)$ & MW & Li et al. & Límites y decodificación \\
-C4 & $0\leq SOC_t\leq B^E$, $P_{carga,t},P_{desc,t}\leq B^P$ y carga del electrolizador nula o superior al mínimo & MWh y MW & Modelo operacional de esta tesis & Despacho horario y verificación posterior \\
-C5 & $\mathrm{AGSR}=E_{grid}/E_{ren}\leq0{,}20$ & fracción anual & Li et al. & Verificación tras la simulación \\
+C2 & $W+P=C_{tot}$, $W\geq0$, $P\geq0$ & MW & Li et al. & Parametrización $P=C_{tot}-W$ y recorte \\
+C3 & $0<E\leq0{,}5\,C_{tot}$ & MW & Li et al. & Límites del catálogo y decodificación \\
+C4 & $0\leq SOC_t\leq B^E$; $P_{carga,t}\leq B^P$; $P_{desc,t}\leq B^P$; carga del electrolizador nula o superior al mínimo & MWh y MW & Modelo operacional de esta tesis & Despacho horario y verificación posterior \\
+C5 & $\mathrm{AGSR}=E_{grid}/E_{ren}\leq\mathrm{AGSR}_{max}$ & fracción anual & Li et al.; $\mathrm{AGSR}_{max}$ según la instancia & Verificación tras la simulación \\
 \hline
 \end{tabular}
 \end{table}
 
-La factibilidad se compara mediante las reglas de Deb. Toda solución factible domina a una infactible; entre dos infactibles se prefiere la menor suma de violaciones normalizadas, y entre dos factibles se minimiza LCOE. Esto elimina el peso arbitrario $10^6$ empleado en la versión preliminar. El residuo máximo de C1 y las violaciones de C2--C5 se almacenan por separado.
+La factibilidad se compara mediante las reglas de Deb \cite{Deb2000Constraint}. Toda solución factible domina a una infactible; entre dos infactibles se prefiere la menor suma de violaciones normalizadas, y entre dos factibles se minimiza LCOE. Esto elimina el peso arbitrario $10^6$ empleado en la versión preliminar. El residuo máximo de C1 y las violaciones de C2--C5 se almacenan por separado.
+
+\section{Óptimo exacto por fuerza bruta}
+\label{sec:fuerza_bruta}
+
+Para cada instancia se enumeran \textbf{todos} los catálogos discretos efectivos sobre \textbf{todos} los valores $W\in\{0;\,0{,}01;\,\ldots;\,C_{tot}\}$ MW, sin muestreo ni poda: entre \BFADesigns{} (I1) y \BFCDesigns{} (I3) diseños anuales por instancia, \BruteForceDesignsTotal{} en total. El mejor diseño factible de esa enumeración es el \textbf{óptimo exacto del dominio discretizado}, único referente de las brechas y tasas de éxito.
+
+Ese volumen es abordable porque el despacho \texttt{THRESHOLD} se reescribe de forma vectorizada: el bucle horario sigue siendo secuencial por el estado de carga, pero cada hora se resuelve simultáneamente para todos los diseños de un bloque de 150 valores de $W$, y el costo presente neto, lineal en cada capacidad, se obtiene del aporte unitario por kW y por kWh. Cada bloque se reduce al vuelo al mejor $W$ por catálogo y a la envolvente inferior por $W$, de modo que nunca se retienen matrices completas. Tres verificaciones preceden a la aceptación de un óptimo: la réplica vectorizada se contrasta contra el simulador oficial en 200 celdas aleatorias de la malla, con diferencia relativa máxima de LCOE de \MaxControlRelDiff{}; los diez mejores catálogos se recalculan con el simulador oficial, que verifica los cinco grupos de restricciones; y se evalúa el diseño un paso de malla más allá del óptimo, dentro del mismo catálogo, para comprobar que la restricción C5 es la que detiene la mejora. El resultado reducido de cada instancia se guarda en disco con una huella del escenario, de los datos y del paso, de modo que repetir el cuaderno tras modificar un algoritmo no vuelve a pagar las horas de enumeración.
+
+Como $W$ es continuo en los optimizadores y discretizado a 0,01 MW en la enumeración, un optimizador puede terminar marginalmente por debajo del óptimo exacto; la brecha se informa con signo y se tolera hasta $-0{,}01$\,\%.
 
 \section{Selección y configuración de los algoritmos}
 
-La selección busca diversidad de mecanismos, no representatividad exhaustiva de toda la literatura. PSO y GA actúan como referencias consolidadas; GWO combina tres líderes; WOA alterna cerco, exploración aleatoria y espiral; SHO incorpora una agrupación dinámica; y la búsqueda aleatoria establece cuánto puede lograrse sin aprendizaje. WOA cuenta además con aplicaciones publicadas en sistemas renovables con hidrógeno \cite{Sun2022WOA}, mientras que SHO dispone de estudios específicos sobre tamaño de población y terminación \cite{Vega2022SHO}; estas referencias motivan su inclusión, no garantizan su desempeño en la presente instancia.
+La selección busca diversidad de mecanismos, no representatividad exhaustiva de toda la literatura. Entre los clásicos, PSO y GA actúan como referencias consolidadas; GWO combina tres líderes; WOA alterna cerco, exploración aleatoria y espiral; SHO incorpora una agrupación dinámica; y la búsqueda aleatoria establece cuánto puede lograrse sin aprendizaje. WOA cuenta además con aplicaciones publicadas en sistemas renovables con hidrógeno \cite{Sun2022WOA}, mientras que SHO dispone de estudios específicos sobre tamaño de población y terminación \cite{Vega2022SHO}; estas referencias motivan su inclusión, no garantizan su desempeño en estas instancias. Los tres híbridos se construyen sobre esos clásicos sin modificarlos, de modo que cada uno tiene un padre identificable con el que compararse. La Tabla~\ref{tab:hiperparametros_auto} se genera desde la configuración efectivamente ejecutada.
 
-\begin{table}[H]
-\centering
-\footnotesize
-\caption{Justificación y configuración de los métodos comparados}
-\label{tab:hiperparametros}
-\renewcommand{\arraystretch}{1.18}
-\begin{tabular}{p{1.4cm} p{3.1cm} p{4.4cm} p{5.0cm}}
-\hline
-\textbf{Código} & \textbf{Papel experimental} & \textbf{Mecanismo distintivo} & \textbf{Configuración} \\
-\hline
-\texttt{gwo} & Enjambre jerárquico & Tres líderes independientes & $a:2\rightarrow0$; $\alpha$, $\beta$, $\delta$ \\
-\texttt{pso} & Referencia de enjambre & Memoria personal y social & $\chi=0{,}729$; $c_1=c_2=1{,}49445$; velocidad al 20\,\% \\
-\texttt{ga} & Referencia evolutiva & Selección, recombinación y mutación & Torneo 3; BLX-0,5; $p_c=0{,}9$; $p_m=0{,}1$; élite 2 \\
-\texttt{sho} & Enjambre con agrupación & Grupo de confianza y ataque promedio & $h:5\rightarrow0$; radio normalizado $M\sim U(0{,}5,1)$ \\
-\texttt{woa} & Enjambre alternante & Cerco, búsqueda aleatoria y espiral & $a:2\rightarrow0$; $b=1$; ramas 50/50 \\
-\texttt{random} & Línea base sin aprendizaje & Muestreo uniforme & Mismo presupuesto de solicitudes \\
-\hline
-\end{tabular}
-\end{table}
+\TablaHiperparametrosAuto
 
-No se ajustaron hiperparámetros después de observar los resultados. La regla de vecindad usada para operacionalizar \texttt{count\_nos} en SHO se declara porque el artículo original no la define inequívocamente: se normalizan las distancias a la mejor hiena, se sortea un radio en $[0{,}5,1]$ y se incluyen las soluciones dentro de él, siempre con al menos la mejor. Por ello la implementación sigue las fases y ecuaciones publicadas, pero no se presenta esa regla particular como información proporcionada por los autores \cite{Dhiman2017SHO}.
+No se ajustaron hiperparámetros después de observar los resultados, ni en los clásicos ni en los híbridos. La regla de vecindad usada para operacionalizar \texttt{count\_nos} en SHO se declara porque el artículo original no la define inequívocamente: se normalizan las distancias a la mejor hiena, se sortea un radio en $[0{,}5,1]$ y se incluyen las soluciones dentro de él, siempre con al menos la mejor. Por ello la implementación sigue las fases y ecuaciones publicadas, pero no se presenta esa regla particular como información proporcionada por los autores \cite{Dhiman2017SHO}.
+
+\subsection{Infraestructura de hibridación}
+
+Los seis clásicos consumen exactamente $\text{población}\times\text{iteraciones}$ solicitudes por construcción y registran su historial al cierre de cada iteración. Un híbrido con búsqueda local no tiene un número fijo de generaciones, así que la clase base de los optimizadores incorpora un \textbf{contrato de presupuesto}: toda solicitud de los híbridos pasa por un método que rechaza cualquier evaluación por encima de las \RequestsPerRun{} de la corrida y que registra un punto de control del historial cada \Population{} solicitudes. Así el historial de un híbrido tiene exactamente \Iterations{} filas y es comparable, a igual número de solicitudes, con el de los clásicos; la figura de convergencia usa por ello las solicitudes acumuladas como abscisa. Al cierre de cada corrida se verifica que el número de solicitudes coincide con el presupuesto.
+
+La \textbf{búsqueda local} es común a GA+LS y SHO+LS. Parte del representante canónico de un diseño ya evaluado y recorre, en orden fijo, los vecinos $W\pm\delta_W$, $n_E\pm1$, $B^P\pm\Delta_B$ y $k\pm1$; cada coordenada recuerda la dirección del último éxito y la prueba primero. Acepta el \textbf{primer vecino que mejora} según las reglas de Deb y reanuda desde él (mejora lamarckiana: el vector mejorado reemplaza al individuo o presa que la originó). El paso continuo $\delta_W$ empieza en el 1\,\% del rango de $W$ y se contrae a la mitad cada vez que el vecindario completo falla, hasta un mínimo igual al paso de la fuerza bruta, 0,01 MW, de modo que la búsqueda local nunca resuelve $W$ más fino que el óptimo certificado. Los vecinos fuera de límites, los que decodifican al mismo diseño (por ejemplo $k\pm1$ con $B^P=0$) y los que ya están en el caché de la corrida se omiten sin solicitar nada; si todo el vecindario está agotado y $\delta_W$ es mínimo, la búsqueda devuelve sin gastar y el presupuesto sobrante lo consume el bucle poblacional. Cada llamada dispone de a lo sumo 4 solicitudes y se registran las solicitudes y mejoras que efectivamente consumió.
+
+\subsection{Los tres híbridos}
+
+\begin{itemize}
+    \item \textbf{GA+LS (algoritmo genético memético).} Conserva íntegro el GA: mismo torneo, mismo cruce BLX-$\alpha$, misma mutación gaussiana y mismo elitismo. En cada generación, tras evaluar los \Population{} individuos, el mejor recibe la búsqueda local y la generación siguiente se produce con los operadores del GA. Cada generación cuesta hasta 24 solicitudes, de modo que el presupuesto alcanza para 25 en lugar de las 30 del GA puro; la hipótesis sometida a prueba es que la intensificación compensa las generaciones de exploración perdidas.
+    \item \textbf{PSO+GA (enjambre con operadores genéticos).} Conserva íntegro el bucle del PSO, incluida la actualización de velocidad con constricción. Al final de cada iteración, las 5 partículas de peor mérito actual se reemplazan por hijos producidos con los operadores del GA: padres por torneo ($k=3$) sobre las mejores posiciones personales del enjambre, cruce BLX-$\alpha$ con $p_c=0{,}9$ y mutación gaussiana. El hijo arranca con velocidad nula y sin memoria personal. No hay búsqueda local, así que mantiene las 30 iteraciones de 20 solicitudes.
+    \item \textbf{SHO+LS (SHO con búsqueda local).} Conserva íntegro el SHO, incluida la regla declarada para \texttt{count\_nos}. Tras evaluar las 20 hienas, la presa recibe la búsqueda local y la presa mejorada guía el cerco. El coeficiente $h$ decae de $h_{max}$ a 0 sobre las 25 generaciones que caben en el presupuesto. SHO se eligió por ser el enjambre clásico de mejor mediana en la comparativa preliminar sobre I1; la elección se fijó antes de correr el experimento de cuatro instancias.
+\end{itemize}
+
+Los tres son híbridos integrativos de bajo nivel (LTH) en la taxonomía de Talbi \cite{Talbi2002Taxonomy}; PSO+GA es además heterogéneo. GWO+LS sería la alternativa inmediata con la misma infraestructura; se deja fuera para mantener un híbrido por familia.
 
 \section{Presupuesto, referencia y reproducibilidad}
 
-Cada método recibe 600 solicitudes de función objetivo por ejecución, incluida la población inicial: 20 individuos durante 30 iteraciones. Las propuestas repetidas cuentan contra el presupuesto; se informan además diseños únicos, duplicados, llamadas reales al simulador y tiempo. Se realizan 30 ejecuciones independientes por método, para un total de 108.000 evaluaciones de diseños anuales. Los identificadores 42--71 generan flujos separados mediante la pareja algoritmo--réplica; no constituyen bloques pareados.
+Cada método recibe \RequestsPerRun{} solicitudes de función objetivo por ejecución, incluida la población inicial: \Population{} individuos durante \Iterations{} iteraciones, o su equivalente en solicitudes para los híbridos. Las propuestas repetidas cuentan contra el presupuesto; se informan además diseños únicos, duplicados, solicitudes de la búsqueda local, llamadas reales al simulador y tiempo. Se realizan \Replicates{} ejecuciones independientes por método y por instancia: \RequestsPerInstance{} evaluaciones de diseños anuales por instancia y \TotalDesignRequests{} en total, en \TotalRuns{} corridas. Los identificadores 42--71 generan flujos separados mediante la pareja algoritmo--réplica, independientes de la instancia; no constituyen bloques pareados. Como los clásicos no se modifican y el flujo aleatorio no depende de la instancia, la corrida de I1 reproduce bit a bit la comparativa previa de seis algoritmos, lo que se verificó antes de ejecutar el experimento.
 
-Como referencia determinista se evalúan los 341 catálogos discretos efectivos sobre $W=0,0{,}5,\ldots,200$ MW: 136.741 diseños. El menor LCOE obtenido se denomina \textbf{mejor referencia de malla}; la expresión ``óptimo global continuo'' no se utiliza.
-
-Las implementaciones de GWO, SHO y WOA se someten previamente a pruebas deterministas de límites, presupuesto y dirección de minimización sobre Sphere y Rastrigin. El simulador exige además 8.760 registros en el caso principal, 8.784 en la sensibilidad y un residuo de balance inferior a $10^{-8}$ MW.
+Las implementaciones se someten previamente a pruebas deterministas: una actualización de GWO, SHO, WOA y de la inyección genética de PSO+GA contrastada contra sus ecuaciones con semilla fija; la búsqueda local sobre un bol cuadrático con una coordenada discreta, donde debe alcanzar el óptimo a la resolución mínima y terminar sin agotar el presupuesto; la ausencia de solicitudes duplicadas de la búsqueda local sobre el objetivo real; el presupuesto e historial exactos de los tres híbridos; y pruebas de límites, presupuesto y dirección de minimización de clásicos e híbridos sobre Sphere y Rastrigin. El simulador exige además 8.760 registros en el caso principal, 8.784 en la sensibilidad y un residuo de balance inferior a $10^{-8}$ MW.
 
 \section{Análisis comparativo}
 
-El análisis usa mediana, rango intercuartílico, mejor y peor valor, brecha respecto de la mejor referencia observada y probabilidades empíricas de quedar a menos de 0,1\,\%, 0,5\,\% y 1\,\% de ella. La desviación típica se conserva como descriptor, pero no se interpreta aisladamente como consistencia.
+Dentro de cada instancia, el análisis descriptivo usa mediana, rango intercuartílico, mejor y peor valor, brecha respecto del óptimo exacto y probabilidades empíricas de quedar a menos de 0,1\,\%, 0,5\,\% y 1\,\% de él. La desviación típica se conserva como descriptor, pero no se interpreta aisladamente como consistencia.
 
-Las 30 ejecuciones por algoritmo se tratan como muestras independientes: aunque los identificadores de réplica sean comunes, cada pareja algoritmo--réplica genera un flujo pseudoaleatorio distinto. Esta comparación describe una única instancia energética y no establece superioridad general entre algoritmos.
+Las \Replicates{} ejecuciones por algoritmo e instancia se tratan como muestras independientes. La inferencia se hace dentro de cada instancia con Kruskal--Wallis como contraste global y Mann--Whitney bilateral por pares, con $A_{12}$ de Vargha--Delaney e intervalos bootstrap al 95\,\%. Con nueve algoritmos hay 36 pares por instancia y corregir por Holm sobre los 36 sacrifica potencia en contrastes que no interesan; por eso el análisis principal usa una \textbf{familia planificada de 12 contrastes por instancia}, fijada antes de ejecutar el experimento: cada una de las ocho metaheurísticas frente a RANDOM y cada híbrido frente a su padre o padres (GA+LS vs GA, PSO+GA vs PSO, PSO+GA vs GA, SHO+LS vs SHO), con Holm dentro de la familia. La matriz completa se calcula igualmente, con Holm sobre los 36 pares, y se relega al anexo.
+
+La lectura transversal resume las cuatro instancias mediante el rango por mediana de cada algoritmo en cada instancia y su rango medio. Es descriptiva: cuatro instancias no justifican un contraste de Friedman, y las instancias no se comparan entre sí porque difieren en región factible y en escala. Ninguna comparación establece superioridad general entre algoritmos fuera de estas instancias, presupuesto e hiperparámetros.
 
 \section{Protocolo de reproducción de Li et al.}
 

@@ -11,11 +11,19 @@ A continuación se listan los símbolos, subíndices y siglas empleados de forma
 $W$ & Capacidad instalada de generación eólica [MW] \\
 $P$ & Capacidad instalada de generación fotovoltaica [MW] \\
 $E$ & Capacidad instalada del electrolizador [MW] \\
-$n_E$ & Número de módulos de electrólisis de 5 MW \\
+$n_E$ & Número de módulos de electrólisis; $E=u\,n_E$ \\
+$u$ & Capacidad de un módulo de electrólisis [MW] \\
+$C_{tot}$ & Capacidad renovable total instalada, $W+P$ [MW] \\
 $B^{P}$ & Potencia nominal del almacenamiento electroquímico [MW] \\
 $B^{E}$ & Capacidad energética del almacenamiento electroquímico [MWh] \\
 $h_B$ & Duración nominal de la batería, $B^E/B^P$ [h] \\
-$\mathbf{x}$ & Vector de variables de decisión \\
+$\Delta_B$, $B_{max}$ & Paso y máximo del catálogo de potencia de batería [MW] \\
+$k$, $K$, $\{h_k\}$ & Índice de duración, número de duraciones y catálogo de duraciones [h] \\
+$\mathrm{AGSR}_{max}$ & Límite de la fracción anual vendida a la red en una instancia [--] \\
+I1--I4 & Las cuatro instancias del problema \\
+$\mathbf{x}$ & Vector de variables de decisión, $(W,n_E,B^P,k)$ \\
+$\mathcal{X}$ & Dominio mixto de decisión \\
+$\delta_W$ & Paso adaptativo de la búsqueda local en $W$ [MW] \\
 \end{tabular}
 
 \vspace{1em}
@@ -61,6 +69,8 @@ O\&M & Costos de operación y mantenimiento \\
 \begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
 IQR & Rango intercuartílico \\
 $\sigma$ & Desviación típica \\
+$A_{12}$ & Tamaño de efecto de Vargha--Delaney: probabilidad de que una corrida del primer grupo supere a una del segundo \\
+$p_{Holm}$ & Valor $p$ corregido por Holm dentro de su familia de contrastes \\
 \end{tabular}
 
 \vspace{1em}
@@ -76,6 +86,10 @@ GA & \textit{Genetic Algorithm} --- algoritmo genético \\
 SHO & \textit{Spotted Hyena Optimizer} \\
 WOA & \textit{Whale Optimization Algorithm} \\
 BLX-$\alpha$ & \textit{Blend Crossover} --- operador de cruce combinado \\
+LS & \textit{Local Search} --- búsqueda local \\
+GA+LS, PSO+GA, SHO+LS & Los tres híbridos: GA memético, PSO con operadores genéticos y SHO con búsqueda local \\
+LRH, LTH, HRH, HTH & Clases de híbridos de Talbi: bajo/alto nivel $\times$ relevo/cooperativo \\
+MA & \textit{Memetic Algorithm} --- algoritmo memético \\
 NOCT & \textit{Nominal Operating Cell Temperature} \\
 ANN & \textit{Artificial Neural Network} --- red neuronal artificial \\
 CNY & Yuan renminbi, moneda de la República Popular China \\
