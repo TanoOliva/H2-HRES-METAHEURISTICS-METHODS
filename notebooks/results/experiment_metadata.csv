@@ -1,2 +1,2 @@
-mode,hours_main,hours_sensitivity,algorithms,replicates_per_algorithm,population,iterations,requests_per_run,total_requests,main_hourly_steps_requested
-completo,8760,8784,6,30,20,30,600,108000,946080000
+mode,hours_main,hours_sensitivity,instances,algorithms,classic_algorithms,hybrid_algorithms,replicates_per_algorithm,population,iterations,requests_per_run,requests_per_instance,total_requests,main_hourly_steps_requested,brute_force_designs_total,comparison_elapsed_s
+completo,8760,8784,4,9,5,3,30,20,30,600,162000,648000,5676480000,67193034,3670.1517173999455

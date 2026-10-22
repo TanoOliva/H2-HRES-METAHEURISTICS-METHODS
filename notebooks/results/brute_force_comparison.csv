@@ -1,4 +1,9 @@
-fuente,wind_mw,lcoe_cny_per_kwh,brecha_pct
-Fuerza bruta (paso 0.01 MW),141.70000000000002,0.28368907095020246,0.0
-Referencia de malla (paso 0.5 MW),141.5,0.28382698153617103,0.04861328831127221
-Mejor corrida metaheurística (ga),141.70113751915335,0.28368827685149395,-0.0002799186820445776
+instance,fuente,algorithm,wind_mw,electrolyzer_mw,battery_mw,battery_duration_h,lcoe_cny_per_kwh,brecha_pct
+I1,optimo exacto (paso 0.01 MW),fuerza_bruta,141.70000000000002,90.0,20.0,1.0,0.28368907095020246,0.0
+I1,mejor corrida metaheuristica,pso_ga,141.70562400251183,90.0,20.0,1.0,0.28368514490574576,-0.0013839251697511656
+I2,optimo exacto (paso 0.01 MW),fuerza_bruta,113.23,100.0,30.0,1.0,0.3260311249221554,0.0
+I2,mejor corrida metaheuristica,pso_ga,113.23594351831801,100.0,30.0,1.0,0.32602574330577866,-0.0016506449738606932
+I3,optimo exacto (paso 0.01 MW),fuerza_bruta,148.49,92.5,22.5,1.0,0.2836307288946808,0.0
+I3,mejor corrida metaheuristica,pso,148.49231485757284,92.5,22.5,1.0,0.2836291448667837,-0.0005584824688265044
+I4,optimo exacto (paso 0.01 MW),fuerza_bruta,212.55,135.0,30.0,1.0,0.2803706111570425,0.0
+I4,mejor corrida metaheuristica,pso_ga,212.55832095435827,135.0,30.0,1.0,0.2803667959517963,-0.0013607721688235763

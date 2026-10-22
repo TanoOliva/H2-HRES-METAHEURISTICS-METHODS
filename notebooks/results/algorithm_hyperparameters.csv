@@ -4,4 +4,7 @@ pso,Particle Swarm Optimization,enjambre,chi=0.729; c1=c2=1.49445; |v| <= 20% de
 ga,Genetic Algorithm,evolutivo,torneo k=3; BLX-0.5 p=0.9; mutacion p=0.1 sigma=10%; elite=2,real-coded GA estandar
 sho,Spotted Hyena Optimizer,enjambre jerarquico,h decae 5.0 -> 0; grupo de confianza y ataque promedio,Dhiman & Kumar (2017)
 woa,Whale Optimization Algorithm,enjambre,encierro/espiral 50/50; b=1.0; a decae 2 -> 0,Mirjalili & Lewis (2016)
+ga_ls,GA memetico (GA + busqueda local),hibrido LTH evolutivo,GA identico + LS primera mejora sobre el mejor: 4 solicitudes/generacion; delta_W 1% del rango -> 0.01 MW (x0.5); 25 generaciones,Moscato (1989); Talbi (2002)
+pso_ga,PSO con operadores geneticos,hibrido LTH heterogeneo,"PSO identico + 5 hijos/iteracion (torneo k=3 sobre pbest, BLX-0.5, mutacion GA); hijos sin memoria",Kao & Zahara (2008); Talbi (2002)
+sho_ls,SHO + busqueda local,hibrido LTH enjambre,SHO identico + LS sobre la presa: 4 solicitudes/generacion; h decae 5.0 -> 0 en 25 generaciones,Dhiman & Kumar (2017); Talbi (2002)
 random,Random Search,linea base,muestreo uniforme sobre el dominio mixto,--

@@ -2,6 +2,9 @@
 wpeb_data/
 data/
 
+# Cache reducido de la fuerza bruta por instancia (se regenera; pesa decenas de MB)
+notebooks/cache/
+
 # Resultados temporales en la raíz (los CSV reproducibles de notebooks/results se conservan)
 /results/
 
