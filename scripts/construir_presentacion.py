@@ -408,6 +408,85 @@ def dibujar_pipeline_psoga(slide, d):
     ], size=9)
 
 
+def hijos_por_iteracion(d) -> int:
+    """Hijos que PSO+GA inyecta por iteración, leído de la tabla de hiperparámetros."""
+    import re
+    fila = d["hyper"][d["hyper"]["codigo"] == "pso_ga"]
+    if not fila.empty:
+        m = re.search(r"(\d+)\s+hijos", str(fila.iloc[0]["hiperparametros"]))
+        if m:
+            return int(m.group(1))
+    return 5
+
+
+def dibujar_detalle_psoga(slide, d):
+    """Cuándo actúa PSO y cuándo GA: línea de tiempo de una iteración, reparto y cuentas de la corrida."""
+    meta = d["meta"]
+    pop, it = int(meta["population"]), int(meta["iterations"])
+    k = hijos_por_iteracion(d)
+    budget = pop * it
+    iniciales, movidas, hijos = pop, (it - 1) * (pop - k), (it - 1) * k
+
+    # --- Franja 1: línea de tiempo de una iteración ------------------------------
+    y, h = 1.12, 0.74
+    add_label(slide, 0.5, 0.86, 5.0, 0.26, [["Una iteración = ", f"{pop} solicitudes · PSO primero, GA al final"]], size=9.5, color=NAVY)
+    segmentos = [
+        (f"Evaluar las {pop} partículas", f"{pop} solicitudes al simulador (mérito de Deb)", NAVY, 2.55),
+        ("Actualizar memorias", "pbest de cada partícula · gbest del enjambre", NAVY, 2.05),
+        (f"Mover las {pop} con PSO", "velocidad con constricción · x ← x + v", NAVY, 2.1),
+        (f"Reemplazar las {k} peores", "torneo, BLX-α y mutación del GA · 0 solicitudes", BROWN, 2.3),
+    ]
+    x = 0.5
+    for i, (t1, t2, fill, w) in enumerate(segmentos):
+        add_box(slide, x, y, w - 0.06, h, [t1, t2], fill=fill, size=8.5, name=f"Tiempo {i + 1}")
+        if i:
+            add_arrow(slide, x - 0.06, y + h / 2, x - 0.005, y + h / 2, color=fill, width=1.2)
+        x += w
+    # Retorno: los hijos se evalúan al inicio de la iteración siguiente.
+    x_fin, x_ini, yr = 0.5 + 9.0 - 1.15, 0.5 + 1.25, y + h + 0.14
+    add_arrow(slide, x_fin, y + h + 0.01, x_fin, yr, color=BROWN, head=False, dashed=True)
+    add_arrow(slide, x_fin, yr, x_ini, yr, color=BROWN, head=False, dashed=True)
+    add_arrow(slide, x_ini, yr, x_ini, y + h + 0.01, color=BROWN, dashed=True)
+    add_label(slide, 2.0, yr + 0.02, 6.0, 0.26,
+              [[f"Los {k} hijos se evalúan al inicio de la iteración siguiente, dentro de las {pop} solicitudes"]],
+              size=9, color=BROWN, align=PP_ALIGN.CENTER)
+
+    # --- Franja 2: reparto de trabajo --------------------------------------------
+    y2, h2, w2 = 2.3, 1.52, 4.4
+    for x2, titulo, color, filas in (
+        (0.5, "PSO actúa sobre todo el enjambre", NAVY, [
+            ["Sobre quién: ", f"las {pop} partículas, en todas las iteraciones"],
+            ["Con qué: ", "su velocidad, su pbest y el gbest del enjambre"],
+            ["Qué produce: ", "una posición nueva, con memoria y velocidad"],
+            ["Cuánto cuesta: ", f"las {pop} solicitudes de la iteración"]]),
+        (5.1, f"GA actúa sobre las {k} peores", BROWN, [
+            ["Sobre quién: ", f"las {k} partículas de peor mérito en la iteración"],
+            ["Con qué: ", "los pbest del enjambre; torneo k = 3, BLX-α, mutación"],
+            ["Qué produce: ", f"{k} hijos con velocidad 0 y sin memoria (pbest = ∞)"],
+            ["Cuánto cuesta: ", "0 solicitudes; se evalúan en la iteración siguiente"]]),
+    ):
+        add_box(slide, x2, y2, w2, h2, [], fill=LIGHT, name="Tarjeta " + titulo[:3])
+        add_label(slide, x2 + 0.15, y2 + 0.06, w2 - 0.3, 0.3, [[titulo]], size=11.5, color=color, bold_label=False)
+        tb = add_label(slide, x2 + 0.15, y2 + 0.4, w2 - 0.3, h2 - 0.45, filas, size=9)
+        for p in tb.text_frame.paragraphs:
+            if p.runs:
+                p.runs[0].font.bold = True
+
+    # --- Franja 3: cuentas de la corrida ------------------------------------------
+    y3, h3, ancho = 3.94, 0.34, 9.0
+    partes = [(iniciales, "D9D9D9", TEXT, f"{iniciales}"),
+              (movidas, NAVY, "FFFFFF", f"{movidas} posiciones movidas por PSO"),
+              (hijos, BROWN, "FFFFFF", f"{hijos} hijos del GA")]
+    x = 0.5
+    for n, fill, color, texto in partes:
+        w = ancho * n / budget
+        add_box(slide, x, y3, w, h3, [texto], fill=fill, color=color, size=8.5, shape=MSO_SHAPE.RECTANGLE, name="Cuenta " + texto[:6])
+        x += w
+    add_label(slide, 0.5, y3 + h3 + 0.02, 9.0, 0.32, [[
+        f"{budget} solicitudes = ", f"{pop} iniciales + {it - 1} × {pop - k} movidas por PSO + {it - 1} × {k} hijos del GA. "
+        f"Desde la segunda iteración, {pop - k} partículas siguen al enjambre y {k} vienen del GA: tres de cada cuatro evaluaciones siguen siendo del PSO."]], size=9)
+
+
 # --------------------------------------------------------------------------- datos
 def cargar_datos():
     d = {}
@@ -472,6 +551,7 @@ def main() -> None:
     s_pregunta = duplicate_slide(prs, S(5))
     s_pipe_exp = duplicate_slide(prs, S(23))
     s_pipe_alg = duplicate_slide(prs, S(23))
+    s_pipe_detalle = duplicate_slide(prs, S(23))
     s_padres = duplicate_slide(prs, S(23))
     s_instancias = duplicate_slide(prs, S(26))
     s_optimo = duplicate_slide(prs, S(15))
@@ -565,6 +645,22 @@ def main() -> None:
                  "seiscientas solicitudes, las mismas que el PSO puro, y la salida es el mejor diseño. Dos cosas importantes: el "
                  "contrato de presupuesto impide pedir la solicitud seiscientos uno, y ni el PSO ni los operadores del GA se tocan: así "
                  "cualquier diferencia se atribuye a la inyección.")
+
+    # =========================================================== 6b. CUÁNDO ACTÚA PSO Y CUÁNDO GA (plantilla 23 vacía)
+    s = s_pipe_detalle
+    set_text(s, "TextBox 3", "EL MÉTODO · UNA ITERACIÓN EN DETALLE")
+    set_text(s, "TextBox 4", "Cuándo actúa PSO y cuándo actúa GA")
+    delete_shapes(s, ("Rounded Rectangle 5", "TextBox 6", "TextBox 7", "Rounded Rectangle 8", "TextBox 9", "TextBox 10"))
+    dibujar_detalle_psoga(s, d)
+    _pop, _it, _k = int(meta["population"]), int(meta["iterations"]), hijos_por_iteracion(d)
+    set_notes(s, "[1:00] Esta lámina responde cuándo actúa cada uno. Dentro de una iteración, primero PSO: se evalúan las "
+                 f"{_pop} partículas, que son las {_pop} solicitudes de la iteración; se actualizan las memorias; y las {_pop} se "
+                 f"mueven con la velocidad. Sólo entonces actúa GA, y sobre {_k} partículas: las de peor mérito en esa iteración. "
+                 "Los hijos no gastan solicitudes al crearse; se evalúan al inicio de la iteración siguiente, dentro de las veinte. "
+                 f"En toda la corrida, de las {_pop * _it} solicitudes, {_pop} son la población inicial, {(_it - 1) * (_pop - _k)} son "
+                 f"posiciones movidas por el PSO y {(_it - 1) * _k} son hijos del GA: tres de cada cuatro evaluaciones siguen siendo "
+                 "del enjambre. Por eso el híbrido se parece tanto al PSO en el resultado típico, y por eso su diferencia frente al "
+                 "PSO puro es una pregunta de efecto pequeño.")
 
     # =========================================================== 7. LOS PADRES (plantilla 23)
     s = s_padres
@@ -992,7 +1088,7 @@ def main() -> None:
         set_notes(s, s.notes_slide.notes_text_frame.text if s.has_notes_slide else "[RESPALDO]")
 
     # =========================================================== ORDEN FINAL
-    cuerpo = [S(1), S(2), S(3), s_pregunta, s_pipe_exp, s_pipe_alg, s_padres, S(12),
+    cuerpo = [S(1), S(2), S(3), s_pregunta, s_pipe_exp, s_pipe_alg, s_pipe_detalle, s_padres, S(12),
               S(6), S(9), S(5), s_instancias, s_optimo, S(11),
               S(8), s_correcto, S(15), S(16), s_exito, s_aporte, S(4), s_presupuesto,
               S(13), S(23), s_futuro, S(25)]
@@ -1000,14 +1096,22 @@ def main() -> None:
     reorder_and_prune(prs, cuerpo + respaldo)
 
     DESTINO.parent.mkdir(parents=True, exist_ok=True)
-    destino = DESTINO
-    try:
-        prs.save(str(destino))
-    except PermissionError:
-        # El archivo esta abierto en PowerPoint: se escribe al lado con otro nombre.
-        destino = DESTINO.with_name(DESTINO.stem + "_nuevo.pptx")
-        prs.save(str(destino))
-        print("AVISO: el destino estaba bloqueado; cierre el archivo en PowerPoint y renombre", destino.name)
+    # Si el destino esta abierto en PowerPoint se escribe al lado con otro nombre
+    # (primero _nuevo, luego _v2, _v3, ...) y se avisa para renombrar al cerrar.
+    candidatos = [DESTINO, DESTINO.with_name(DESTINO.stem + "_nuevo.pptx")]
+    candidatos += [DESTINO.with_name(DESTINO.stem + f"_v{n}.pptx") for n in range(2, 20)]
+    destino = None
+    for candidato in candidatos:
+        try:
+            prs.save(str(candidato))
+        except PermissionError:
+            continue
+        destino = candidato
+        break
+    if destino is None:
+        raise PermissionError("todos los nombres de salida estan bloqueados; cierre PowerPoint")
+    if destino != DESTINO:
+        print("AVISO: el destino estaba bloqueado; cierre los archivos en PowerPoint y renombre", destino.name)
     print(destino, "->", len(cuerpo), "diapositivas de cuerpo +", len(respaldo), "de respaldo")
 
 
