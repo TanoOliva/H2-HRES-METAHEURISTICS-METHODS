@@ -1,7 +1,8 @@
 """Figuras especificas de la presentacion, generadas desde notebooks/results/*.csv.
 
 Las figuras de la tesis se extraen del cuaderno; estas se dibujan aparte porque la
-diapositiva necesita un recorte distinto (un panel por pregunta, fuentes grandes).
+diapositiva necesita un recorte distinto (un panel por pregunta, fuentes grandes) y
+porque la defensa se centra en un hibrido, PSO+GA, frente a sus padres y a la linea base.
 
 Uso:
     python scripts/figuras_presentacion.py [--salida presentacion/figuras]
@@ -29,6 +30,9 @@ COLORS = {"gwo": "#2a78d6", "pso": "#eb6834", "ga": "#1baf7a", "sho": "#eda100",
           "ga_ls": "#0d7a52", "pso_ga": "#a8431a", "sho_ls": "#a86f00", "random": "#898781"}
 HYBRID_PAIRS = (("ga_ls", "ga"), ("pso_ga", "pso"), ("pso_ga", "ga"), ("sho_ls", "sho"))
 MARKERS = ("o", "s", "^", "D")
+# Protagonista de la defensa y sus comparadores: bucle base, donante de operadores,
+# mejor clasico por rango medio y linea base.
+FOCO = ("pso_ga", "pso", "ga", "sho", "random")
 
 plt.rcParams.update({
     "figure.dpi": 200, "savefig.dpi": 200, "font.size": 11, "axes.grid": True,
@@ -45,7 +49,7 @@ def truthy(s: pd.Series) -> pd.Series:
     return s.astype(str).str.lower().isin(("true", "1", "1.0"))
 
 
-def fig_exito(summary: pd.DataFrame, instances: list[str], salida: Path) -> None:
+def fig_exito(summary: pd.DataFrame, instances: list[str], salida: Path, algs=ORDER, nombre="pres_exito.png") -> None:
     """Tasa de exito al 0,5 % del optimo exacto: barras por algoritmo, un color por instancia."""
     fig, ax = plt.subplots(figsize=(10, 4.6))
     n_inst = len(instances)
@@ -53,16 +57,16 @@ def fig_exito(summary: pd.DataFrame, instances: list[str], salida: Path) -> None
     tonos = ["#3C4975", "#497DB5", "#57B6D0", "#1BAF7A"]
     for k, inst in enumerate(instances):
         sub = summary[summary["instance"] == inst].set_index("algorithm")
-        valores = [100 * sub.loc[a, "success_0.5pct"] if a in sub.index else 0 for a in ORDER]
-        xs = np.arange(len(ORDER)) + (k - (n_inst - 1) / 2) * width
+        valores = [100 * sub.loc[a, "success_0.5pct"] if a in sub.index else 0 for a in algs]
+        xs = np.arange(len(algs)) + (k - (n_inst - 1) / 2) * width
         ax.bar(xs, valores, width=width * 0.95, color=tonos[k % len(tonos)], label=inst)
-    ax.set_xticks(range(len(ORDER)), [LABELS[a] for a in ORDER], rotation=20)
+    ax.set_xticks(range(len(algs)), [LABELS[a] for a in algs], rotation=20 if len(algs) > 5 else 0)
     ax.set_ylabel("Corridas a menos de 0,5 % del óptimo [%]")
     ax.set_ylim(0, 100)
     ax.legend(title="Instancia", ncol=4, loc="upper right", fontsize=9)
     ax.set_title("¿Con qué frecuencia una corrida queda a menos de 0,5 % del óptimo exacto?", fontsize=12)
     plt.tight_layout()
-    fig.savefig(salida / "pres_exito.png")
+    fig.savefig(salida / nombre)
     plt.close(fig)
 
 
@@ -124,6 +128,82 @@ def fig_hibrido_vs_padre(tests: pd.DataFrame, instances: list[str], salida: Path
     plt.close(fig)
 
 
+def fig_psoga_a12(tests: pd.DataFrame, instances: list[str], salida: Path) -> None:
+    """PSO+GA frente a RANDOM, PSO y GA: los tres contrastes planificados que lo validan."""
+    planned = tests[(tests["family"] == "planned") & (tests["algoritmo_a"] == "pso_ga")]
+    pares = ["random", "ga", "pso"]
+    filas = planned[planned["algoritmo_b"].isin(pares)]
+    fig, ax = plt.subplots(figsize=(8, 4.6))
+    _a12_panel(ax, filas, pares, lambda f: f["algoritmo_b"], lambda f: COLORS[f["algoritmo_b"]], instances)
+    ax.set_xticklabels(["PSO+GA vs RANDOM\n(¿aprende?)", "PSO+GA vs GA\n(¿mejor que el donante?)",
+                        "PSO+GA vs PSO\n(¿aporta la inyección?)"], fontsize=10)
+    ax.set_ylabel("A12 de PSO+GA frente a ...")
+    ax.set_title("Tres contrastes planificados por instancia (> 0,5: gana PSO+GA)", fontsize=12)
+    _leyenda_instancias(fig, instances)
+    plt.tight_layout(rect=(0, 0.08, 1, 1))
+    fig.savefig(salida / "pres_psoga_a12.png")
+    plt.close(fig)
+
+
+def fig_convergencia_foco(history: pd.DataFrame, brute: pd.DataFrame, instances: list[str], salida: Path) -> None:
+    """Mediana e IQR del mejor LCOE por solicitudes: PSO+GA y sus comparadores, un panel por instancia."""
+    optimo = brute.set_index("instance")["optimum_lcoe_cny_per_kwh"]
+    fig, axes = plt.subplots(2, 2, figsize=(11, 7.2), sharex=True)
+    for ax, inst in zip(axes.ravel(), instances):
+        sub = history[history["instance"] == inst]
+        for a in FOCO:
+            g = sub[sub["algorithm"] == a]
+            if g.empty:
+                continue
+            res = g.groupby("n_evaluations")["best_score"].agg(
+                med="median", q25=lambda s: s.quantile(0.25), q75=lambda s: s.quantile(0.75)).reset_index()
+            lw = 2.6 if a == "pso_ga" else 1.5
+            ax.plot(res["n_evaluations"], res["med"], color=COLORS[a], lw=lw, label=LABELS[a],
+                    linestyle="--" if a == "random" else "-")
+            ax.fill_between(res["n_evaluations"], res["q25"], res["q75"], color=COLORS[a], alpha=0.10, linewidth=0)
+        ax.axhline(optimo[inst], color="#111111", lw=0.9, linestyle=":", label="Óptimo exacto")
+        fact = sub.loc[sub["best_score"] < 1.0, "best_score"]
+        if not fact.empty:
+            ax.set_ylim(min(fact.min(), optimo[inst]) * 0.998, fact.quantile(0.98) * 1.015)
+        ax.set_title("{} (óptimo {:.5f})".format(inst, optimo[inst]), fontsize=11)
+    for ax in axes[1]:
+        ax.set_xlabel("Solicitudes de objetivo acumuladas")
+    for ax in axes[:, 0]:
+        ax.set_ylabel("Mejor LCOE factible [CNY/kWh]")
+    h, l = axes[0, 0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=6, fontsize=9, frameon=False, bbox_to_anchor=(0.5, 0.0))
+    fig.suptitle("Convergencia de PSO+GA frente a sus padres, el mejor clásico y RANDOM (mediana e IQR, 30 semillas)", fontsize=11.5)
+    plt.tight_layout(rect=(0, 0.06, 1, 0.96))
+    fig.savefig(salida / "pres_convergencia_foco.png")
+    plt.close(fig)
+
+
+def fig_distribucion_foco(runs: pd.DataFrame, brute: pd.DataFrame, instances: list[str], salida: Path) -> None:
+    """Boxplots del LCOE final de PSO+GA y sus comparadores, un panel por instancia."""
+    optimo = brute.set_index("instance")["optimum_lcoe_cny_per_kwh"]
+    fig, axes = plt.subplots(2, 2, figsize=(11, 7.2))
+    for ax, inst in zip(axes.ravel(), instances):
+        sub = runs[runs["instance"] == inst]
+        datos = [sub.loc[sub["algorithm"] == a, "score"].dropna().to_numpy() for a in FOCO]
+        caja = ax.boxplot(datos, tick_labels=[LABELS[a] for a in FOCO], patch_artist=True,
+                          medianprops={"color": "#222222", "lw": 1.6})
+        for parche, a in zip(caja["boxes"], FOCO):
+            parche.set_facecolor(COLORS[a])
+            parche.set_alpha(0.75 if a == "pso_ga" else 0.5)
+            parche.set_edgecolor("#444444")
+        ax.axhline(optimo[inst], color="#111111", lw=0.9, linestyle=":")
+        todos = pd.concat([pd.Series(d) for d in datos])
+        if not todos.empty:
+            ax.set_ylim(min(todos.min(), optimo[inst]) * 0.998, todos.quantile(0.97) * 1.01)
+        ax.set_title("{} (óptimo {:.5f}, línea punteada)".format(inst, optimo[inst]), fontsize=11)
+    for ax in axes[:, 0]:
+        ax.set_ylabel("LCOE final [CNY/kWh]")
+    fig.suptitle("Distribución del LCOE final en 30 corridas (eje recortado al percentil 97)", fontsize=11.5)
+    plt.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(salida / "pres_distribucion_foco.png")
+    plt.close(fig)
+
+
 def fig_presupuesto(summary: pd.DataFrame, instances: list[str], salida: Path) -> None:
     """Solicitudes duplicadas y de busqueda local por algoritmo (media sobre instancias)."""
     medio = summary.groupby("algorithm")[["mean_duplicates", "mean_unique"]].mean()
@@ -154,11 +234,11 @@ def fig_presupuesto(summary: pd.DataFrame, instances: list[str], salida: Path) -
 
 
 def fig_ranking(cross: pd.DataFrame, instances: list[str], salida: Path) -> None:
-    """Mapa de rangos por instancia (1 = mejor mediana)."""
+    """Mapa de rangos por instancia (1 = mejor)."""
     algs = list(cross["algorithm"])
     matriz = np.array([[cross.set_index("algorithm").loc[a, "rank_" + i] for i in instances] for a in algs], dtype=float)
     fig, ax = plt.subplots(figsize=(6.2, 4.8))
-    im = ax.imshow(matriz, cmap="YlGnBu_r", vmin=1, vmax=len(algs))
+    ax.imshow(matriz, cmap="YlGnBu_r", vmin=1, vmax=len(algs))
     ax.set_xticks(range(len(instances)), instances)
     ax.set_yticks(range(len(algs)), [LABELS[a] for a in algs])
     ax.grid(False)
@@ -186,9 +266,16 @@ def main(argv=None) -> None:
     summary = read("algorithm_summary.csv")
     tests = read("pairwise_tests.csv")
     cross = read("cross_instance_ranking.csv")
+    brute = read("brute_force_summary.csv")
+    runs = read("algorithm_runs.csv")
+    history = read("algorithm_history.csv")
     fig_exito(summary, instances, args.salida)
+    fig_exito(summary, instances, args.salida, algs=FOCO, nombre="pres_exito_foco.png")
     fig_vs_random(tests, instances, args.salida)
     fig_hibrido_vs_padre(tests, instances, args.salida)
+    fig_psoga_a12(tests, instances, args.salida)
+    fig_convergencia_foco(history, brute, instances, args.salida)
+    fig_distribucion_foco(runs, brute, instances, args.salida)
     fig_presupuesto(summary, instances, args.salida)
     fig_ranking(cross, instances, args.salida)
     for nombre in sorted(args.salida.glob("pres_*.png")):
