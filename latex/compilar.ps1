@@ -45,6 +45,11 @@ if (-not (Test-Path $pdfDir)) {
     New-Item -ItemType Directory -Path $pdfDir | Out-Null
 }
 
+& $python (Join-Path $workspaceRoot "scripts\analisis_estadistico.py")
+if ($LASTEXITCODE -ne 0) {
+    throw "Fallo el analisis estadistico."
+}
+
 & $python (Join-Path $workspaceRoot "scripts\generar_tablas_latex.py")
 if ($LASTEXITCODE -ne 0) {
     throw "Fallo la generacion automatica de tablas LaTeX."

@@ -5,9 +5,8 @@
 A continuación se listan los símbolos, subíndices y siglas empleados de forma recurrente en este documento.
 
 \vspace{1em}
-\noindent\textbf{Variables de decisión y capacidades}
-
-\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
+\noindent\begin{tabular}{@{}p{3.4cm} p{11.1cm}@{}}
+\multicolumn{2}{@{}l}{\textbf{Variables de decisión y capacidades}} \\[0.6em]
 $W$ & Capacidad instalada de generación eólica [MW] \\
 $P$ & Capacidad instalada de generación fotovoltaica [MW] \\
 $E$ & Capacidad instalada del electrolizador [MW] \\
@@ -20,29 +19,53 @@ $h_B$ & Duración nominal de la batería, $B^E/B^P$ [h] \\
 $\Delta_B$, $B_{max}$ & Paso y máximo del catálogo de potencia de batería [MW] \\
 $k$, $K$, $\{h_k\}$ & Índice de duración, número de duraciones y catálogo de duraciones [h] \\
 $\mathrm{AGSR}_{max}$ & Límite de la fracción anual vendida a la red en una instancia [--] \\
-I1--I4 & Las cuatro instancias del problema \\
+I1--I8 & Las ocho instancias del problema \\
 $\mathbf{x}$ & Vector de variables de decisión, $(W,n_E,B^P,k)$ \\
 $\mathcal{X}$ & Dominio mixto de decisión \\
-$\delta_W$ & Paso adaptativo de la búsqueda local en $W$ [MW] \\
 \end{tabular}
 
 \vspace{1em}
-\noindent\textbf{Magnitudes operacionales}
+\noindent\begin{tabular}{@{}p{3.4cm} p{11.1cm}@{}}
+\multicolumn{2}{@{}l}{\textbf{Magnitudes operacionales}} \\[0.6em]
+$t$, $T$, $\Delta t$ & Índice horario, número de horas simuladas y paso temporal (1 h) \\
+$v_t$ & Velocidad del viento en la hora $t$ [m/s] \\
+$p^{pu}_{wt,t}$ & Potencia eólica por unidad de capacidad instalada [--] \\
+$G_t$ & Irradiancia global horizontal [kW/m$^2$] \\
+$T_{amb,t}$, $T_{cell,t}$ & Temperatura ambiente y de la celda fotovoltaica [$^\circ$C] \\
+$f_{T,t}$, $r_{pv,t}$ & Factor de corrección térmica y producción relativa fotovoltaica [--] \\
+$P_{wt,t}$, $P_{pv,t}$ & Potencia eólica y fotovoltaica en la hora $t$ [MW] \\
+$P_{ren,t}$ & Potencia renovable total en la hora $t$ [MW] \\
+$P_{el,t}$ & Potencia consumida por el electrolizador en la hora $t$ [MW] \\
+$P_{carga,t}$, $P_{desc,t}$ & Potencia de carga y de descarga de la batería [MW] \\
+$P_{grid,t}$, $P_{vert,t}$ & Potencia vendida a la red y potencia vertida [MW] \\
+$SOC_t$ & Estado de carga del almacenamiento electroquímico [MWh] \\
+$E_{wt}$, $E_{pv}$, $E_{ren}$ & Energía anual eólica, fotovoltaica y renovable total [MWh] \\
+$E_{el}$, $E_{grid}$ & Energía anual consumida por el electrolizador y vendida a la red [MWh] \\
+$E_{use}$ & Energía útil anual, $E_{el}+E_{grid}$ [MWh] \\
+$M_{H_2}$ & Masa anual de hidrógeno producida [kg] \\
+\end{tabular}
 
-\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
-$v$ & Velocidad del viento [m/s] \\
+\vspace{1em}
+\noindent\begin{tabular}{@{}p{3.4cm} p{11.1cm}@{}}
+\multicolumn{2}{@{}l}{\textbf{Parámetros técnicos}} \\[0.6em]
 $v_{ci}$, $v_{r}$, $v_{co}$ & Velocidades de arranque, nominal y de corte de la turbina [m/s] \\
-$G$ & Irradiancia global horizontal [kW/m$^2$] \\
-$T_{amb}$ & Temperatura ambiente [$^\circ$C] \\
-$T_{cell}$ & Temperatura de la celda fotovoltaica [$^\circ$C] \\
-$\eta$ & Eficiencia de un componente [--] \\
-$SOC$ & Estado de carga del almacenamiento electroquímico [MWh] \\
+$T_{NOCT}$ & Temperatura nominal de operación de la celda fotovoltaica [$^\circ$C] \\
+$\gamma$ & Coeficiente térmico de potencia fotovoltaica [1/$^\circ$C] \\
+$f_{der}$ & Factor de pérdidas del sistema fotovoltaico [--] \\
+$\kappa_{DC/AC}$ & Relación entre la potencia del campo fotovoltaico y la del inversor [--] \\
+$\eta_{el}$ & Eficiencia del electrolizador [--] \\
+$\eta_{inv}$, $\eta_{rect}$ & Eficiencia del inversor y del rectificador [--] \\
+$\eta_{bid}$ & Eficiencia del convertidor bidireccional de la batería [--] \\
+$\eta_{rt}$ & Eficiencia de ciclo completo de la batería [--] \\
+$\eta_{carga}$, $\eta_{desc}$ & Eficiencias efectivas de carga y de descarga [--] \\
+$\rho_{min}$ & Carga mínima del electrolizador, como fracción de $E$ [--] \\
+$\alpha_E^{max}$ & Capacidad máxima del electrolizador, como fracción de $C_{tot}$ [--] \\
+$\beta_B$ & Razón entre potencia de batería y capacidad del electrolizador en el modelo base [--] \\
 \end{tabular}
 
 \vspace{1em}
-\noindent\textbf{Indicadores de desempeño}
-
-\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
+\noindent\begin{tabular}{@{}p{3.4cm} p{11.1cm}@{}}
+\multicolumn{2}{@{}l}{\textbf{Indicadores de desempeño}} \\[0.6em]
 AGSR & Fracción anual de energía renovable vendida a la red [--] \\
 CF & Factor de capacidad de un componente [--] \\
 CRF & Factor de recuperación de capital [--] \\
@@ -53,30 +76,45 @@ HHV & Poder calorífico superior del hidrógeno [kWh/kg] \\
 \end{tabular}
 
 \vspace{1em}
-\noindent\textbf{Parámetros económicos}
-
-\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
+\noindent\begin{tabular}{@{}p{3.4cm} p{11.1cm}@{}}
+\multicolumn{2}{@{}l}{\textbf{Parámetros económicos}} \\[0.6em]
 $i$ & Tasa de descuento real [--] \\
 $N$ & Horizonte económico del proyecto [años] \\
-$S$ & Valor residual de un componente al término del proyecto [CNY] \\
+$j$, $K_j$ & Componente del sistema y su capacidad instalada \\
+$NPC_j$ & Costo presente neto del componente $j$ [CNY] \\
+$C^{cap}_j$, $C^{rep}_j$, $C^{om}_j$ & Valor presente de la inversión, los reemplazos y la operación y mantenimiento del componente $j$ [CNY] \\
+$c^{cap}_j$, $c^{rep}_j$, $c^{om}_j$ & Costos unitarios de inversión, reemplazo y operación y mantenimiento del componente $j$ [CNY por unidad de capacidad] \\
+$\mathcal{R}_j$ & Años en que se reemplaza el componente $j$ \\
+$S_j$ & Valor residual del componente $j$ al término del proyecto [CNY] \\
+$C_{ann}$ & Costo anualizado del sistema [CNY/año] \\
 CAPEX & Costo de inversión inicial \\
 O\&M & Costos de operación y mantenimiento \\
 \end{tabular}
 
 \vspace{1em}
-\noindent\textbf{Estadística descriptiva}
-
-\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
+\noindent\begin{tabular}{@{}p{3.4cm} p{11.1cm}@{}}
+\multicolumn{2}{@{}l}{\textbf{Comparación estadística}} \\[0.6em]
 IQR & Rango intercuartílico \\
 $\sigma$ & Desviación típica \\
-$A_{12}$ & Tamaño de efecto de Vargha--Delaney: probabilidad de que una corrida del primer grupo supere a una del segundo \\
-$p_{Holm}$ & Valor $p$ corregido por Holm dentro de su familia de contrastes \\
+$R$ & Número de réplicas (ejecuciones independientes) por algoritmo e instancia \\
+$\alpha$ & Nivel de significación de los contrastes \\
+$\varepsilon$ & Tolerancia práctica: brecha relativa al óptimo por debajo de la cual dos resultados se tratan como iguales [\%] \\
+$p$, $p_{Holm}$ & Valor $p$ de un contraste y valor $p$ corregido por Holm dentro de su familia \\
+$U$ & Estadístico de Mann--Whitney (dos muestras independientes) \\
+$W$ & En los contrastes pareados, estadístico de Wilcoxon de rangos con signo; no debe confundirse con la capacidad eólica \\
+$\hat{A}_{12}$ & Tamaño de efecto de Vargha--Delaney: probabilidad de que una corrida del primer algoritmo obtenga menor LCOE que una del segundo \\
+$\hat{\Delta}_{HL}$ & Estimador de Hodges--Lehmann del desplazamiento entre dos algoritmos [puntos porcentuales de brecha] \\
+$k$, $N$ & En el contraste de Friedman, número de algoritmos y de instancias \\
+$R_j$ & Rango medio del algoritmo $j$ sobre las instancias \\
+$\chi^2_F$, $F_F$ & Estadísticos de Friedman y de Iman--Davenport \\
+$q_\alpha$, CD & Valor crítico de Nemenyi y diferencia crítica entre rangos medios \\
+$d_z$ & Efecto estandarizado de una diferencia pareada \\
+P1, P2, P3 & Las tres preguntas del protocolo: en una instancia, en general y todos los algoritmos a la vez \\
 \end{tabular}
 
 \vspace{1em}
-\noindent\textbf{Siglas}
-
-\begin{tabular}{@{}p{2.6cm} p{11.9cm}@{}}
+\noindent\begin{tabular}{@{}p{3.4cm} p{11.1cm}@{}}
+\multicolumn{2}{@{}l}{\textbf{Siglas}} \\[0.6em]
 HRES & \textit{Hybrid Renewable Energy System} --- sistema híbrido de energías renovables \\
 HRES-H$_2$ & Sistema híbrido de energías renovables con tecnologías de hidrógeno \\
 WPEB & \textit{Wind--Photovoltaic--Electrolysis--Battery} \\
@@ -86,10 +124,9 @@ GA & \textit{Genetic Algorithm} --- algoritmo genético \\
 SHO & \textit{Spotted Hyena Optimizer} \\
 WOA & \textit{Whale Optimization Algorithm} \\
 BLX-$\alpha$ & \textit{Blend Crossover} --- operador de cruce combinado \\
-LS & \textit{Local Search} --- búsqueda local \\
-GA+LS, PSO+GA, SHO+LS & Los tres híbridos: GA memético, PSO con operadores genéticos y SHO con búsqueda local \\
+PSO+GA & El híbrido de esta tesis: PSO con inyección de operadores genéticos \\
+RANDOM & Búsqueda aleatoria, línea base sin aprendizaje \\
 LRH, LTH, HRH, HTH & Clases de híbridos de Talbi: bajo/alto nivel $\times$ relevo/cooperativo \\
-MA & \textit{Memetic Algorithm} --- algoritmo memético \\
 NOCT & \textit{Nominal Operating Cell Temperature} \\
 ANN & \textit{Artificial Neural Network} --- red neuronal artificial \\
 CNY & Yuan renminbi, moneda de la República Popular China \\

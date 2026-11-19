@@ -1,0 +1,2 @@
+n_instances,k_algorithms,friedman_chi2,friedman_p,iman_davenport_f,iman_davenport_df1,iman_davenport_df2,iman_davenport_p,q_alpha,critical_difference,posthoc_procede
+8,7,37.28571428571428,1.5488646109211744e-06,24.359999999999975,6,42,3.2977850950501304e-12,2.948320017529671,3.1845495882558525,True

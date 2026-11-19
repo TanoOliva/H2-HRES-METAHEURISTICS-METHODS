@@ -1,11 +1,16 @@
-"""Figuras especificas de la presentacion, generadas desde notebooks/results/*.csv.
+"""Figuras de la presentacion de defensa, generadas desde notebooks/results/*.csv.
 
-Las figuras de la tesis se extraen del cuaderno; estas se dibujan aparte porque la
-diapositiva necesita un recorte distinto (un panel por pregunta, fuentes grandes) y
-porque la defensa se centra en un hibrido, PSO+GA, frente a sus padres y a la linea base.
+Las figuras de la tesis salen del cuaderno; estas se dibujan aparte porque la lamina
+necesita otro recorte: ocho instancias a la vez, el hibrido PSO+GA frente a sus padres
+y a la linea base, y texto que se lea proyectado. Cada figura se guarda al tamano en
+pulgadas con que entra en la lamina (``TAMANOS``), de modo que los 11 pt del grafico
+son 11 pt en la diapositiva.
+
+Ningun veredicto va escrito en las figuras: solo datos, ejes y leyendas. Los conteos
+(replicas, solicitudes, instancias) se leen de los CSV.
 
 Uso:
-    python scripts/figuras_presentacion.py [--salida presentacion/figuras]
+    python scripts/figuras_presentacion.py [--resultados notebooks/results] [--salida presentacion/figuras]
 """
 
 from __future__ import annotations
@@ -19,267 +24,342 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+from matplotlib.ticker import MaxNLocator
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "notebooks" / "results"
 
-ORDER = ("gwo", "pso", "ga", "sho", "woa", "ga_ls", "pso_ga", "sho_ls", "random")
+ORDER = ("gwo", "pso", "ga", "sho", "woa", "pso_ga", "random")
 LABELS = {"gwo": "GWO", "pso": "PSO", "ga": "GA", "sho": "SHO", "woa": "WOA",
-          "ga_ls": "GA+LS", "pso_ga": "PSO+GA", "sho_ls": "SHO+LS", "random": "RANDOM"}
+          "pso_ga": "PSO+GA", "random": "RANDOM"}
 COLORS = {"gwo": "#2a78d6", "pso": "#eb6834", "ga": "#1baf7a", "sho": "#eda100", "woa": "#e87ba4",
-          "ga_ls": "#0d7a52", "pso_ga": "#a8431a", "sho_ls": "#a86f00", "random": "#898781"}
-HYBRID_PAIRS = (("ga_ls", "ga"), ("pso_ga", "pso"), ("pso_ga", "ga"), ("sho_ls", "sho"))
-MARKERS = ("o", "s", "^", "D")
-# Protagonista de la defensa y sus comparadores: bucle base, donante de operadores,
-# mejor clasico por rango medio y linea base.
-FOCO = ("pso_ga", "pso", "ga", "sho", "random")
+          "pso_ga": "#a8431a", "random": "#898781"}
+CONTROL, BASELINE = "pso_ga", "random"
+# Protagonista de la defensa y sus contrastes confirmatorios: los dos padres y la linea base.
+FOCO = ("pso_ga", "pso", "ga", "random")
+TINTA, GRIS = "#33333d", "#555555"
+
+# Tamano (ancho, alto) en pulgadas de cada figura dentro de la lamina de 10 x 5,625.
+TAMANOS = {
+    "pres_convergencia.png": (9.0, 3.1),
+    "pres_brecha.png": (9.0, 2.75),
+    "pres_a12_foco.png": (9.0, 2.6),
+    "pres_a12_control_resto.png": (9.0, 2.6),
+    "pres_a12_linea_base.png": (9.0, 2.6),
+    "pres_diferencia_critica.png": (9.0, 2.3),
+    "pres_duplicados.png": (5.3, 3.3),
+}
 
 plt.rcParams.update({
-    "figure.dpi": 200, "savefig.dpi": 200, "font.size": 11, "axes.grid": True,
-    "grid.alpha": 0.25, "axes.spines.top": False, "axes.spines.right": False,
-    "font.family": "DejaVu Sans",
+    "figure.dpi": 100, "savefig.dpi": 250, "font.size": 11, "font.family": "DejaVu Sans",
+    "axes.titlesize": 11.5, "axes.labelsize": 11, "xtick.labelsize": 11, "ytick.labelsize": 11,
+    "legend.fontsize": 11, "axes.grid": True, "grid.alpha": 0.25,
+    "axes.spines.top": False, "axes.spines.right": False,
+    "axes.edgecolor": GRIS, "axes.labelcolor": TINTA, "xtick.color": TINTA, "ytick.color": TINTA,
+    "text.color": TINTA,
 })
 
 
-def read(name: str) -> pd.DataFrame:
-    return pd.read_csv(RESULTS / name)
+def coma(x, d=2) -> str:
+    return f"{float(x):.{d}f}".replace(".", ",").replace("-", "−")
 
 
-def truthy(s: pd.Series) -> pd.Series:
-    return s.astype(str).str.lower().isin(("true", "1", "1.0"))
+def truthy(v) -> bool:
+    return str(v).strip().lower() in ("true", "1", "1.0")
 
 
-def fig_exito(summary: pd.DataFrame, instances: list[str], salida: Path, algs=ORDER, nombre="pres_exito.png") -> None:
-    """Tasa de exito al 0,5 % del optimo exacto: barras por algoritmo, un color por instancia."""
-    fig, ax = plt.subplots(figsize=(10, 4.6))
-    n_inst = len(instances)
-    width = 0.8 / n_inst
-    tonos = ["#3C4975", "#497DB5", "#57B6D0", "#1BAF7A"]
-    for k, inst in enumerate(instances):
-        sub = summary[summary["instance"] == inst].set_index("algorithm")
-        valores = [100 * sub.loc[a, "success_0.5pct"] if a in sub.index else 0 for a in algs]
-        xs = np.arange(len(algs)) + (k - (n_inst - 1) / 2) * width
-        ax.bar(xs, valores, width=width * 0.95, color=tonos[k % len(tonos)], label=inst)
-    ax.set_xticks(range(len(algs)), [LABELS[a] for a in algs], rotation=20 if len(algs) > 5 else 0)
-    ax.set_ylabel("Corridas a menos de 0,5 % del óptimo [%]")
-    ax.set_ylim(0, 100)
-    ax.legend(title="Instancia", ncol=4, loc="upper right", fontsize=9)
-    ax.set_title("¿Con qué frecuencia una corrida queda a menos de 0,5 % del óptimo exacto?", fontsize=12)
-    plt.tight_layout()
+def guardar(fig, salida: Path, nombre: str) -> None:
+    fig.set_size_inches(*TAMANOS[nombre])
     fig.savefig(salida / nombre)
     plt.close(fig)
 
 
-def _a12_panel(ax, filas: pd.DataFrame, etiquetas, clave_x, color_de, instances):
-    despl = np.linspace(-0.27, 0.27, len(instances))
-    for k, inst in enumerate(instances):
-        sub = filas[filas["instance"] == inst]
-        for _, fila in sub.iterrows():
-            if not np.isfinite(fila["a12"]):
-                continue
-            x = etiquetas.index(clave_x(fila)) + despl[k]
-            color = color_de(fila)
-            lleno = truthy(pd.Series([fila["significativo_alpha_0.05"]])).iloc[0]
-            ax.errorbar([x], [fila["a12"]],
-                        yerr=[[fila["a12"] - fila["a12_ci_low"]], [fila["a12_ci_high"] - fila["a12"]]],
-                        fmt="none", ecolor=color, elinewidth=1.2, capsize=3)
-            ax.scatter([x], [fila["a12"]], marker=MARKERS[k], s=70,
-                       facecolor=color if lleno else "white", edgecolor=color, linewidths=1.5, zorder=3)
-    ax.axhline(0.5, color="#555555", lw=1, linestyle="--")
-    ax.set_xticks(range(len(etiquetas)))
-    ax.set_ylim(0, 1.0)
-
-
-def _leyenda_instancias(fig, instances):
-    handles = [Line2D([], [], marker=MARKERS[k], color="#333333", linestyle="", markerfacecolor="white",
-                      markersize=8, label=inst) for k, inst in enumerate(instances)]
-    handles.append(Line2D([], [], marker="o", color="#333333", linestyle="", markersize=8,
-                          label="lleno: significativo (Holm)"))
-    fig.legend(handles=handles, loc="lower center", ncol=5, fontsize=9, frameon=False, bbox_to_anchor=(0.5, 0.0))
-
-
-def fig_vs_random(tests: pd.DataFrame, instances: list[str], salida: Path) -> None:
-    planned = tests[(tests["family"] == "planned") & (tests["algoritmo_b"] == "random")]
-    orden = [a for a in ORDER if a != "random"]
-    fig, ax = plt.subplots(figsize=(10, 4.6))
-    _a12_panel(ax, planned, orden, lambda f: f["algoritmo_a"], lambda f: COLORS[f["algoritmo_a"]], instances)
-    ax.set_xticklabels([LABELS[a] for a in orden])
-    ax.set_ylabel("A12 frente a RANDOM")
-    ax.set_title("¿Le ganan a la búsqueda aleatoria? (> 0,5: gana la metaheurística)", fontsize=12)
-    _leyenda_instancias(fig, instances)
-    plt.tight_layout(rect=(0, 0.08, 1, 1))
-    fig.savefig(salida / "pres_vs_random.png")
-    plt.close(fig)
-
-
-def fig_hibrido_vs_padre(tests: pd.DataFrame, instances: list[str], salida: Path) -> None:
-    planned = tests[tests["family"] == "planned"]
-    pares = list(HYBRID_PAIRS)
-    filas = planned[[(a, b) in pares for a, b in zip(planned["algoritmo_a"], planned["algoritmo_b"])]]
-    fig, ax = plt.subplots(figsize=(8, 4.6))
-    _a12_panel(ax, filas, pares, lambda f: (f["algoritmo_a"], f["algoritmo_b"]),
-               lambda f: COLORS[f["algoritmo_a"]], instances)
-    ax.set_xticklabels(["{} vs {}".format(LABELS[h], LABELS[p]) for h, p in pares])
-    ax.set_ylabel("A12 híbrido frente a padre")
-    ax.set_title("¿Aporta la hibridación? (> 0,5: gana el híbrido)", fontsize=12)
-    _leyenda_instancias(fig, instances)
-    plt.tight_layout(rect=(0, 0.08, 1, 1))
-    fig.savefig(salida / "pres_hibrido_vs_padre.png")
-    plt.close(fig)
-
-
-def fig_psoga_a12(tests: pd.DataFrame, instances: list[str], salida: Path) -> None:
-    """PSO+GA frente a RANDOM, PSO y GA: los tres contrastes planificados que lo validan."""
-    planned = tests[(tests["family"] == "planned") & (tests["algoritmo_a"] == "pso_ga")]
-    pares = ["random", "ga", "pso"]
-    filas = planned[planned["algoritmo_b"].isin(pares)]
-    fig, ax = plt.subplots(figsize=(8, 4.6))
-    _a12_panel(ax, filas, pares, lambda f: f["algoritmo_b"], lambda f: COLORS[f["algoritmo_b"]], instances)
-    ax.set_xticklabels(["PSO+GA vs RANDOM\n(¿aprende?)", "PSO+GA vs GA\n(¿mejor que el donante?)",
-                        "PSO+GA vs PSO\n(¿aporta la inyección?)"], fontsize=10)
-    ax.set_ylabel("A12 de PSO+GA frente a ...")
-    ax.set_title("Tres contrastes planificados por instancia (> 0,5: gana PSO+GA)", fontsize=12)
-    _leyenda_instancias(fig, instances)
-    plt.tight_layout(rect=(0, 0.08, 1, 1))
-    fig.savefig(salida / "pres_psoga_a12.png")
-    plt.close(fig)
-
-
-def fig_convergencia_foco(history: pd.DataFrame, brute: pd.DataFrame, instances: list[str], salida: Path) -> None:
-    """Mediana e IQR del mejor LCOE por solicitudes: PSO+GA y sus comparadores, un panel por instancia."""
+def con_brecha(tabla: pd.DataFrame, brute: pd.DataFrame, columna: str) -> pd.DataFrame:
+    """Anade ``gap``: brecha relativa al optimo exacto de la instancia, en porcentaje."""
     optimo = brute.set_index("instance")["optimum_lcoe_cny_per_kwh"]
-    fig, axes = plt.subplots(2, 2, figsize=(11, 7.2), sharex=True)
-    for ax, inst in zip(axes.ravel(), instances):
-        sub = history[history["instance"] == inst]
+    tabla = tabla.copy()
+    tabla["gap"] = (tabla[columna] / tabla["instance"].map(optimo) - 1.0) * 100.0
+    return tabla
+
+
+# --------------------------------------------------------------------------- explorar
+def fig_convergencia(history: pd.DataFrame, brute: pd.DataFrame, instances: list[str], salida: Path) -> None:
+    """Mediana e IQR de la brecha al optimo frente a las solicitudes, un panel por instancia."""
+    nombre = "pres_convergencia.png"
+    h = con_brecha(history[history["algorithm"].isin(FOCO)], brute, "best_score")
+    h["gap"] = h["gap"].fillna(np.inf)            # sin diseno factible todavia
+    presupuesto = int(h["n_evaluations"].max())
+    ncols = 4
+    nrows = int(np.ceil(len(instances) / ncols))
+    fig, axes = plt.subplots(nrows, ncols, figsize=TAMANOS[nombre], sharex=True, sharey=True, squeeze=False)
+    resumen, techo, piso = {}, [], [0.0]
+    for inst in instances:
         for a in FOCO:
-            g = sub[sub["algorithm"] == a]
+            g = h[(h["instance"] == inst) & (h["algorithm"] == a)]
             if g.empty:
                 continue
-            res = g.groupby("n_evaluations")["best_score"].agg(
-                med="median", q25=lambda s: s.quantile(0.25), q75=lambda s: s.quantile(0.75)).reset_index()
-            lw = 2.6 if a == "pso_ga" else 1.5
-            ax.plot(res["n_evaluations"], res["med"], color=COLORS[a], lw=lw, label=LABELS[a],
-                    linestyle="--" if a == "random" else "-")
-            ax.fill_between(res["n_evaluations"], res["q25"], res["q75"], color=COLORS[a], alpha=0.10, linewidth=0)
-        ax.axhline(optimo[inst], color="#111111", lw=0.9, linestyle=":", label="Óptimo exacto")
-        fact = sub.loc[sub["best_score"] < 1.0, "best_score"]
-        if not fact.empty:
-            ax.set_ylim(min(fact.min(), optimo[inst]) * 0.998, fact.quantile(0.98) * 1.015)
-        ax.set_title("{} (óptimo {:.5f})".format(inst, optimo[inst]), fontsize=11)
-    for ax in axes[1]:
-        ax.set_xlabel("Solicitudes de objetivo acumuladas")
-    for ax in axes[:, 0]:
-        ax.set_ylabel("Mejor LCOE factible [CNY/kWh]")
-    h, l = axes[0, 0].get_legend_handles_labels()
-    fig.legend(h, l, loc="lower center", ncol=6, fontsize=9, frameon=False, bbox_to_anchor=(0.5, 0.0))
-    fig.suptitle("Convergencia de PSO+GA frente a sus padres, el mejor clásico y RANDOM (mediana e IQR, 30 semillas)", fontsize=11.5)
-    plt.tight_layout(rect=(0, 0.06, 1, 0.96))
-    fig.savefig(salida / "pres_convergencia_foco.png")
-    plt.close(fig)
-
-
-def fig_distribucion_foco(runs: pd.DataFrame, brute: pd.DataFrame, instances: list[str], salida: Path) -> None:
-    """Boxplots del LCOE final de PSO+GA y sus comparadores, un panel por instancia."""
-    optimo = brute.set_index("instance")["optimum_lcoe_cny_per_kwh"]
-    fig, axes = plt.subplots(2, 2, figsize=(11, 7.2))
+            res = g.groupby("n_evaluations")["gap"].quantile([0.25, 0.5, 0.75]).unstack()
+            resumen[(inst, a)] = res
+            temprano = res.loc[res.index >= 0.15 * presupuesto, 0.5]
+            if len(temprano) and np.isfinite(temprano.iloc[0]):
+                techo.append(float(temprano.iloc[0]))
+            if np.isfinite(res[0.25].iloc[-1]):
+                piso.append(float(res[0.25].iloc[-1]))
+    ymax = (max(techo) if techo else 5.0) * 1.12
+    ymin = min(piso) - 0.04 * ymax
     for ax, inst in zip(axes.ravel(), instances):
-        sub = runs[runs["instance"] == inst]
-        datos = [sub.loc[sub["algorithm"] == a, "score"].dropna().to_numpy() for a in FOCO]
-        caja = ax.boxplot(datos, tick_labels=[LABELS[a] for a in FOCO], patch_artist=True,
-                          medianprops={"color": "#222222", "lw": 1.6})
-        for parche, a in zip(caja["boxes"], FOCO):
+        for a in FOCO:
+            res = resumen.get((inst, a))
+            if res is None:
+                continue
+            recorte = res.clip(upper=ymax * 3)
+            ax.fill_between(res.index, recorte[0.25], recorte[0.75], color=COLORS[a], alpha=0.13, linewidth=0)
+            ax.plot(res.index, recorte[0.5], color=COLORS[a], lw=2.6 if a == CONTROL else 1.6,
+                    linestyle="--" if a == BASELINE else "-", zorder=3 if a == CONTROL else 2)
+        ax.axhline(0.0, color="#111111", lw=0.9, linestyle=":")
+        ax.text(0.96, 0.9, inst, transform=ax.transAxes, ha="right", va="top", fontsize=11.5, fontweight="bold")
+        ax.set_ylim(ymin, ymax)
+        ax.set_xlim(0, presupuesto)
+        ax.set_xticks([0, presupuesto // 2, presupuesto])
+        for etiqueta, alineacion in zip(ax.get_xticklabels(), ("left", "center", "right")):
+            etiqueta.set_horizontalalignment(alineacion)   # evita que 600 y 0 se pisen entre paneles
+        ax.yaxis.set_major_locator(MaxNLocator(4))
+    for ax in axes.ravel()[len(instances):]:
+        ax.axis("off")
+    handles = [Line2D([], [], color=COLORS[a], lw=2.6 if a == CONTROL else 1.6,
+                      linestyle="--" if a == BASELINE else "-", label=LABELS[a]) for a in FOCO]
+    handles.append(Line2D([], [], color="#111111", lw=0.9, linestyle=":", label="óptimo exacto"))
+    fig.legend(handles=handles, loc="upper center", ncol=len(handles), frameon=False,
+               bbox_to_anchor=(0.5, 1.0), columnspacing=1.6, handlelength=1.8)
+    fig.supxlabel("Solicitudes de evaluación acumuladas", fontsize=11, y=0.005)
+    fig.supylabel("Brecha al óptimo [%]", fontsize=11, x=0.004)
+    fig.subplots_adjust(left=0.075, right=0.99, top=0.885, bottom=0.185, wspace=0.08, hspace=0.16)
+    guardar(fig, salida, nombre)
+
+
+def fig_brecha(runs: pd.DataFrame, brute: pd.DataFrame, instances: list[str], salida: Path) -> None:
+    """Distribucion de la brecha final al optimo: cuatro cajas por instancia, con las corridas encima."""
+    nombre = "pres_brecha.png"
+    r = con_brecha(runs[runs["algorithm"].isin(FOCO)], brute, "score")
+    r = r[np.isfinite(r["gap"])]
+    fig, ax = plt.subplots(figsize=TAMANOS[nombre])
+    ancho = 0.19
+    despl = (np.arange(len(FOCO)) - (len(FOCO) - 1) / 2) * ancho
+    techo = float(r["gap"].quantile(0.97)) * 1.1 if len(r) else 5.0
+    rng = np.random.default_rng(7)
+    recortadas = 0
+    for k, a in enumerate(FOCO):
+        datos, pos = [], []
+        for i, inst in enumerate(instances):
+            v = r.loc[(r["instance"] == inst) & (r["algorithm"] == a), "gap"].to_numpy()
+            if len(v) == 0:
+                continue
+            datos.append(v)
+            pos.append(i + despl[k])
+            recortadas += int((v > techo).sum())
+            ax.scatter(i + despl[k] + rng.uniform(-ancho * 0.28, ancho * 0.28, len(v)), np.minimum(v, techo),
+                       s=7, color=COLORS[a], alpha=0.45, linewidths=0, zorder=3)
+        if not datos:
+            continue
+        caja = ax.boxplot(datos, positions=pos, widths=ancho * 0.86, patch_artist=True, showfliers=False,
+                          medianprops={"color": "#111111", "lw": 1.5}, whiskerprops={"color": GRIS, "lw": 0.9},
+                          capprops={"color": GRIS, "lw": 0.9}, manage_ticks=False)
+        for parche in caja["boxes"]:
             parche.set_facecolor(COLORS[a])
-            parche.set_alpha(0.75 if a == "pso_ga" else 0.5)
-            parche.set_edgecolor("#444444")
-        ax.axhline(optimo[inst], color="#111111", lw=0.9, linestyle=":")
-        todos = pd.concat([pd.Series(d) for d in datos])
-        if not todos.empty:
-            ax.set_ylim(min(todos.min(), optimo[inst]) * 0.998, todos.quantile(0.97) * 1.01)
-        ax.set_title("{} (óptimo {:.5f}, línea punteada)".format(inst, optimo[inst]), fontsize=11)
-    for ax in axes[:, 0]:
-        ax.set_ylabel("LCOE final [CNY/kWh]")
-    fig.suptitle("Distribución del LCOE final en 30 corridas (eje recortado al percentil 97)", fontsize=11.5)
-    plt.tight_layout(rect=(0, 0, 1, 0.96))
-    fig.savefig(salida / "pres_distribucion_foco.png")
-    plt.close(fig)
-
-
-def fig_presupuesto(summary: pd.DataFrame, instances: list[str], salida: Path) -> None:
-    """Solicitudes duplicadas y de busqueda local por algoritmo (media sobre instancias)."""
-    medio = summary.groupby("algorithm")[["mean_duplicates", "mean_unique"]].mean()
-    ls = summary.groupby("algorithm")["mean_ls_requests"].mean() if "mean_ls_requests" in summary.columns else None
-    fig, ax = plt.subplots(figsize=(10, 4.6))
-    xs = np.arange(len(ORDER))
-    unicos = [medio.loc[a, "mean_unique"] for a in ORDER]
-    dups = [medio.loc[a, "mean_duplicates"] for a in ORDER]
-    ax.bar(xs, unicos, color=[COLORS[a] for a in ORDER], alpha=0.85, label="diseños únicos")
-    ax.bar(xs, dups, bottom=unicos, color="#d9d9d9", edgecolor="#777777", label="solicitudes duplicadas")
-    for x, u, d in zip(xs, unicos, dups):
-        if d > 5:
-            ax.text(x, u + d / 2, "{:.0f}".format(d), ha="center", va="center", fontsize=9, color="#333333")
-    if ls is not None:
-        for x, a in zip(xs, ORDER):
-            v = ls.get(a, np.nan)
-            if np.isfinite(v) and v > 0:
-                ax.text(x, 612, "LS: {:.0f}".format(v), ha="center", va="bottom", fontsize=9, color="#a86f00")
-    ax.set_xticks(xs, [LABELS[a] for a in ORDER], rotation=20)
-    ax.set_ylabel("Solicitudes por corrida (media de 4 instancias)")
-    ax.set_ylim(0, 680)
-    ax.axhline(600, color="#555555", lw=0.8, linestyle=":")
-    ax.legend(loc="lower right", fontsize=9)
-    ax.set_title("Cómo se gasta el presupuesto de 600 solicitudes", fontsize=12)
-    plt.tight_layout()
-    fig.savefig(salida / "pres_presupuesto.png")
-    plt.close(fig)
-
-
-def fig_ranking(cross: pd.DataFrame, instances: list[str], salida: Path) -> None:
-    """Mapa de rangos por instancia (1 = mejor)."""
-    algs = list(cross["algorithm"])
-    matriz = np.array([[cross.set_index("algorithm").loc[a, "rank_" + i] for i in instances] for a in algs], dtype=float)
-    fig, ax = plt.subplots(figsize=(6.2, 4.8))
-    ax.imshow(matriz, cmap="YlGnBu_r", vmin=1, vmax=len(algs))
+            parche.set_alpha(0.85 if a == CONTROL else 0.55)
+            parche.set_edgecolor(GRIS)
+            parche.set_linewidth(0.8)
+    ax.axhline(0.0, color="#111111", lw=0.9, linestyle=":")
+    for i in range(1, len(instances)):
+        ax.axvline(i - 0.5, color="#dddddd", lw=0.8, zorder=0)
     ax.set_xticks(range(len(instances)), instances)
-    ax.set_yticks(range(len(algs)), [LABELS[a] for a in algs])
-    ax.grid(False)
-    for i in range(len(algs)):
-        for j in range(len(instances)):
-            v = matriz[i, j]
-            ax.text(j, i, "{:.0f}".format(v), ha="center", va="center", fontsize=10,
-                    color="white" if v <= 3 else "#222222")
-    medios = cross.set_index("algorithm").loc[algs, "mean_rank"]
-    for i, a in enumerate(algs):
-        ax.text(len(instances) - 0.4, i, "  media {:.2f}".format(medios[a]), va="center", fontsize=9, color="#333333")
-    ax.set_xlim(-0.5, len(instances) + 1.2)
-    ax.set_title("Rango por mediana en cada instancia (1 = mejor)", fontsize=12)
-    plt.tight_layout()
-    fig.savefig(salida / "pres_ranking.png")
-    plt.close(fig)
+    ax.set_xlim(-0.5, len(instances) - 0.5)
+    piso = min(0.0, float(r["gap"].min()) if len(r) else 0.0)
+    ax.set_ylim(piso - 0.04 * techo, techo)
+    ax.grid(axis="x", visible=False)
+    ax.set_ylabel("Brecha al óptimo [%]")
+    if recortadas:
+        ax.text(0.012, 0.975, "eje recortado: {} corridas quedan por encima".format(recortadas), transform=ax.transAxes,
+                ha="left", va="top", fontsize=11, color=GRIS, style="italic",
+                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.8, "pad": 1.5})
+    handles = [Patch(facecolor=COLORS[a], edgecolor=GRIS, alpha=0.85 if a == CONTROL else 0.55, label=LABELS[a])
+               for a in FOCO]
+    handles.append(Line2D([], [], color="#111111", lw=0.9, linestyle=":", label="óptimo exacto"))
+    fig.legend(handles=handles, loc="upper center", ncol=len(handles), frameon=False,
+               bbox_to_anchor=(0.5, 1.0), columnspacing=1.6, handlelength=1.6)
+    fig.subplots_adjust(left=0.075, right=0.99, top=0.87, bottom=0.11)
+    guardar(fig, salida, nombre)
 
 
+# --------------------------------------------------------------------------- P1
+def fig_a12(tests: pd.DataFrame, pares: list[tuple[str, str]], instances: list[str], salida: Path,
+            nombre: str, foco: str = "b") -> None:
+    """A12 por instancia con IC al 95 %, un panel por par (a frente a b).
+
+    Marcador lleno: significativo tras Holm. Banda gris: efecto despreciable (0,44 a 0,56).
+    ``foco`` indica que algoritmo del par cambia entre paneles y da color y titulo al panel.
+    """
+    fig, axes = plt.subplots(1, len(pares), figsize=TAMANOS[nombre], sharex=True, sharey=True, squeeze=False)
+    posiciones = np.arange(len(instances))[::-1]
+    for ax, (a, b) in zip(axes.ravel(), pares):
+        sub = tests[(tests["algoritmo_a"] == a) & (tests["algoritmo_b"] == b)].drop_duplicates("instance") \
+            .set_index("instance").reindex(instances)
+        color = COLORS[b if foco == "b" else a]
+        ax.axvspan(0.44, 0.56, color="#e9e7e1", zorder=0)
+        ax.axvline(0.5, color=GRIS, lw=1.0, linestyle="--", zorder=1)
+        for y, (_, fila) in zip(posiciones, sub.iterrows()):
+            if not np.isfinite(fila.get("a12", np.nan)):
+                continue
+            ax.plot([fila["a12_ci_low"], fila["a12_ci_high"]], [y, y], color=color, lw=1.8, zorder=2,
+                    solid_capstyle="butt")
+            ax.scatter([fila["a12"]], [y], s=62, zorder=3, edgecolor=color, linewidths=1.7, clip_on=False,
+                       facecolor=color if truthy(fila["significativo"]) else "white")
+        # Con mas de tres paneles el titulo completo no cabe: el rival comun pasa al pie de la figura.
+        nombre_panel = "{} frente a {}".format(LABELS[a], LABELS[b]) if len(pares) <= 3 else LABELS[b if foco == "b" else a]
+        ax.set_title(nombre_panel, fontsize=11.5, color=color, fontweight="bold", pad=5)
+        ax.set_xlim(-0.03, 1.03)
+        ax.set_xticks([0, 0.5, 1] if len(pares) > 3 else [0, 0.25, 0.5, 0.75, 1])
+        ax.set_xticklabels(["0", "0,5", "1"] if len(pares) > 3 else ["0", "0,25", "0,5", "0,75", "1"])
+        ax.set_yticks(posiciones, instances)
+        ax.set_ylim(-0.7, len(instances) - 0.3)
+        ax.grid(axis="y", visible=False)
+        ax.tick_params(axis="y", length=0)
+    if foco == "b":
+        pie = r"$\hat{A}_{12}$ con IC bootstrap al 95 %" + "  ·  a la derecha de 0,5: {} obtiene menor LCOE".format(LABELS[pares[0][0]])
+    else:
+        pie = r"$\hat{A}_{12}$" + " frente a {}, IC al 95 %  ·  a la derecha de 0,5: la metaheurística obtiene menor LCOE".format(LABELS[pares[0][1]])
+    fig.supxlabel(pie, fontsize=11, y=0.005)
+    fig.subplots_adjust(left=0.05, right=0.99, top=0.89, bottom=0.225, wspace=0.07)
+    guardar(fig, salida, nombre)
+
+
+# --------------------------------------------------------------------------- P3
+def grupos_cd(rangos: np.ndarray, cd: float) -> list[tuple[int, int]]:
+    """Grupos maximales de algoritmos consecutivos cuyo rango medio difiere menos que la diferencia critica."""
+    grupos, n = [], len(rangos)
+    for inicio in range(n):
+        fin = inicio
+        while fin + 1 < n and rangos[fin + 1] - rangos[inicio] <= cd:
+            fin += 1
+        if fin > inicio and not any(s <= inicio and fin <= e for s, e in grupos):
+            grupos.append((inicio, fin))
+    return grupos
+
+
+def fig_diferencia_critica(ranks: pd.DataFrame, friedman: pd.Series, salida: Path) -> None:
+    """Diagrama de diferencia critica (Nemenyi) sobre los rangos medios por instancia."""
+    nombre = "pres_diferencia_critica.png"
+    ranks = ranks.sort_values("mean_rank").reset_index(drop=True)
+    k = len(ranks)
+    cd = float(friedman["critical_difference"])
+    valores = ranks["mean_rank"].to_numpy()
+    fig, ax = plt.subplots(figsize=TAMANOS[nombre])
+    ax.hlines(0, 1, k, color="#222222", lw=1.3)
+    for marca in range(1, k + 1):
+        ax.vlines(marca, -0.07, 0.07, color="#222222", lw=1.3)
+        ax.text(marca, 0.13, str(marca), ha="center", va="bottom", fontsize=11)
+    ax.text(1, 0.43, "mejor", ha="center", va="bottom", fontsize=11, color=GRIS, style="italic")
+    ax.text(k, 0.43, "peor", ha="center", va="bottom", fontsize=11, color=GRIS, style="italic")
+    # Regla de la diferencia critica, centrada sobre el eje.
+    x0 = (1 + k) / 2 - min(cd, k - 1) / 2
+    ax.hlines(0.62, x0, x0 + min(cd, k - 1), color="#8a1c1c", lw=2.6)
+    ax.vlines([x0, x0 + min(cd, k - 1)], 0.56, 0.68, color="#8a1c1c", lw=1.6)
+    ax.text((1 + k) / 2, 0.72, "diferencia crítica (Nemenyi) = {}".format(coma(cd, 2)), ha="center", va="bottom",
+            fontsize=11, color="#8a1c1c")
+    mitad = int(np.ceil(k / 2))
+    paso = 0.27
+    for i, fila in ranks.iterrows():
+        izquierda = i < mitad
+        profundidad = (i if izquierda else k - 1 - i) + 1
+        y = -0.42 - paso * profundidad
+        x_texto = 0.55 if izquierda else k + 0.45
+        color = COLORS.get(fila["algorithm"], "#444444")
+        ax.plot([fila["mean_rank"], fila["mean_rank"], x_texto], [0, y, y], color=color, lw=1.5)
+        ax.text(x_texto - 0.06 if izquierda else x_texto + 0.06, y,
+                "{} ({})".format(LABELS.get(fila["algorithm"], fila["algorithm"]), coma(fila["mean_rank"], 2)),
+                ha="right" if izquierda else "left", va="center", fontsize=11.5, color=color, fontweight="bold")
+    for nivel, (inicio, fin) in enumerate(grupos_cd(valores, cd)):
+        y = -0.15 - 0.1 * nivel
+        ax.hlines(y, valores[inicio] - 0.04, valores[fin] + 0.04, color="#222222", lw=3.4)
+    ax.set_xlim(1 - 2.3, k + 2.3)
+    ax.set_ylim(-0.42 - paso * (mitad + 0.55), 1.02)
+    ax.axis("off")
+    fig.subplots_adjust(left=0.0, right=1.0, top=1.0, bottom=0.0)
+    guardar(fig, salida, nombre)
+
+
+# --------------------------------------------------------------------------- lectura
+def fig_duplicados(summary: pd.DataFrame, salida: Path) -> None:
+    """Porcentaje de las solicitudes que repite un diseno ya evaluado: media y rango entre instancias."""
+    nombre = "pres_duplicados.png"
+    s = summary[summary["algorithm"].isin(ORDER)].copy()
+    s["share"] = 100.0 * s["mean_duplicates"] / (s["mean_duplicates"] + s["mean_unique"])
+    res = s.groupby("algorithm")["share"].agg(["mean", "min", "max"]).reindex([a for a in ORDER if a in set(s["algorithm"])])
+    res = res.sort_values("mean")
+    fig, ax = plt.subplots(figsize=TAMANOS[nombre])
+    ys = np.arange(len(res))
+    ax.barh(ys, res["mean"], color=[COLORS[a] for a in res.index], alpha=0.9, height=0.62)
+    ax.errorbar(res["mean"], ys, xerr=[res["mean"] - res["min"], res["max"] - res["mean"]], fmt="none",
+                ecolor="#333333", elinewidth=1.2, capsize=3)
+    tope = max(float(res["max"].max()), 1.0)
+    for y, (_, fila) in zip(ys, res.iterrows()):
+        ax.text(fila["max"] + tope * 0.03, y, coma(fila["mean"], 1) + " %", va="center", ha="left", fontsize=11)
+    ax.set_yticks(ys, [LABELS[a] for a in res.index])
+    for etiqueta, a in zip(ax.get_yticklabels(), res.index):
+        if a == CONTROL:
+            etiqueta.set_fontweight("bold")
+    ax.set_xlim(0, tope * 1.28)
+    ax.xaxis.set_major_locator(MaxNLocator(5))
+    ax.grid(axis="y", visible=False)
+    ax.tick_params(axis="y", length=0)
+    ax.set_xlabel("Solicitudes duplicadas [% del presupuesto]\nmedia y rango entre instancias")
+    fig.subplots_adjust(left=0.2, right=0.98, top=0.98, bottom=0.2)
+    guardar(fig, salida, nombre)
+
+
+# --------------------------------------------------------------------------- principal
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--resultados", type=Path, default=RESULTS)
     parser.add_argument("--salida", type=Path, default=ROOT / "presentacion" / "figuras")
     args = parser.parse_args(argv)
     args.salida.mkdir(parents=True, exist_ok=True)
+
+    def read(name: str) -> pd.DataFrame:
+        return pd.read_csv(args.resultados / name)
+
     instances = list(read("instances.csv")["instance"])
-    summary = read("algorithm_summary.csv")
-    tests = read("pairwise_tests.csv")
-    cross = read("cross_instance_ranking.csv")
     brute = read("brute_force_summary.csv")
+    instances = [i for i in instances if i in set(brute["instance"])]
+    summary = read("algorithm_summary.csv")
     runs = read("algorithm_runs.csv")
     history = read("algorithm_history.csv")
-    fig_exito(summary, instances, args.salida)
-    fig_exito(summary, instances, args.salida, algs=FOCO, nombre="pres_exito_foco.png")
-    fig_vs_random(tests, instances, args.salida)
-    fig_hibrido_vs_padre(tests, instances, args.salida)
-    fig_psoga_a12(tests, instances, args.salida)
-    fig_convergencia_foco(history, brute, instances, args.salida)
-    fig_distribucion_foco(runs, brute, instances, args.salida)
-    fig_presupuesto(summary, instances, args.salida)
-    fig_ranking(cross, instances, args.salida)
-    for nombre in sorted(args.salida.glob("pres_*.png")):
-        print(nombre)
+    tests = read("stat_per_instance.csv")
+    ranks = read("stat_ranks.csv")
+    friedman = read("stat_friedman.csv").iloc[0]
+
+    fig_convergencia(history, brute, instances, args.salida)
+    fig_brecha(runs, brute, instances, args.salida)
+    control = tests[tests["family"] == "control"]
+    base = tests[tests["family"] == "linea_base"]
+    fig_a12(control, [(CONTROL, b) for b in ("pso", "ga", "random")], instances, args.salida, "pres_a12_foco.png")
+    fig_a12(control, [(CONTROL, b) for b in ("gwo", "sho", "woa")], instances, args.salida, "pres_a12_control_resto.png")
+    fig_a12(base, [(a, BASELINE) for a in ("gwo", "pso", "ga", "sho", "woa")], instances, args.salida,
+            "pres_a12_linea_base.png", foco="a")
+    fig_diferencia_critica(ranks, friedman, args.salida)
+    fig_duplicados(summary, args.salida)
+
+    # Las figuras pres_* de versiones anteriores del guion ya no se usan: se retiran.
+    for viejo in sorted(args.salida.glob("pres_*.png")):
+        if viejo.name not in TAMANOS:
+            viejo.unlink()
+            print("eliminada", viejo.name)
+    replicas = sorted(set(runs.groupby(["instance", "algorithm"]).size()))
+    print("datos: {} instancias, réplicas por celda {}, hasta {} solicitudes".format(
+        len(instances), replicas, int(runs["n_evaluations"].max())))
+    for nombre in TAMANOS:
+        print(args.salida / nombre)
 
 
 if __name__ == "__main__":

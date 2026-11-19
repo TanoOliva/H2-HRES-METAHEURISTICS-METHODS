@@ -2,627 +2,254 @@
 
 \section{Base Conceptual}
 
-\subsection{Hidrógeno verde: definición, producción y relevancia en la transición energética}
+El hidrógeno no es una fuente primaria de energía, sino un vector energético: debe producirse a partir de otros recursos y permite almacenar energía en forma química, transportarla y reconvertirla en electricidad o emplearla en la industria, la movilidad y el respaldo energético. Su impacto ambiental depende de la ruta de producción. Se denomina hidrógeno verde al producido mediante electrólisis del agua alimentada con electricidad renovable, que es la ruta de menor emisión de carbono \cite{Khan2022Review,Irena2020GreenHydrogen}. Para un sistema renovable, su valor está en desacoplar en el tiempo la generación y el consumo: los excedentes de generación solar y eólica pueden convertirse en hidrógeno, una forma de almacenamiento de mayor horizonte temporal que las baterías, útil cuando se requiere autonomía prolongada \cite{Khan2022Review,Zhang2018SA}.
 
-La transición energética hacia sistemas bajos en carbono ha impulsado el interés por tecnologías capaces de integrar de manera eficiente fuentes renovables variables como la energía solar y eólica, con alternativas de almacenamiento y conversión energética de larga duración. En este contexto, el hidrógeno verde ha adquirido una relevancia creciente debido a su potencial para desacoplar temporalmente la generación y el consumo energético, facilitando la penetración de energías renovables en distintos sectores \cite{Khan2022Review}.
+Los sistemas híbridos de energías renovables con tecnologías de hidrógeno (\emph{Hybrid Renewable Energy Systems with Hydrogen Technologies}, HRES-H$_2$) integran fuentes renovables con una cadena de hidrógeno de tres eslabones. El electrolizador convierte electricidad en hidrógeno, con una producción que depende de su corriente, su eficiencia y su capacidad nominal. El almacenamiento, generalmente en tanques con compresión, conserva el hidrógeno para períodos de baja generación, a costa de pérdidas, costos y restricciones de presión, volumen y seguridad. La celda de combustible reconvierte el hidrógeno en electricidad cuando la generación renovable no cubre la demanda \cite{Khan2022Review,Wang2021HybridSystem}. Estas configuraciones pueden incluir además baterías y convertidores, y resultan especialmente valiosas en emplazamientos remotos o con infraestructura de red limitada \cite{Khan2022Review,Zhang2018SA}.
 
-El hidrógeno no constituye una fuente primaria de energía, sino un vector energético, ya que debe ser producido a partir de otros recursos. Su interés radica en que permite almacenar energía en forma química, transportarla y posteriormente reconvertirla en electricidad o emplearla en procesos industriales, movilidad y aplicaciones de respaldo energético. Sin embargo, el impacto ambiental del hidrógeno depende directamente de la ruta de producción utilizada. Históricamente, una parte importante del hidrógeno se ha producido a partir de combustibles fósiles, mientras que su producción mediante electrólisis con energías renovables representa la vía de menor emisión de carbono \cite{Khan2022Review}.
+El sistema estudiado en esta tesis ocupa sólo una parte de esa cadena. Incluye el electrolizador, cuya capacidad nominal es una variable de decisión, y una batería auxiliar; el almacenamiento de hidrógeno tiene capacidad fija, y no hay celda de combustible ni reelectrificación (Sección~\ref{sec:alcance_wpeb}).
 
-Frente a ello, el hidrógeno verde se define como el hidrógeno producido mediante procesos de baja o nula emisión de carbono, principalmente a través de la electrólisis del agua alimentada con electricidad renovable. Esta ruta tecnológica resulta particularmente atractiva porque permite utilizar excedentes de generación solar y eólica para producir hidrógeno sin emisiones directas relevantes durante el proceso de producción, contribuyendo así a la descarbonización del sistema energético \cite{Khan2022Review}.
-
-Desde una perspectiva sistémica, el valor del hidrógeno verde no reside únicamente en su producción, sino en su capacidad para resolver una de las principales limitaciones de las energías renovables: su intermitencia. La variabilidad de la radiación solar y de la velocidad del viento afecta la continuidad del suministro eléctrico y puede comprometer tanto la confiabilidad operativa como la viabilidad económica de sistemas energéticos renovables. En este escenario, el hidrógeno aparece como una opción de almacenamiento de mayor horizonte temporal que otras tecnologías, especialmente útil cuando se requiere almacenar excedentes energéticos durante períodos prolongados o cuando las baterías resultan insuficientes para cubrir necesidades de autonomía extendida \cite{Khan2022Review,Zhang2018SA}.
-
-Por tanto, el hidrógeno verde debe entenderse como una tecnología estratégica dentro de la transición energética, no solo por su aporte a la reducción de emisiones, sino también por su capacidad de integrarse con sistemas híbridos renovables, mejorar la flexibilidad operativa y ampliar las posibilidades de electrificación limpia en contextos aislados, descentralizados o con alta penetración renovable \cite{Khan2022Review}.
-
-\subsection{Tecnologías asociadas al hidrógeno verde en sistemas energéticos}
-
-La utilización del hidrógeno verde en sistemas energéticos requiere un conjunto de tecnologías que permitan su producción, almacenamiento y posterior reconversión en energía útil. Dentro de las configuraciones más estudiadas se encuentran el electrolizador, el tanque de almacenamiento de hidrógeno y la celda de combustible, cuya interacción permite conformar una cadena energética completa basada en hidrógeno \cite{Khan2022Review,Wang2021HybridSystem}.
-
-\subsubsection{Electrolizador}
-
-El electrolizador es el dispositivo encargado de convertir energía eléctrica en energía química mediante la descomposición del agua en hidrógeno y oxígeno. En términos funcionales, cuando existe excedente de electricidad renovable, dicho excedente puede dirigirse al electrolizador para producir hidrógeno. En la revisión de Khan et al. se presenta este componente como parte fundamental del modelado matemático de sistemas HRES-H$_2$, donde la tasa de producción de hidrógeno depende de parámetros como la corriente del electrolizador, su eficiencia y su capacidad nominal \cite{Khan2022Review}. En este trabajo, la capacidad nominal del electrolizador se considera además una variable de decisión relevante en el proceso de optimización del sistema.
-
-\subsubsection{Almacenamiento de Hidrógeno}
-
-Una vez producido, el hidrógeno debe ser almacenado para su uso posterior. Para ello se emplean tanques de hidrógeno, generalmente acompañados por procesos de compresión que permiten aumentar la densidad energética volumétrica del gas almacenado. El almacenamiento es una etapa crítica porque determina cuánta energía puede preservarse para períodos de baja generación renovable o alta demanda. Sin embargo, también introduce costos, pérdidas energéticas y restricciones operacionales asociadas a la presión, el volumen, la seguridad y la eficiencia del proceso de compresión \cite{Khan2022Review}.
-
-\subsubsection{Celda de Combustible}
-
-La etapa de reconversión está dada por la celda de combustible o fuel cell, que transforma la energía química del hidrógeno nuevamente en energía eléctrica. En la literatura revisada, este componente cumple el rol de respaldo o complemento cuando la energía producida por fuentes renovables no es suficiente para abastecer la demanda. La celda de combustible constituye así el elemento que cierra el ciclo energético del hidrógeno dentro del sistema, permitiendo recuperar parte de la energía almacenada y mejorar la continuidad del suministro \cite{Khan2022Review,Wang2021HybridSystem}. En la propuesta, la capacidad de la fuel cell también forma parte del conjunto de variables susceptibles de optimización, puesto que influye directamente en la capacidad del sistema para responder ante déficit de generación.
-
-\subsection{Sistemas híbridos de energías renovables con tecnologías de hidrógeno HRES-H$_2$}
-
-Los Hybrid Renewable Energy Systems with Hydrogen Technologies (HRES-H$_2$) corresponden a configuraciones energéticas que integran múltiples fuentes renovables con tecnologías de conversión y almacenamiento basadas en hidrógeno. Su objetivo principal es aprovechar la complementariedad entre recursos renovables y dispositivos de almacenamiento para mejorar la confiabilidad, estabilidad y eficiencia del sistema energético bajo condiciones variables de generación y demanda \cite{Khan2022Review}.
-
-En términos generales, un HRES-H$_2$ puede incorporar componentes como paneles fotovoltaicos, turbinas eólicas, baterías, electrolizadores, tanques de hidrógeno, celdas de combustible y convertidores. Una configuración estudiada combina generación solar y eólica con electrolizador, almacenamiento y pila de combustible. Esta arquitectura puede operar en diferentes modos según la disponibilidad del recurso y la demanda: usar excedentes para producir hidrógeno y, cuando la generación es insuficiente, reelectrificar el hidrógeno almacenado \cite{Khan2022Review,Wang2021HybridSystem}.
-
-La relevancia de estas configuraciones se debe a que permiten mitigar el carácter intermitente y no despachable de la energía solar y eólica. Los HRES-H$_2$ emergen como una solución prometedora porque integran múltiples fuentes renovables con tecnologías de almacenamiento y conversión capaces de suavizar el suministro energético, balancear desajustes entre generación y demanda y mejorar la confiabilidad operacional. Además, se destaca que estas configuraciones resultan especialmente valiosas en contextos descentralizados, zonas rurales o emplazamientos remotos donde la infraestructura convencional de red es limitada o inexistente \cite{Khan2022Review,Zhang2018SA}.
-
-No obstante, la principal ventaja de los HRES-H$_2$ también constituye una fuente de complejidad. Al combinar múltiples subsistemas con comportamientos dinámicos y no lineales, el diseño y operación de estas arquitecturas requiere modelar adecuadamente la interacción entre generación, almacenamiento, conversión y demanda. En la literatura, esta complejidad se expresa en la necesidad de definir variables de diseño, restricciones operacionales e indicadores de desempeño económico, técnico y ambiental para encontrar configuraciones adecuadas del sistema \cite{Khan2022Review}. Por ello, antes de abordar el problema de optimización propiamente tal, es necesario establecer una base conceptual clara sobre el rol funcional de cada componente y sobre la lógica de operación integrada del sistema.
-
-En consecuencia, los HRES-H$_2$ pueden entenderse como plataformas energéticas complejas pero estratégicas para la transición hacia sistemas sostenibles, ya que combinan el potencial de las energías renovables con la capacidad de almacenamiento y flexibilidad que aporta el hidrógeno. Esta base conceptual justifica la necesidad de estudiar no solo su funcionamiento tecnológico, sino también los métodos más adecuados para su diseño y optimización \cite{Khan2022Review}.
+La complementariedad entre subsistemas que justifica estas configuraciones es también la fuente de su complejidad. Combinar componentes con comportamientos dinámicos y no lineales obliga a definir variables de diseño, restricciones operacionales e indicadores de desempeño económico, técnico y ambiental para encontrar configuraciones adecuadas \cite{Khan2022Review}. La sección siguiente formaliza ese problema de dimensionamiento para el sistema WPEB.
 
 \section{Problema de Optimización del Sistema WPEB}
-
-\subsection{Nomenclatura}
-
-En la Tabla~\ref{tab:nomenclatura_wpeb} se presenta la nomenclatura utilizada en la formulación matemática del sistema base WPEB.
-
-\begin{table}[H]
-\centering
-\caption{Nomenclatura del sistema base WPEB}
-\label{tab:nomenclatura_wpeb}
-\begin{tabular}{@{}p{2.8cm} p{9.2cm} p{2.5cm}@{}}
-\hline
-\textbf{Símbolo} & \textbf{Descripción} & \textbf{Unidad} \\
-\hline
-$W$ & Capacidad eólica instalada & MW \\
-$P$ & Capacidad fotovoltaica instalada & MW \\
-$E$ & Capacidad nominal del electrolizador & MW \\
-$B^{P}$ & Potencia nominal de la batería & MW \\
-$B^{E}$ & Capacidad energética de la batería & MWh \\
-$p_{wt}(t)$ & Potencia de una turbina eólica en el instante $t$ & MW \\
-$P_{wt}(t)$ & Potencia eólica total en el instante $t$ & MW \\
-$P_{pv}(t)$ & Potencia fotovoltaica en el instante $t$ & MW \\
-$P_{ren}(t)$ & Potencia renovable total en el instante $t$ & MW \\
-$P_{el}(t)$ & Potencia absorbida por el electrolizador en el instante $t$ & MW \\
-$P_{el}^{min}$ & Potencia mínima de operación del electrolizador & MW \\
-$P_{grid}(t)$ & Potencia vendida a la red en el instante $t$ & MW \\
-$P_{ch}(t)$ & Potencia de carga de la batería en el instante $t$ & MW \\
-$P_{dis}(t)$ & Potencia de descarga de la batería en el instante $t$ & MW \\
-$SOC(t)$ & Estado de carga de la batería en el instante $t$ & MWh \\
-$E_{wt}$ & Energía eólica anual & MWh \\
-$E_{pv}$ & Energía fotovoltaica anual & MWh \\
-$E_{ren}$ & Energía renovable anual total & MWh \\
-$E_{el}$ & Energía anual consumida por el electrolizador & MWh \\
-$E_{grid}$ & Energía anual vendida a la red & MWh \\
-$E_{use}$ & Energía útil anual del sistema & MWh \\
-$M_{H_2}$ & Masa anual de hidrógeno producida & kg \\
-$CF_{el}$ & Factor de capacidad del electrolizador & -- \\
-$AGSR$ & Tasa anual de venta de energía a la red & -- \\
-$AGSR^{max}$ & Máximo valor permitido de la tasa anual de venta a red & -- \\
-$NPC$ & Costo presente neto del sistema & USD \\
-$NPC_j$ & Costo presente neto del componente $j$ & USD \\
-$C_{ann}$ & Costo anualizado del sistema & USD/año \\
-$C_{tot}$ & Capacidad renovable total instalada & MW \\
-$C^{cap}_j$ & Costo de inversión del componente $j$ & USD \\
-$C^{rep}_j$ & Costo de reemplazo del componente $j$ & USD \\
-$C^{om}_j$ & Costo de operación y mantenimiento del componente $j$ & USD \\
-$K_j$ & Capacidad instalada del componente $j$ & según componente \\
-\hline
-\end{tabular}
-\end{table}
-
-
-\begin{table}[H]
-\centering
-\caption{Nomenclatura del sistema base WPEB}
-\label{tab:nomenclatura_wpeb_parametros}
-\begin{tabular}{@{}p{2.8cm} p{9.2cm} p{2.5cm}@{}}
-\hline
-\textbf{Símbolo} & \textbf{Descripción} & \textbf{Unidad} \\
-\hline
-
-$c^{cap}_j$ & Costo unitario de inversión del componente $j$ & CNY/unidad \\
-$c^{rep}_j$ & Costo unitario de reemplazo del componente $j$ & CNY/unidad \\
-$c^{om}_j$ & Costo unitario anual de operación y mantenimiento del componente $j$ & CNY/unidad-año \\
-$CRF(i,N)$ & Factor de recuperación de capital & -- \\
-$LCOE$ & Costo nivelado de la energía & CNY/kWh \\
-$LCOH$ & Costo nivelado del hidrógeno & CNY/kg \\
-$v(t)$ & Velocidad del viento en el instante $t$ & m/s \\
-$v_{in}$ & Velocidad de arranque de la turbina eólica & m/s \\
-$v_r$ & Velocidad nominal de la turbina eólica & m/s \\
-$v_{out}$ & Velocidad de corte de la turbina eólica & m/s \\
-$P_{wt}^{r}$ & Potencia nominal de una turbina eólica & MW \\
-$N_{wt}$ & Número de turbinas eólicas & -- \\
-$G(t)$ & Irradiancia solar en el instante $t$ & kW/m$^2$ \\
-$T_{amb}(t)$ & Temperatura ambiente en el instante $t$ & $^\circ$C \\
-$T_{cell}(t)$ & Temperatura de la celda fotovoltaica en el instante $t$ & $^\circ$C \\
-$T_{NOCT}$ & Temperatura nominal de operación de la celda & $^\circ$C \\
-$f_T(t)$ & Factor de corrección térmica del sistema fotovoltaico & -- \\
-$f_{der}$ & Factor de pérdidas del sistema fotovoltaico & -- \\
-$\gamma$ & Coeficiente de temperatura de potencia del sistema fotovoltaico & 1/$^\circ$C \\
-$\eta_{el}$ & Eficiencia del electrolizador & -- \\
-$\eta_{rt}$ & Eficiencia de ciclo completo de la batería & -- \\
-$\eta_{ch}$ & Eficiencia de carga de la batería & -- \\
-$\eta_{dis}$ & Eficiencia de descarga de la batería & -- \\
-$\beta_B$ & Razón entre potencia de batería y capacidad del electrolizador & -- \\
-$\tau_B$ & Duración nominal de la batería & h \\
-$\alpha_{el}^{min}$ & Fracción mínima de carga del electrolizador & -- \\
-$\alpha_E^{max}$ & Fracción máxima del electrolizador respecto a la capacidad renovable total & -- \\
-$HHV_{H_2}$ & Poder calorífico superior del hidrógeno & kWh/kg \\
-$i$ & Tasa de descuento real & -- \\
-$N$ & Vida útil del proyecto & años \\
-$\mathcal{R}_j$ & Conjunto de años en que se reemplaza el componente $j$ & -- \\
-$t$ & Índice temporal horario & -- \\
-$T$ & Número total de horas simuladas & h \\
-$j$ & Índice de componente del sistema & -- \\
-\hline
-\end{tabular}
-\end{table}
-
-
+\label{sec:wpeb}
 
 \subsection{Modelado Matemático del Sistema Base WPEB}
 
-En esta investigación se adopta como modelo base el sistema \textit{Wind--Photovoltaic--Electrolysis--Battery} (WPEB), implementado en el notebook de referencia utilizado para la réplica computacional. Esta configuración representa un sistema híbrido renovable orientado a la producción de hidrógeno, en el cual interactúan generación eólica, generación fotovoltaica, electrólisis, almacenamiento mediante batería y exportación de excedentes a la red \cite{Li2024WPEB}.
+En esta investigación se adopta como modelo base el sistema \textit{Wind--Photovoltaic--Electrolysis--Battery} (WPEB) de Li et al. \cite{Li2024WPEB}: un sistema híbrido renovable orientado a la producción de hidrógeno, en el cual interactúan generación eólica, generación fotovoltaica, electrólisis, almacenamiento mediante batería y exportación de excedentes a la red. Esta sección presenta el modelo tal como lo implementa el simulador de esta tesis, que reconstruye el de Li et al. con los supuestos declarados en el capítulo de metodología; cuando una ecuación se aparta de una lectura literal del artículo, se indica expresamente. Los símbolos se definen en la Nomenclatura. La resolución temporal es horaria, con paso $\Delta t=1$ h sobre un horizonte de $T$ horas.
 
-A diferencia de formulaciones HRES-H$_2$ de carácter más general, el modelo utilizado aquí se limita a los componentes efectivamente considerados en la implementación base. En consecuencia, la formulación matemática se concentra en la relación entre capacidades renovables, operación del electrolizador, apoyo de la batería y aprovechamiento de excedentes, manteniendo coherencia directa con la estructura computacional empleada en la investigación \cite{Li2024WPEB}.
+A diferencia de formulaciones HRES-H$_2$ de carácter más general, el modelo utilizado aquí se limita a los componentes efectivamente considerados en la implementación base. En consecuencia, la formulación matemática se concentra en la relación entre capacidades renovables, operación del electrolizador, apoyo de la batería y aprovechamiento de excedentes \cite{Li2024WPEB}.
 
 \subsubsection{Modelo Eólico}
 
-La potencia entregada por una turbina eólica se representa mediante una función por tramos dependiente de la velocidad del viento \cite{Li2024WPEB,Wang2021HybridSystem}:
-
+La potencia eólica se obtiene de una curva de potencia cúbica por tramos, normalizada por la potencia nominal de la turbina \cite{Li2024WPEB,Wang2021HybridSystem}:
 \begin{equation}
-p_{wt}(t)=
+p^{pu}_{wt,t}=
 \begin{cases}
-0, & v(t)<v_{in} \ \text{o} \ v(t)\geq v_{out} \\[4pt]
-P_{wt}^{r}\left(\dfrac{v(t)^3-v_{in}^3}{v_r^3-v_{in}^3}\right), & v_{in}\leq v(t)<v_r \\[10pt]
-P_{wt}^{r}, & v_r\leq v(t)<v_{out}
+0, & v_t<v_{ci} \ \text{o} \ v_t\geq v_{co}, \\[4pt]
+\dfrac{v_t^3-v_{ci}^3}{v_r^3-v_{ci}^3}, & v_{ci}\leq v_t<v_r, \\[10pt]
+1, & v_r\leq v_t<v_{co}.
 \end{cases}
 \end{equation}
-
-Esta expresión distingue las regiones de no generación, incremento progresivo y operación nominal del aerogenerador \cite{Li2024WPEB,Wang2021HybridSystem}.
-
-Si el parque eólico está compuesto por \(N_{wt}\) turbinas, la potencia total queda dada por:
-
+La expresión distingue las regiones de no generación, de incremento progresivo y de operación nominal del aerogenerador. La potencia del parque se obtiene escalando esa curva por la capacidad eólica instalada:
 \begin{equation}
-P_{wt}(t)=N_{wt}\,p_{wt}(t)
+P_{wt,t}=W\,p^{pu}_{wt,t}\leq W.
 \end{equation}
-
-De este modo, la producción horaria del subsistema eólico se obtiene a partir de la contribución individual de cada turbina \cite{Li2024WPEB}.
-
-En la implementación adoptada, el número de turbinas se aproxima mediante:
-
-\begin{equation}
-N_{wt}=\mathrm{round}\left(\frac{W}{P_{wt}^{r}}\right)
-\end{equation}
-
-Con ello, la capacidad eólica instalada \(W\) se traduce en un número entero de unidades de generación.
-
-Además, la potencia total no puede superar la capacidad instalada:
-
-\begin{equation}
-P_{wt}(t)\leq W
-\end{equation}
-
-Esta cota garantiza consistencia entre el dimensionamiento del parque y la potencia efectivamente disponible.
+Esta tesis trata $W$ como una capacidad agregada continua: no la convierte en un número entero de turbinas ni aplica un recorte posterior que dependa de ese redondeo. La idealización equivale a planificar capacidad agregada, no a seleccionar equipos, y es la que permite que $W$ sea la coordenada continua del dominio mixto de la Sección~\ref{sec:formulacion}.
 
 \subsubsection{Modelo Fotovoltaico}
 
-La producción fotovoltaica depende de la irradiancia, de la temperatura ambiente y de las pérdidas del sistema. Para aproximar este comportamiento, primero se estima la temperatura de la celda mediante una relación tipo NOCT \cite{Li2024WPEB,Khan2022Review}:
-
+La producción fotovoltaica depende de la irradiancia, de la temperatura ambiente y de las pérdidas del sistema. Primero se estima la temperatura de la celda mediante una relación tipo NOCT \cite{Li2024WPEB,Khan2022Review},
 \begin{equation}
-T_{cell}(t)=T_{amb}(t)+\left(\frac{T_{NOCT}-20}{0.8}\right)G(t)
+T_{cell,t}=T_{amb,t}+\frac{T_{NOCT}-20}{0{,}8}\,G_t,
+\end{equation}
+y con ella un factor de corrección térmica respecto de las condiciones estándar \cite{Li2024WPEB}:
+\begin{equation}
+f_{T,t}=1+\gamma\left(T_{cell,t}-25\right).
+\end{equation}
+La producción relativa del campo combina la disponibilidad del recurso, el factor de pérdidas y el efecto térmico:
+\begin{equation}
+r_{pv,t}=G_t\,f_{der}\,\max\left(f_{T,t},0\right).
 \end{equation}
 
-Así se obtiene una aproximación de la temperatura de operación del módulo bajo las condiciones ambientales del instante \(t\).
-
-Luego se define un factor de corrección térmica:
-
+La capacidad fotovoltaica $P$ corresponde a la potencia nominal del inversor, en corriente alterna. El campo de módulos se sobredimensiona respecto de ella en la relación $\kappa_{DC/AC}$, la potencia en corriente continua se convierte con la eficiencia del inversor $\eta_{inv}$ y el resultado se recorta a la potencia nominal:
 \begin{equation}
-f_T(t)=1+\gamma\left(T_{cell}(t)-25\right)
+P_{pv,t}=\min\left(\eta_{inv}\,\kappa_{DC/AC}\,P\,r_{pv,t},\;P\right).
 \end{equation}
-
-Este término corrige el rendimiento del sistema fotovoltaico respecto de las condiciones estándar \cite{Li2024WPEB}.
-
-La producción relativa del subsistema se expresa como:
-
-\begin{equation}
-r_{pv}(t)=G(t)\,f_{der}\,\max\left(f_T(t),0\right)
-\end{equation}
-
-Aquí se combinan la disponibilidad del recurso solar, el factor de pérdidas y el efecto térmico.
-
-Finalmente, la potencia fotovoltaica instantánea se calcula como:
-
-\begin{equation}
-P_{pv}(t)=P\cdot \mathrm{clip}\left(r_{pv}(t),0,1\right)
-\end{equation}
-
-Con esta formulación, la producción queda limitada al rango físicamente realizable del sistema \cite{Li2024WPEB}.
-
-En particular, debe cumplirse:
-
-\begin{equation}
-P_{pv}(t)\leq P
-\end{equation}
-
-lo que impide que la generación supere la capacidad nominal instalada.
+Así, $P_{pv,t}\leq P$ en todas las horas. El recorte en el inversor (\textit{clipping}) es la consecuencia directa del sobredimensionamiento del campo.
 
 \subsubsection{Generación Renovable Total}
 
-La potencia renovable total del sistema se obtiene sumando las contribuciones eólica y fotovoltaica:
-
+La potencia renovable total es la suma de las contribuciones eólica y fotovoltaica,
 \begin{equation}
-P_{ren}(t)=P_{wt}(t)+P_{pv}(t)
+P_{ren,t}=P_{wt,t}+P_{pv,t},
 \end{equation}
-
-Esta magnitud representa la disponibilidad instantánea de energía renovable para alimentar al electrolizador, cargar la batería o exportar excedentes \cite{Li2024WPEB}.
-
-La energía eólica anual se calcula como:
-
+y representa la energía disponible en cada hora para alimentar al electrolizador, cargar la batería o exportar excedentes \cite{Li2024WPEB}. La carga auxiliar de la planta se fija en cero, de modo que toda la generación queda disponible para el despacho. Las energías anuales se obtienen agregando la producción horaria:
 \begin{equation}
-E_{wt}=\sum_{t=1}^{T}P_{wt}(t)
+E_{wt}=\sum_{t=1}^{T}P_{wt,t}\,\Delta t,\qquad
+E_{pv}=\sum_{t=1}^{T}P_{pv,t}\,\Delta t,\qquad
+E_{ren}=E_{wt}+E_{pv}=\sum_{t=1}^{T}P_{ren,t}\,\Delta t.
 \end{equation}
-
-mientras que la energía fotovoltaica anual se obtiene mediante:
-
-\begin{equation}
-E_{pv}=\sum_{t=1}^{T}P_{pv}(t)
-\end{equation}
-
-Ambas expresiones agregan la producción horaria de cada tecnología a lo largo del horizonte de simulación \cite{Li2024WPEB}.
-
-Por tanto, la energía renovable anual total queda dada por:
-
-\begin{equation}
-E_{ren}=E_{wt}+E_{pv}
-\end{equation}
-
-De forma equivalente, también puede escribirse como:
-
-\begin{equation}
-E_{ren}=\sum_{t=1}^{T}P_{ren}(t)
-\end{equation}
-
-En ambos casos se cuantifica la energía renovable total disponible en el sistema durante el año analizado.
 
 \subsubsection{Modelo del Electrolizador}
 
-El electrolizador es el componente encargado de transformar la electricidad renovable en hidrógeno. Su potencia absorbida en cada instante se encuentra limitada tanto por la generación disponible como por su capacidad nominal \cite{Li2024WPEB,Khan2022Review}:
-
+El electrolizador convierte la electricidad renovable en hidrógeno. Su consumo horario $P_{el,t}$ está limitado por su capacidad nominal $E$ y por una carga mínima técnica $\rho_{min}E$: en cada hora el equipo está apagado o funciona entre ese mínimo y su potencia nominal \cite{Li2024WPEB,Khan2022Review},
 \begin{equation}
-P_{el}(t)=\min\left(P_{ren}(t),E\right)
+P_{el,t}\in\{0\}\cup\left[\rho_{min}E,\;E\right].
 \end{equation}
-
-Esta asignación representa la potencia inicialmente destinada al proceso de electrólisis.
-
-No obstante, el modelo considera una carga mínima de operación:
-
+La regla que fija el valor de $P_{el,t}$ en cada hora, incluido el apoyo de la batería para alcanzar la carga mínima, forma parte del despacho horario. La energía anual consumida y el factor de capacidad del electrolizador son
 \begin{equation}
-P_{el}^{min}=\alpha_{el}^{min}E
+E_{el}=\sum_{t=1}^{T}P_{el,t}\,\Delta t,\qquad
+CF_{el}=\frac{E_{el}}{E\,T\,\Delta t}.
 \end{equation}
+El factor de capacidad se mide sobre la carga en corriente alterna, que es la potencia contratada.
 
-Dicho umbral establece el nivel mínimo a partir del cual el electrolizador puede mantenerse operando de manera técnicamente aceptable \cite{Li2024WPEB}.
-
-Si la potencia disponible no alcanza ese umbral y la batería no logra completarlo, el equipo se apaga, lo que se expresa como:
-
+El electrolizador se alimenta en corriente continua, de modo que la energía que llega a las celdas descuenta la eficiencia del rectificador $\eta_{rect}$. La masa anual de hidrógeno producida es
 \begin{equation}
-P_{el}(t)=0
+M_{H_2}=\frac{1000\,\eta_{rect}\,\eta_{el}\,E_{el}}{HHV_{H_2}},
 \end{equation}
-
-De este modo, la lógica operativa del modelo evita estados intermedios de funcionamiento no viables \cite{Li2024WPEB}.
-
-La energía anual consumida por el electrolizador se obtiene agregando su operación horaria:
-
-\begin{equation}
-E_{el}=\sum_{t=1}^{T}P_{el}(t)
-\end{equation}
-
-Esta cantidad representa la fracción de la generación renovable que efectivamente se destina a producir hidrógeno.
-
-La masa anual de hidrógeno producida se estima mediante:
-
-\begin{equation}
-M_{H_2}=\frac{E_{el}\cdot 1000\cdot \eta_{el}}{HHV_{H_2}}
-\end{equation}
-
-La relación anterior conecta la energía consumida por el electrolizador con la producción de hidrógeno, considerando la eficiencia del proceso y el contenido energético del vector \cite{Li2024WPEB}.
-
-Por su parte, el factor de capacidad del electrolizador se define como:
-
-\begin{equation}
-CF_{el}=\frac{E_{el}}{E\cdot T}
-\end{equation}
-
-Este indicador resulta útil para evaluar el grado de utilización anual del equipo respecto de su potencial máximo de operación \cite{Li2024WPEB}.
+donde el factor 1000 convierte MWh en kWh y el cociente $HHV_{H_2}/\eta_{el}$ es el consumo específico de electricidad por kilogramo de hidrógeno \cite{Li2024WPEB}.
 
 \subsubsection{Modelo de la Batería}
 
-En el sistema base WPEB, la batería no constituye una variable de decisión independiente. Su tamaño se define como una proporción de la capacidad del electrolizador \cite{Li2024WPEB}.
-
-La potencia nominal de la batería se calcula como:
-
+En el sistema base WPEB, la batería no constituye una variable de decisión independiente. Su potencia es una fracción $\beta_B$ de la capacidad del electrolizador, redondeada hacia arriba al paquete comercial de 2,5 MW, y su duración es de una hora \cite{Li2024WPEB}:
 \begin{equation}
-B^{P}=\beta_B E
+B^{P}=2{,}5\left\lceil\frac{\beta_B\,E}{2{,}5}\right\rceil,\qquad
+B^{E}=B^{P}h_B,\qquad
+h_B=1\ \text{h}.
 \end{equation}
+En las instancias mixtas de esta tesis, en cambio, la potencia y la duración de la batería se eligen de catálogos discretos (Sección~\ref{sec:formulacion}).
 
-Así, el tamaño del subsistema de almacenamiento queda directamente condicionado por la decisión adoptada para el electrolizador.
-
-Su capacidad energética se expresa como:
-
+El estado de carga debe permanecer dentro de su rango físico y las potencias de carga y descarga están acotadas por la potencia nominal \cite{Li2024WPEB}:
 \begin{equation}
-B^{E}=B^{P}\tau_B
+0\leq SOC_t\leq B^{E},\qquad
+0\leq P_{carga,t}\leq B^{P},\qquad
+0\leq P_{desc,t}\leq B^{P}.
 \end{equation}
-
-La batería queda entonces definida por su potencia nominal y por su duración equivalente.
-
-El estado de carga debe mantenerse dentro del rango físico admisible:
-
+Las eficiencias de carga y de descarga reparten simétricamente la eficiencia de ciclo completo $\eta_{rt}$ y descuentan además el convertidor bidireccional $\eta_{bid}$, por el que la energía pasa en ambos sentidos:
 \begin{equation}
-0\leq SOC(t)\leq B^{E}
+\eta_{carga}=\eta_{desc}=\sqrt{\eta_{rt}}\;\eta_{bid}.
 \end{equation}
-
-Esta restricción impide sobrecargas o descargas imposibles desde el punto de vista operativo \cite{Li2024WPEB}.
-
-A partir de la eficiencia de ciclo completo \(\eta_{rt}\), se adoptan las eficiencias de carga y descarga:
-
+La batería parte descargada, $SOC_0=0$, y su estado de carga evoluciona como
 \begin{equation}
-\eta_{ch}=\eta_{dis}=\sqrt{\eta_{rt}}
+SOC_{t+1}=SOC_t+\eta_{carga}\,P_{carga,t}\,\Delta t-\frac{P_{desc,t}\,\Delta t}{\eta_{desc}},
 \end{equation}
-
-Con esta hipótesis, las pérdidas del almacenamiento se distribuyen simétricamente entre ambos procesos.
-
-Durante los periodos con excedente renovable, la potencia de carga está acotada por:
-
-\begin{equation}
-0\leq P_{ch}(t)\leq B^{P}
-\end{equation}
-
-La evolución del estado de carga durante la carga se expresa como:
-
-\begin{equation}
-SOC(t+1)=SOC(t)+P_{ch}(t)\eta_{ch}
-\end{equation}
-
-Esto refleja el incremento de energía almacenada una vez consideradas las pérdidas del proceso de carga \cite{Li2024WPEB}.
-
-Durante los periodos de apoyo al electrolizador, la descarga debe satisfacer:
-
-\begin{equation}
-0\leq P_{dis}(t)\leq B^{P}
-\end{equation}
-
-y la dinámica correspondiente queda dada por:
-
-\begin{equation}
-SOC(t+1)=SOC(t)-\frac{P_{dis}(t)}{\eta_{dis}}
-\end{equation}
-
-En este caso, la energía útil extraída del almacenamiento incorpora las pérdidas asociadas a la descarga \cite{Li2024WPEB}.
+donde, por la prioridad del despacho, en una misma hora la batería sólo carga o sólo descarga.
 
 \subsubsection{Despacho Horario del Sistema}
 
-La operación horaria del sistema sigue una lógica secuencial. En primer lugar, la energía renovable disponible se asigna al electrolizador. Si éste no alcanza su carga mínima, la batería puede descargarse para sostener la operación. Cuando existe excedente renovable una vez abastecido el electrolizador, dicho excedente se utiliza para cargar la batería. Finalmente, si aún sobra energía, ésta se vende a la red \cite{Li2024WPEB}.
-
-En consecuencia, la potencia exportada se calcula como:
-
+La operación horaria sigue una prioridad fija \cite{Li2024WPEB}. La generación renovable se asigna primero al electrolizador, hasta su capacidad nominal. Si no alcanza la carga mínima, la batería puede descargarse para completarla; si ni siquiera así se alcanza, el electrolizador se apaga en esa hora. El excedente que queda después de abastecer al electrolizador carga la batería, dentro de sus límites de potencia y de energía, y el remanente se exporta a la red:
 \begin{equation}
-P_{grid}(t)=\max\left(P_{ren}(t)-P_{el}(t)-P_{ch}(t),\,0\right)
+P_{grid,t}=P_{ren,t}+P_{desc,t}-P_{el,t}-P_{carga,t}\geq0.
 \end{equation}
-
-Esta expresión cuantifica la parte de la energía renovable que no es absorbida ni por la electrólisis ni por el almacenamiento.
-
-La energía anual vendida a la red se obtiene mediante:
-
+No se admiten compras de electricidad a la red. El simulador admite además un límite a la potencia exportable, por encima del cual la energía remanente se vierte ($P_{vert,t}$); ninguna instancia de esta tesis impone ese límite, de modo que $P_{vert,t}=0$ en todas las horas. El balance horario
 \begin{equation}
-E_{grid}=\sum_{t=1}^{T}P_{grid}(t)
+P_{ren,t}+P_{desc,t}=P_{el,t}+P_{carga,t}+P_{grid,t}+P_{vert,t}
 \end{equation}
+se cumple por construcción y su residuo se registra para cada diseño evaluado. La regla de carga mínima admite dos variantes, una para la instancia base y otra para las instancias mixtas, que se definen en la Sección~\ref{sec:politicas_despacho}.
 
-Así se acumula la exportación horaria de excedentes a lo largo de todo el horizonte temporal.
+La energía anual vendida a la red es
+\begin{equation}
+E_{grid}=\sum_{t=1}^{T}P_{grid,t}\,\Delta t.
+\end{equation}
 
 \subsection{Variables de Decisión}
 
-De acuerdo con la implementación base del sistema WPEB, las variables de decisión principales se definen como \cite{Li2024WPEB}:
-
+En la formulación base de Li et al., las variables de decisión son las capacidades eólica, fotovoltaica y del electrolizador \cite{Li2024WPEB}:
 \begin{equation}
 \mathbf{x}=
 \left[
 W,\,
 P,\,
 E
-\right]^T
+\right]^T.
 \end{equation}
-
-El vector de decisión contiene la capacidad eólica instalada, la capacidad fotovoltaica instalada y la capacidad nominal del electrolizador.
-
-A partir de estas variables, las capacidades de la batería se generan de forma dependiente:
-
-\begin{equation}
-B^{P}=\beta_B E
-\end{equation}
-
-\begin{equation}
-B^{E}=B^{P}\tau_B
-\end{equation}
-
-Por tanto, el problema de optimización no ajusta de manera independiente el tamaño de la batería, sino que lo deriva del tamaño seleccionado para el electrolizador \cite{Li2024WPEB}.
+Como la capacidad renovable total es fija, $P=C_{tot}-W$, de modo que los grados de libertad efectivos son $W$ y $E$. La batería se deriva del electrolizador según la regla anterior, por lo que el problema base no ajusta su tamaño de manera independiente \cite{Li2024WPEB}. La formulación de esta tesis (Sección~\ref{sec:formulacion}) amplía este vector con el número de módulos del electrolizador y con la potencia y la duración de la batería.
 
 \subsection{Restricciones del Problema}
 
 \subsubsection{Restricción de Capacidad Renovable Total}
 
-El sistema base WPEB impone una capacidad renovable total fija, de manera que la distribución entre recurso eólico y fotovoltaico debe satisfacer:
-
+El sistema base WPEB impone una capacidad renovable total fija, de manera que el reparto entre recurso eólico y fotovoltaico debe satisfacer
 \begin{equation}
-W+P=C_{tot}
+W+P=C_{tot},\qquad W\geq0,\qquad P\geq0,
 \end{equation}
-
-Esta igualdad obliga al modelo a buscar la mejor combinación entre ambas tecnologías manteniendo constante la capacidad total instalada \cite{Li2024WPEB}.
-
-En el caso base considerado:
-
-\begin{equation}
-C_{tot}=200\ \text{MW}
-\end{equation}
-
-Este valor corresponde a la configuración base empleada en la simulación del sistema \cite{Li2024WPEB}.
+con $C_{tot}=200$ MW en el caso base. Esta igualdad obliga a buscar la mejor combinación entre ambas tecnologías manteniendo constante la capacidad total instalada \cite{Li2024WPEB}.
 
 \subsubsection{Restricción de Tamaño del Electrolizador}
 
-La capacidad del electrolizador debe ser positiva y estar acotada por una fracción máxima de la capacidad renovable total:
-
+La capacidad del electrolizador debe ser positiva y estar acotada por una fracción $\alpha_E^{max}=0{,}5$ de la capacidad renovable total, lo que evita sobredimensionar la electrólisis respecto de la infraestructura renovable disponible \cite{Li2024WPEB}:
 \begin{equation}
-0<E\leq \alpha_E^{max}(W+P)
+0<E\leq\alpha_E^{max}\,C_{tot}.
 \end{equation}
 
-Con ello se evita un sobredimensionamiento del proceso de electrólisis respecto de la infraestructura renovable disponible \cite{Li2024WPEB}.
+\subsubsection{Restricciones de Operación de la Batería y del Electrolizador}
 
-\subsubsection{Restricciones de la Batería}
-
-Dado que la batería depende del tamaño del electrolizador, se mantienen las relaciones:
-
+El estado de carga y las potencias de la batería deben respetar los límites del modelo de la batería, y el electrolizador sólo puede estar apagado o funcionar por encima de su carga mínima técnica:
 \begin{equation}
-B^{P}=\beta_B E
+0\leq SOC_t\leq B^{E},\qquad
+P_{carga,t},\,P_{desc,t}\leq B^{P},\qquad
+P_{el,t}\in\{0\}\cup\left[\rho_{min}E,\;E\right],\qquad\forall t.
 \end{equation}
-
-\begin{equation}
-B^{E}=B^{P}\tau_B
-\end{equation}
-
-Estas expresiones fijan, respectivamente, la potencia nominal y la capacidad energética del sistema de almacenamiento.
-
-Asimismo, el estado de carga debe satisfacer:
-
-\begin{equation}
-0\leq SOC(t)\leq B^{E}, \qquad \forall t
-\end{equation}
-
-de modo que la operación de la batería permanezca siempre dentro de límites físicamente admisibles \cite{Li2024WPEB}.
-
-\subsubsection{Restricción de Operación Mínima del Electrolizador}
-
-El electrolizador sólo puede estar apagado o funcionar por encima de su carga mínima técnica:
-
-\begin{equation}
-P_{el}(t)\in \{0\}\cup\left[P_{el}^{min},E\right], \qquad \forall t
-\end{equation}
-
-Esta condición resume la lógica discreta de operación adoptada en el modelo \cite{Li2024WPEB}.
-
-Recordando además que:
-
-\begin{equation}
-P_{el}^{min}=\alpha_{el}^{min}E
-\end{equation}
-
-la carga mínima queda determinada como una fracción de la capacidad nominal instalada.
+Estas condiciones resumen la lógica operativa adoptada en el modelo \cite{Li2024WPEB}.
 
 \subsubsection{Restricción sobre la Fracción de Energía Vendida a la Red}
 
-La factibilidad global del sistema se evalúa mediante el indicador \textit{Annual Grid Sales Rate}:
-
+La factibilidad global del sistema se evalúa mediante el indicador \textit{Annual Grid Sales Rate}, la fracción de la energía renovable anual que no se aprovecha internamente y termina exportada \cite{Li2024WPEB}. Para que una solución sea admisible debe cumplirse
 \begin{equation}
-AGSR=\frac{E_{grid}}{E_{ren}}
+\mathrm{AGSR}=\frac{E_{grid}}{E_{ren}}\leq\mathrm{AGSR}_{max},
 \end{equation}
+lo que limita el nivel de excedentes no absorbidos por la electrólisis ni por el almacenamiento.
 
-Esta razón mide la fracción de la energía renovable anual total que no es aprovechada internamente y termina siendo exportada \cite{Li2024WPEB}.
-
-Para que una solución sea admisible, debe cumplirse:
-
-\begin{equation}
-AGSR\leq AGSR^{max}
-\end{equation}
-
-De esta manera, se limita el nivel de excedentes no absorbidos por la electrólisis ni por el almacenamiento.
-
-\subsection{Funciones Objetivo}
+\subsection{Función Objetivo e Indicadores Económicos}
 
 \subsubsection{Costo Presente Neto}
 
 La evaluación económica del sistema se basa en el costo presente neto total \cite{Li2024WPEB,Khan2022Review}:
-
 \begin{equation}
-NPC=NPC_{wt}+NPC_{pv}+NPC_{el}+NPC_{bat}+NPC_{H_2,alm}
+NPC=NPC_{wt}+NPC_{pv}+NPC_{el}+NPC_{bat}+NPC_{H_2,alm}.
 \end{equation}
-
-Así, el costo global se descompone en los aportes de los principales componentes del sistema.
-
-Para un componente genérico \(j\), se considera:
-
+Para un componente genérico $j$ se reúnen inversión, reemplazos y operación y mantenimiento, y se descuenta el valor residual $S_j$ al término del horizonte:
 \begin{equation}
-NPC_j=C^{cap}_j+C^{rep}_j+C^{om}_j-S_j
+NPC_j=C^{cap}_j+C^{rep}_j+C^{om}_j-S_j,
 \end{equation}
-
-lo que permite reunir inversión, reemplazos y operación y mantenimiento, descontando el valor residual $S_j$ al término del horizonte.
-
-El costo de inversión se calcula como:
-
+con
 \begin{equation}
-C^{cap}_j=K_jc^{cap}_j
+C^{cap}_j=K_j\,c^{cap}_j,\qquad
+C^{rep}_j=\sum_{m\in\mathcal{R}_j}\frac{K_j\,c^{rep}_j}{(1+i)^m},\qquad
+C^{om}_j=\sum_{y=1}^{N}\frac{K_j\,c^{om}_j}{(1+i)^y}.
 \end{equation}
-
-mientras que el costo de reemplazo se expresa como:
-
-\begin{equation}
-C^{rep}_j=\sum_{m\in\mathcal{R}_j}\frac{K_jc^{rep}_j}{(1+i)^m}
-\end{equation}
-
-y el costo de operación y mantenimiento queda dado por:
-
-\begin{equation}
-C^{om}_j=\sum_{y=1}^{N}\frac{K_jc^{om}_j}{(1+i)^y}
-\end{equation}
-
-Con este esquema, todos los costos relevantes se expresan en valor presente y pueden compararse dentro de un marco económico homogéneo \cite{Li2024WPEB,Khan2022Review}.
+Con este esquema, todos los costos se expresan en valor presente y pueden compararse en un marco económico homogéneo \cite{Li2024WPEB,Khan2022Review}. En la batería, el producto $K_j\,c_j$ se desdobla en un término por potencia instalada y otro por energía almacenable, según el reparto descrito en la Sección~\ref{sec:reparto_bateria}.
 
 \subsubsection{Costo Anualizado}
 
 El costo anual equivalente del sistema se obtiene mediante el factor de recuperación de capital:
-
 \begin{equation}
-CRF(i,N)=\frac{i(1+i)^N}{(1+i)^N-1}
+CRF(i,N)=\frac{i(1+i)^N}{(1+i)^N-1},\qquad
+C_{ann}=CRF(i,N)\cdot NPC.
 \end{equation}
-
-A partir de él, el costo anualizado se define como:
-
-\begin{equation}
-C_{ann}=CRF(i,N)\cdot NPC
-\end{equation}
-
-Esta transformación permite expresar el costo total del proyecto como una magnitud anual comparable con la energía producida o utilizada \cite{Li2024WPEB,Khan2022Review}.
+Esta transformación expresa el costo total del proyecto como una magnitud anual comparable con la energía producida o utilizada \cite{Li2024WPEB,Khan2022Review}.
 
 \subsubsection{Costo Nivelado de la Energía}
 
-La función objetivo principal del modelo es el costo nivelado de la energía:
-
+La función objetivo del modelo es el costo nivelado de la energía, que relaciona el costo anualizado con la energía útil anual \cite{Li2024WPEB,Khan2022Review}:
 \begin{equation}
-LCOE=\frac{C_{ann}}{E_{use}\cdot 1000},\qquad
-E_{use}=\sum_{t=1}^{8760}(P_{el,t}+P_{grid,t})\Delta t,
-\quad \Delta t=1\ \mathrm{h}
+LCOE=\frac{C_{ann}}{1000\,E_{use}},\qquad
+E_{use}=E_{el}+E_{grid}=\sum_{t=1}^{T}\left(P_{el,t}+P_{grid,t}\right)\Delta t.
 \end{equation}
-
-Esta métrica relaciona el costo anualizado del sistema con la energía útil anual total \cite{Li2024WPEB,Khan2022Review}.
-
-Por tanto, se considera tanto la energía destinada a electrólisis como la energía vendida a la red. $E_{use}$ se expresa en MWh/año y el factor 1000 convierte el denominador a kWh/año \cite{Li2024WPEB}.
+La energía útil considera tanto la destinada a electrólisis como la vendida a la red. $E_{use}$ se expresa en MWh/año y el factor 1000 convierte el denominador a kWh/año \cite{Li2024WPEB}.
 
 \subsubsection{Costo Nivelado del Hidrógeno}
 
-Como indicador complementario, también se calcula el costo nivelado del hidrógeno:
-
+Como indicador complementario se calcula también el costo nivelado del hidrógeno:
 \begin{equation}
-LCOH_{tesis}=\frac{C_{ann}}{M_{H_2}}
+LCOH_{tesis}=\frac{C_{ann}}{M_{H_2}}.
 \end{equation}
-
-Este cociente asigna todo el costo anualizado del sistema al hidrógeno y no descuenta créditos por electricidad exportada. Se informa como indicador secundario y no integra la función objetivo. Dado que Li et al. remite parte de su evaluación económica a un modelo antecedente \cite{Li2023TechnoEconomic}, el valor se denomina ``LCOH según esta tesis'' y no se presenta como directamente equivalente al publicado.
+Este cociente asigna todo el costo anualizado del sistema al hidrógeno y no descuenta créditos por electricidad exportada. Se informa como indicador secundario y no integra la función objetivo. Dado que Li et al. remiten parte de su evaluación económica a un modelo antecedente \cite{Li2023TechnoEconomic}, el valor se denomina ``LCOH según esta tesis'' y no se presenta como directamente equivalente al publicado.
 
 \subsection{Formulación General del Problema de Optimización}
 
-A partir de los elementos anteriores, el problema de optimización del sistema base WPEB se formula como \cite{Li2024WPEB}:
-
+A partir de los elementos anteriores, el problema de optimización del sistema base WPEB se formula como \cite{Li2024WPEB}
 \begin{equation}
-\min_{\mathbf{x}} \quad LCOE(W,P,E)
+\min_{\mathbf{x}} \quad LCOE(W,P,E),
 \end{equation}
-
-El objetivo consiste en identificar la combinación de capacidades renovables y de electrólisis que minimiza el costo nivelado de la energía.
-
-Las condiciones publicadas y las reglas operacionales se organizan en cinco grupos:
+es decir, como la búsqueda de la combinación de capacidades renovables y de electrólisis que minimiza el costo nivelado de la energía. Las condiciones publicadas y las reglas operacionales se organizan en cinco grupos:
 \begin{align}
 P_{ren,t}+P_{desc,t}&=P_{el,t}+P_{carga,t}+P_{grid,t}+P_{vert,t}, &&\forall t,\\
 W+P&=200,\qquad W\geq0,\quad P\geq0,\\
-0<E&\leq0{,}5(W+P),\\
+0<E&\leq0{,}5\,(W+P),\\
 0\leq SOC_t&\leq B^E,\quad
-P_{carga,t},P_{desc,t}\leq B^P, &&\forall t,\\
+P_{carga,t},P_{desc,t}\leq B^P,\quad
+P_{el,t}\in\{0\}\cup\left[\rho_{min}E,\,E\right], &&\forall t,\\
 \mathrm{AGSR}&=\frac{\sum_tP_{grid,t}\Delta t}{\sum_tP_{ren,t}\Delta t}\leq0{,}20.
 \end{align}
-Además, la carga del electrolizador es nula o pertenece al intervalo entre su carga mínima y su potencia nominal. Los límites de batería y carga mínima forman parte del simulador adoptado; no deben atribuirse sin distinción a la ecuación de restricciones publicada por Li et al.
+Los límites de batería y de carga mínima forman parte del simulador adoptado; no deben atribuirse sin distinción a la ecuación de restricciones publicada por Li et al.
 
-En conjunto, el problema consiste en encontrar la combinación óptima de capacidad eólica, capacidad fotovoltaica y capacidad del electrolizador que minimice el costo nivelado de la energía, manteniendo la coherencia física del sistema, la factibilidad del despacho horario y un nivel acotado de venta de excedentes a la red \cite{Li2024WPEB}.
+En conjunto, el problema consiste en encontrar la combinación de capacidad eólica, capacidad fotovoltaica y capacidad del electrolizador que minimiza el costo nivelado de la energía, manteniendo la coherencia física del sistema, la factibilidad del despacho horario y un nivel acotado de venta de excedentes a la red \cite{Li2024WPEB}.
 
 \subsection{Comentario sobre el Alcance del Modelo}
+\label{sec:alcance_wpeb}
 
-Conviene señalar que esta formulación reconstruye parcialmente el caso base WPEB utilizado en esta investigación. Aunque el sistema puede enmarcarse conceptualmente dentro de los HRES-H$_2$, no representa una cadena completa de hidrógeno con modelado detallado de todos los subsistemas usuales, tales como compresión, celda de combustible o convertidor como variables independientes de optimización \cite{Li2024WPEB,Khan2022Review}.
+Conviene señalar que esta formulación reconstruye parcialmente el caso base WPEB utilizado en esta investigación. Aunque el sistema puede enmarcarse conceptualmente dentro de los HRES-H$_2$, no representa una cadena completa de hidrógeno con modelado detallado de todos los subsistemas usuales: no incluye celda de combustible ni reelectrificación, el almacenamiento de hidrógeno tiene capacidad fija y la compresión y los convertidores no son variables independientes de optimización \cite{Li2024WPEB,Khan2022Review}.
 
 Se trata de una formulación enfocada en la interacción entre generación renovable, electrólisis, batería auxiliar y exportación de excedentes. La comparación con indicadores publicados permite cuantificar la correspondencia alcanzada, pero no reemplaza los datos y detalles de implementación que el artículo no informa \cite{Li2024WPEB}.
 
@@ -630,9 +257,9 @@ Se trata de una formulación enfocada en la interacción entre generación renov
 
 \subsection{Definición y taxonomía}
 
-Una metaheurística es una estrategia de alto nivel que coordina heurísticas subordinadas para explorar el espacio de soluciones de un problema de optimización, sin garantizar optimalidad pero ofreciendo soluciones de calidad aceptable con un esfuerzo computacional acotado. Su interés en el dimensionamiento de sistemas HRES-H$_2$ proviene de tres características del problema: la no linealidad introducida por las curvas de conversión y por la dinámica de la batería, la ausencia de derivadas explotables, ya que la función objetivo es el resultado de una simulación secuencial y no de una expresión analítica, y la no convexidad de la región factible \cite{Khan2022Review}.
+Una metaheurística es una estrategia de alto nivel que coordina heurísticas subordinadas para explorar el espacio de soluciones de un problema de optimización, sin garantizar optimalidad pero ofreciendo soluciones de calidad aceptable con un esfuerzo computacional acotado \cite{Blum2003Overview,Talbi2009Metaheuristics}. Su interés en el dimensionamiento de sistemas HRES-H$_2$ proviene de tres características del problema: la no linealidad introducida por las curvas de conversión y por la dinámica de la batería, la ausencia de derivadas explotables, ya que la función objetivo es el resultado de una simulación secuencial y no de una expresión analítica, y la no convexidad de la región factible \cite{Khan2022Review}.
 
-Las metaheurísticas se clasifican habitualmente según el número de soluciones que mantienen simultáneamente. Las de \textbf{trayectoria} operan sobre una única solución que transforman iterativamente, como el recocido simulado aplicado a este mismo dominio por Zhang et al. \cite{Zhang2018SA}. Las de \textbf{población} mantienen un conjunto de soluciones que evoluciona de forma conjunta, y se subdividen a su vez en \textbf{algoritmos evolutivos}, que imitan mecanismos de selección natural, herencia y mutación, y \textbf{algoritmos de inteligencia de enjambre}, que reproducen el comportamiento colectivo emergente de grupos de organismos. Este trabajo se centra en las de población para comparar mecanismos evolutivos y de enjambre dentro de una interfaz común y, sobre esa base, en 	extbf{híbridos} que combinan ambos mecanismos o les añaden una búsqueda local; la selección no pretende representar exhaustivamente toda la literatura.
+Las metaheurísticas se clasifican habitualmente según el número de soluciones que mantienen simultáneamente \cite{Blum2003Overview,Talbi2009Metaheuristics}. Las de \textbf{trayectoria} operan sobre una única solución que transforman iterativamente, como el recocido simulado aplicado a este mismo dominio por Zhang et al. \cite{Zhang2018SA}. Las de \textbf{población} mantienen un conjunto de soluciones que evoluciona de forma conjunta, y se subdividen a su vez en \textbf{algoritmos evolutivos}, que imitan mecanismos de selección natural, herencia y mutación, y \textbf{algoritmos de inteligencia de enjambre}, que reproducen el comportamiento colectivo emergente de grupos de organismos. Este trabajo se centra en las de población para comparar mecanismos evolutivos y de enjambre dentro de una interfaz común y, sobre esa base, en un \textbf{híbrido} que combina ambos mecanismos; la selección no pretende representar exhaustivamente toda la literatura.
 
 \subsection{La tensión entre exploración y explotación}
 
@@ -644,7 +271,7 @@ Algunos métodos gestionan este compromiso mediante un parámetro decreciente, c
 
 El resultado de Wolpert y Macready \cite{Wolpert1997NFL} establece que, promediado sobre el conjunto de todos los problemas de optimización posibles, el desempeño de dos algoritmos cualesquiera es idéntico. Su consecuencia práctica es determinante para el diseño de esta investigación: \textbf{no existe una metaheurística universalmente superior}, y cualquier afirmación sobre la superioridad de un algoritmo debe estar acotada a una clase de problemas y sustentada en evidencia empírica.
 
-Este teorema justifica que la selección de un optimizador requiera comparación experimental y que se incluya una búsqueda aleatoria. Si un método no presenta una ventaja detectable frente al muestreo no informado bajo un presupuesto dado, sus resultados no justifican afirmar superioridad para esa instancia; ello no demuestra ausencia de utilidad en otros problemas.
+El teorema motiva, por tanto, que la elección de un optimizador se apoye en una comparación experimental sobre el problema de interés. No implica, en cambio, que deba incluirse una búsqueda aleatoria: esa referencia proviene de la práctica recomendada para evaluar algoritmos aleatorizados \cite{Arcuri2014Hitchhiker} y se justifica en la Sección~\ref{sec:linea_base}.
 
 \subsection{Grey Wolf Optimizer (GWO)}
 
@@ -721,44 +348,107 @@ Si $p<0{,}5$ y $\max_j|A_j|\geq1$, se reemplaza $\mathbf X^*$ por una ballena al
 \end{equation}
 con $b=1$, $l\sim U(-1,1)$ y $p\sim U(0,1)$ sorteados por individuo. Todas las operaciones con vectores son componente a componente.
 
-\subsection{Búsqueda aleatoria como línea base}
+\subsection{Metáforas y novedad en GWO, SHO y WOA}
+\label{sec:metaforas}
 
-La búsqueda aleatoria muestrea configuraciones uniformemente sobre el dominio admisible y retiene la mejor encontrada, sin memoria ni mecanismo de aprendizaje alguno. No es un competidor serio en términos de diseño algorítmico, y esa es precisamente su utilidad: establece el desempeño atribuible exclusivamente al presupuesto de evaluaciones y a la geometría del problema.
+GWO, SHO y WOA pertenecen a una familia numerosa de algoritmos propuestos en la última década que se presentan mediante metáforas de comportamiento animal. Sörensen sostuvo que en esa familia la metáfora tiende a reemplazar la descripción del método en términos de optimización y oculta si el método aporta ideas nuevas \cite{Sorensen2015Metaphor}. Camacho-Villalón, Dorigo y Stützle analizaron por componentes seis de esos algoritmos, entre ellos GWO y WOA, y concluyeron que reutilizan conceptos propuestos antes para PSO \cite{CamachoVillalon2023Exposing}. A raíz de esas críticas, la revista \emph{Swarm Intelligence} declaró que no publicará nuevas metaheurísticas basadas en metáforas salvo que se describan en la terminología estándar de la optimización y demuestren una contribución útil y novedosa \cite{Aranha2022Elephant}.
+
+Las ecuaciones de las secciones anteriores hacen concreta esa crítica para esta tesis. SHO no figura en el análisis de Camacho-Villalón et al., pero comparte con GWO y WOA la misma regla de cerco: un candidato se obtiene restando a una posición guía un coeficiente aleatorio, de amplitud decreciente, multiplicado por la distancia entre esa guía, escalada al azar, y el individuo. Los tres difieren en la guía y en cómo combinan los candidatos: GWO promedia los que inducen sus tres líderes; SHO toma como guía la mejor solución y promedia los candidatos de un grupo de soluciones cercanas a ella; y WOA usa una sola guía, la mejor o una ballena al azar, y con probabilidad 0,5 sustituye el cerco por una espiral alrededor de la mejor. Difieren también en la amplitud inicial del parámetro decreciente: 2 para $a$ y 5 para $h$.
+
+Esta tesis no usa las metáforas como argumento. GWO, SHO y WOA se incluyen por sus mecanismos, la guía y el calendario de contracción, que son distintos de la memoria del enjambre de PSO y de la recombinación del GA, y, en el caso de WOA y SHO, porque cuentan con aplicaciones o estudios publicados que motivan probarlos (Sección~\ref{sec:seleccion_algoritmos}); se describen por sus ecuaciones y se evalúan con el mismo presupuesto, la misma línea base y el mismo óptimo exacto que los demás, que es lo que piden las guías metodológicas del área \cite{LaTorre2021Guidelines}. De ello se siguen dos cautelas para leer los resultados. Primero, como los tres comparten la regla de cerco, no son tres mecanismos independientes: sus diferencias miden variaciones de la guía y del calendario. Segundo, un buen desempeño de cualquiera de ellos se atribuye a esos componentes, no a la metáfora, y no constituye evidencia de novedad frente a PSO.
+
+\subsection{Búsqueda aleatoria como línea base}
+\label{sec:linea_base}
+
+La búsqueda aleatoria muestrea configuraciones uniformemente sobre el dominio admisible y retiene la mejor encontrada, sin memoria ni mecanismo de aprendizaje alguno. No compite en sofisticación algorítmica, y esa es precisamente su utilidad: establece el desempeño atribuible exclusivamente al presupuesto de evaluaciones y a la geometría del problema.
 
 Si un algoritmo no muestra una ventaja detectable frente a esta referencia bajo el presupuesto ensayado, sus resultados no justifican atribuirle una mejora para esa instancia. Esta conclusión es local al experimento y no demuestra que el método carezca de utilidad en otros problemas \cite{Arcuri2014Hitchhiker}.
 
 \subsection{Metaheurísticas híbridas}
 
-Hibridar consiste en combinar componentes de dos o más métodos de búsqueda para obtener un algoritmo que explote las fortalezas complementarias de cada uno \cite{Talbi2002Taxonomy,Blum2011HybridSurvey}. La motivación es la misma que la del compromiso entre exploración y explotación: los métodos poblacionales localizan con eficacia regiones prometedoras del espacio, mientras que las búsquedas locales refinan con precisión una solución dada; integrarlos permite cubrir ambas fases con un presupuesto fijo de evaluaciones.
+Hibridar consiste en combinar componentes de dos o más métodos de búsqueda para obtener un algoritmo que explote las fortalezas complementarias de cada uno \cite{Talbi2002Taxonomy,Blum2011HybridSurvey}. La motivación es la misma que la del compromiso entre exploración y explotación: métodos con mecanismos distintos de generación de candidatos, como la memoria de velocidad de un enjambre y la recombinación de un algoritmo evolutivo, fallan de maneras distintas, y combinarlos busca cubrir las carencias de uno con las capacidades del otro sin ampliar el presupuesto de evaluaciones.
 
 Talbi \cite{Talbi2002Taxonomy} propone una taxonomía jerárquica que esta tesis usa para describir sin ambigüedad qué se hibrida y cómo. En la dimensión de \textbf{diseño} distingue dos niveles y dos modos de cooperación. Un híbrido de \textbf{bajo nivel} sustituye o inserta una función interna de una metaheurística, por ejemplo un operador de variación o la actualización de la mejor solución, por otro método; uno de \textbf{alto nivel} mantiene ambos métodos intactos y los comunica sólo por sus entradas y salidas. En modo \textbf{relevo} (\emph{relay}) los métodos se ejecutan en secuencia, cada uno sobre la salida del anterior; en modo \textbf{cooperativo} (\emph{teamwork}) operan entrelazados dentro de un mismo bucle. Las cuatro combinaciones se abrevian LRH, LTH, HRH y HTH. Una segunda dimensión distingue híbridos \textbf{homogéneos}, que combinan instancias del mismo método, de \textbf{heterogéneos}; \textbf{globales}, en los que todos los componentes exploran el espacio completo, de \textbf{parciales}, que lo descomponen; y \textbf{generalistas}, en los que todos los componentes resuelven el mismo problema, de \textbf{especialistas}, en los que alguno resuelve un subproblema auxiliar.
 
-Dentro de esa taxonomía, los \textbf{algoritmos meméticos} \cite{Moscato1989Memetic,Krasnogor2005Tutorial,Neri2012MemeticReview} constituyen el híbrido más estudiado: un algoritmo evolutivo cuyos individuos reciben una búsqueda local antes de la selección. Su diseño exige decidir qué individuos se refinan, con qué profundidad y si la mejora se escribe de vuelta en el genotipo, lo que se denomina aprendizaje \emph{lamarckiano}, o sólo modifica la aptitud, el llamado efecto Baldwin \cite{Krasnogor2005Tutorial}. Con un presupuesto fijo, cada evaluación gastada por la búsqueda local es una evaluación menos para la exploración poblacional, de modo que la profundidad de la búsqueda local es la decisión crítica. Para espacios mixtos como el de este problema resulta adecuada una búsqueda local de coordenadas con paso adaptativo, en la línea de la búsqueda directa de Hooke y Jeeves \cite{Hooke1961DirectSearch}: recorre en orden fijo los vecinos de cada coordenada, recuerda la dirección del último éxito y contrae el paso de la coordenada continua cuando el vecindario completo falla.
+Dentro de esa taxonomía, la hibridación entre enjambres de partículas y operadores evolutivos cuenta con una tradición amplia, porque ambos métodos trabajan sobre poblaciones de vectores reales y sus debilidades son complementarias. PSO converge con rapidez hacia la mejor posición conocida, pero cuando el enjambre se contrae alrededor de ella pierde la capacidad de generar candidatos lejanos; el GA mantiene esa capacidad mediante la recombinación y la mutación, pero carece de una memoria direccional que acelere el avance. Kao y Zahara \cite{Kao2008HybridGAPSO} integran ambos mecanismos sobre una misma población: en cada generación una parte de los individuos se renueva con cruce y mutación de codificación real y el resto se desplaza con la actualización de velocidad de PSO, y reportan mejoras frente a los métodos puros en funciones multimodales. El principio es inyectar \textbf{diversidad estructurada}: los operadores genéticos recombinan información de buenas soluciones sin depender de la memoria de velocidad del enjambre, y lo hacen dentro del mismo bucle, no en una fase posterior.
 
-La hibridación entre enjambres y operadores evolutivos cuenta igualmente con una tradición amplia. Kao y Zahara \cite{Kao2008HybridGAPSO} integran la actualización de velocidad de PSO con cruce y mutación genéticos sobre la misma población y reportan mejoras en funciones multimodales. El principio es inyectar diversidad estructurada: los operadores genéticos recombinan información de buenas soluciones sin depender de la memoria de velocidad del enjambre.
-
-Los tres híbridos de esta tesis son de bajo nivel y cooperativos (LTH), globales y generalistas. \textbf{GA+LS} es un algoritmo genético memético: conserva íntegro el GA de referencia y aplica una búsqueda local lamarckiana al mejor individuo de cada generación. \textbf{PSO+GA} es heterogéneo: conserva el bucle del PSO y reemplaza en cada iteración las partículas de peor mérito por hijos producidos con los operadores del GA. \textbf{SHO+LS} aplica la misma búsqueda local de GA+LS a la presa del SHO, el enjambre clásico de mejor mediana en la instancia de referencia. En los tres casos el método base se conserva sin modificaciones y la única diferencia frente a su padre es el componente inyectado, lo que permite atribuir a ese componente cualquier cambio de desempeño; por ello el capítulo de diseño experimental incluye los contrastes híbrido frente a padre en la familia planificada de comparaciones.
+El híbrido de esta tesis, \textbf{PSO+GA}, adopta ese principio con el menor número posible de decisiones nuevas. En la taxonomía de Talbi es de bajo nivel y cooperativo (LTH), heterogéneo, global y generalista: conserva íntegro el bucle del PSO y, al final de cada iteración, reemplaza las partículas de peor mérito por hijos producidos con los operadores del GA (selección por torneo, cruce BLX-$\alpha$ y mutación gaussiana) a partir de las mejores posiciones personales del enjambre. Tiene por tanto dos padres: PSO, del que hereda el bucle y la memoria, y GA, del que hereda los operadores de variación. La implementación de ninguno de los dos se modifica, y la única diferencia frente al PSO es el componente inyectado, de modo que la comparación con PSO funciona como una ablación en bloque de ese componente. La comparación con GA no tiene esa propiedad: el híbrido y el GA comparten los operadores de variación, pero difieren en todo el bucle de búsqueda, de modo que esa comparación indica si los mismos operadores rinden más dentro del enjambre que en un algoritmo genético generacional, y no el efecto de un componente aislado. Con un presupuesto fijo, sin embargo, cada evaluación dedicada a un hijo es una evaluación que deja de dedicarse a la partícula reemplazada: la hibridación redistribuye el presupuesto entre dos mecanismos, no lo amplía, y que el saldo sea favorable es una cuestión empírica. Por ello el capítulo de diseño experimental sitúa al híbrido como algoritmo de control y declara confirmatorios sus contrastes frente a PSO, frente a GA y frente a la búsqueda aleatoria.
 
 \subsection{Tratamiento de restricciones en metaheurísticas}
 
-Las metaheurísticas de población se formulan para optimización sin restricciones, por lo que su aplicación a problemas restringidos exige un mecanismo adicional. Las estrategias habituales son tres. La \textbf{penalización} incorpora la violación de restricciones a la función objetivo mediante un término aditivo; es sencilla y general, pero su eficacia depende críticamente de la calibración del peso: un valor excesivo aplana el paisaje y uno insuficiente permite que soluciones infactibles dominen la población. La \textbf{reparación} transforma toda solución infactible en una factible cercana, lo que preserva la totalidad del presupuesto de evaluaciones pero exige un operador específico del problema. El \textbf{rechazo} descarta las soluciones infactibles, opción viable únicamente cuando la región factible ocupa una fracción sustancial del dominio.
+Las metaheurísticas de población se formulan habitualmente para optimización sin restricciones, por lo que su aplicación a problemas restringidos exige un mecanismo adicional. Las estrategias habituales son tres. La \textbf{penalización} incorpora la violación de restricciones a la función objetivo mediante un término aditivo; es sencilla y general, pero su eficacia depende críticamente de la calibración del peso: un valor excesivo aplana el paisaje y uno insuficiente permite que soluciones infactibles dominen la población. La \textbf{reparación} transforma toda solución infactible en una factible cercana, lo que preserva la totalidad del presupuesto de evaluaciones pero exige un operador específico del problema. El \textbf{rechazo} descarta las soluciones infactibles, opción viable únicamente cuando la región factible ocupa una fracción sustancial del dominio.
 
 La estrategia adoptada combina proyección para los límites representacionales con las reglas de factibilidad de Deb \cite{Deb2000Constraint}. Una solución factible domina a cualquier solución infactible; entre infactibles se minimiza la suma normalizada de violaciones y entre factibles se compara únicamente el LCOE. Este criterio evita calibrar un coeficiente de penalización y se detalla en el capítulo de diseño experimental.
 
-\subsection{Evaluación empírica de metaheurísticas}
+\subsection{Comparación estadística de algoritmos estocásticos}
+\label{sec:marco_estadistica}
 
-Dado que las metaheurísticas son algoritmos estocásticos, una única ejecución no caracteriza su distribución de resultados. Dos ejecuciones del mismo algoritmo sobre el mismo problema con semillas distintas pueden diferir, y seleccionar únicamente la mejor puede sesgar la comparación a favor de los algoritmos con mayor varianza.
+Dado que las metaheurísticas son algoritmos estocásticos, una única ejecución no caracteriza su distribución de resultados. Dos ejecuciones del mismo algoritmo sobre el mismo problema con semillas distintas pueden diferir, y seleccionar únicamente la mejor sesga la comparación a favor de los algoritmos con mayor varianza. La metodología establecida para comparar algoritmos evolutivos y de enjambre \cite{Demsar2006Statistical,Garcia2008Extension,Derrac2011Tutorial,Arcuri2014Hitchhiker} exige ejecuciones independientes replicadas, un presupuesto idéntico para todos los competidores, contrastes de hipótesis adecuados al diseño, tamaños de efecto y corrección por comparaciones múltiples. Esta tesis organiza esos requisitos en el protocolo de siete pasos de la guía docente de Vega \cite{VegaGuiaEstadistica}: diseñar, preguntar, explorar, elegir la prueba, cuantificar, corregir y reportar. Los conceptos en que se apoya son los siguientes.
 
-La metodología establecida para la comparación de algoritmos evolutivos y de enjambre \cite{Derrac2011Tutorial,Arcuri2014Hitchhiker} exige cuatro elementos: un número suficiente de ejecuciones independientes con semillas distintas, un presupuesto computacional idéntico para todos los competidores, contrastes de hipótesis no paramétricos con corrección por comparaciones múltiples, y el reporte de tamaños de efecto que cuantifiquen la magnitud práctica de las diferencias detectadas. Estos cuatro requisitos estructuran el protocolo experimental de esta tesis, que los concreta con el contraste global de Kruskal--Wallis \cite{Kruskal1952}, comparaciones por pares de Mann--Whitney \cite{Mann1947} corregidas por Holm \cite{Holm1979}, el tamaño de efecto $A_{12}$ de Vargha y Delaney \cite{Vargha2000A12} y sus intervalos de confianza por bootstrap \cite{Efron1994Bootstrap}.
+\textbf{Lógica del contraste.} Un contraste parte de una hipótesis nula $H_0$, que aquí afirma que dos algoritmos producen la misma distribución de resultados, y calcula un estadístico cuya distribución bajo $H_0$ es conocida. El valor $p$ es la probabilidad, suponiendo cierta $H_0$, de observar un estadístico al menos tan extremo como el obtenido; si $p$ es menor que un nivel de significación $\alpha$ fijado de antemano, $H_0$ se rechaza. El valor $p$ no es la probabilidad de que $H_0$ sea cierta ni mide el tamaño de la diferencia. Cuando no existe una dirección justificada antes de ver los datos, el contraste debe ser bilateral.
 
-\section{Brechas y oportunidades de investigación}
+\textbf{Errores y potencia.} Rechazar una $H_0$ cierta es un error de tipo I, cuya probabilidad acota $\alpha$; no rechazar una $H_0$ falsa es un error de tipo II, de probabilidad $\beta$. La potencia $1-\beta$ crece con el tamaño de la muestra y con el tamaño del efecto \cite{Cohen1988Power}. De ahí que un resultado no significativo obtenido con poca potencia exprese ausencia de evidencia y no evidencia de igualdad.
 
-La revisión precedente motiva cuatro riesgos metodológicos que este trabajo controla de forma directa. No se estima aquí su prevalencia en toda la literatura de HRES-H$_2$.
+\textbf{Significativo no equivale a relevante.} Con suficientes ejecuciones, una diferencia arbitrariamente pequeña resulta significativa. La significación debe acompañarse de un tamaño de efecto, que mide la magnitud de la diferencia, y de una tolerancia práctica $\varepsilon$, por debajo de la cual dos resultados se consideran iguales para el problema, ambos declarados antes de mirar los datos \cite{Arcuri2014Hitchhiker}.
 
-\textbf{Ausencia de una línea base no informada.} Una comparación limitada a algoritmos bioinspirados no permite determinar si el método aporta algo sobre el muestreo uniforme bajo el mismo presupuesto.
+\textbf{Unidad de análisis y pseudo-replicación.} Las $R$ ejecuciones de un algoritmo sobre una instancia replican su aleatoriedad interna y sólo sostienen conclusiones sobre esa instancia. Para concluir sobre el desempeño \emph{en general}, la unidad de análisis es la instancia: cada algoritmo aporta un único valor resumen, típicamente la mediana, por instancia. Tratar las $R\times N$ ejecuciones de $N$ instancias como observaciones independientes es pseudo-replicación \cite{Hurlbert1984Pseudoreplication}: infla el tamaño muestral, porque las ejecuciones sobre una misma instancia comparten su dificultad, y produce valores $p$ artificialmente pequeños \cite{Demsar2006Statistical}.
 
-\textbf{Reporte de una ejecución sin dispersión.} Un único valor por algoritmo impide distinguir una diferencia sistemática de una fluctuación muestral y compromete la reproducibilidad.
+\textbf{Muestras independientes o pareadas.} Dos muestras son pareadas cuando cada observación de un algoritmo tiene una compañera natural en el otro, por ejemplo la misma instancia o la misma población inicial; son independientes cuando cada algoritmo consume su propio flujo aleatorio. La distinción determina la prueba: Mann--Whitney para muestras independientes y Wilcoxon de rangos con signo para pareadas.
 
-\textbf{Ausencia de contrastes y tamaños de efecto.} Una comparación limitada al valor medio no controla la variación muestral ni el error por comparaciones múltiples; sin tamaños de efecto tampoco permite juzgar la importancia práctica.
+\textbf{Por qué pruebas no paramétricas.} El resultado final de una metaheurística está acotado inferiormente por el óptimo, suele ser asimétrico y presenta empates y valores atípicos, de modo que la normalidad, que puede examinarse con la prueba de Shapiro--Wilk \cite{Shapiro1965}, rara vez se sostiene; entre instancias, además, las magnitudes no son conmensurables. Las pruebas basadas en rangos no requieren esos supuestos \cite{Derrac2011Tutorial}.
+
+\textbf{Mann--Whitney y $\hat{A}_{12}$.} Dadas las muestras independientes $a_1,\ldots,a_{n_A}$ y $b_1,\ldots,b_{n_B}$ de un problema de minimización, el estadístico de Mann--Whitney \cite{Mann1947} y el tamaño de efecto de Vargha y Delaney \cite{Vargha2000A12} son
+\begin{equation}
+U_A=\sum_{i=1}^{n_A}\sum_{j=1}^{n_B}\left[\mathbf{1}(a_i<b_j)+\tfrac12\,\mathbf{1}(a_i=b_j)\right],
+\qquad
+\hat{A}_{12}=\frac{U_A}{n_A\,n_B}.
+\label{eq:a12}
+\end{equation}
+Bajo $H_0$ el valor esperado de $U_A$ es $n_An_B/2$, y el contraste evalúa cuánto se aparta de él. $\hat{A}_{12}$ estima la probabilidad de que una ejecución de A obtenga un valor menor, es decir mejor, que una de B, contando los empates por mitades: vale 0,5 si no hay diferencia y se aproxima a 1 cuando A gana casi siempre. Como la orientación depende de qué algoritmo se nombra primero y de si se minimiza, debe declararse siempre. Los umbrales de Vargha y Delaney califican la magnitud de $|\hat{A}_{12}-0{,}5|$ como despreciable por debajo de 0,06, pequeña por debajo de 0,14, mediana por debajo de 0,21 y grande desde 0,21.
+
+\textbf{Hodges--Lehmann y bootstrap.} $\hat{A}_{12}$ informa con qué frecuencia gana un algoritmo, no por cuánto. El estimador de Hodges--Lehmann \cite{Hodges1963Estimates}, $\hat{\Delta}_{HL}=\operatorname{mediana}_{i,j}(a_i-b_j)$, expresa el desplazamiento entre ambas distribuciones en las unidades de la respuesta; en el caso pareado se calcula como la mediana de los promedios $(d_i+d_j)/2$, $i\leq j$, de las diferencias. La incertidumbre de ambos estimadores se cuantifica con intervalos bootstrap percentil \cite{Efron1994Bootstrap}: cada muestra se remuestrea con reemplazo un número $B$ de veces, se recalcula el estadístico y se toman los percentiles 2,5 y 97,5 de los $B$ valores.
+
+\textbf{Wilcoxon de rangos con signo.} Para comparar dos algoritmos sobre $N$ instancias se calculan las diferencias $d_i$ entre sus valores resumen, se descartan las nulas, se ordenan los valores absolutos $|d_i|$ y se suman por separado los rangos de las diferencias positivas, $R^+$, y negativas, $R^-$; el estadístico es $W=\min(R^+,R^-)$ \cite{Wilcoxon1945}. Con pocas instancias se usa su distribución exacta, en la que las $2^N$ asignaciones de signo son equiprobables bajo $H_0$; el menor valor $p$ bilateral alcanzable es por tanto $2/2^N$, lo que acota de antemano lo que el contraste puede detectar. La prueba de signos, que sólo cuenta cuántas diferencias son positivas, es menos potente pero no depende de las magnitudes y sirve como comprobación de robustez.
+
+\textbf{Friedman e Iman--Davenport.} Para comparar $k$ algoritmos a la vez sobre $N$ instancias, cada instancia ordena a los algoritmos del mejor (rango 1) al peor (rango $k$), con rangos promedio en caso de empate, y se calcula el rango medio $R_j$ de cada algoritmo. En esta sección, y sólo en ella, $k$ y $N$ siguen la notación de Demšar \cite{Demsar2006Statistical} y no designan el índice de duración de la batería ni el horizonte económico. Bajo la hipótesis nula de que todos los algoritmos son equivalentes, el estadístico de Friedman \cite{Friedman1937}
+\begin{equation}
+\chi^2_F=\frac{12N}{k(k+1)}\left[\sum_{j=1}^{k}R_j^2-\frac{k(k+1)^2}{4}\right]
+\label{eq:friedman}
+\end{equation}
+sigue aproximadamente una distribución $\chi^2$ con $k-1$ grados de libertad. Como esa aproximación es conservadora, Iman y Davenport \cite{Iman1980Approximations} proponen
+\begin{equation}
+F_F=\frac{(N-1)\,\chi^2_F}{N(k-1)-\chi^2_F},
+\label{eq:iman_davenport}
+\end{equation}
+que se contrasta con una distribución $F$ de $k-1$ y $(k-1)(N-1)$ grados de libertad.
+
+\textbf{Nemenyi y diferencia crítica.} Sólo si el contraste global rechaza la igualdad procede preguntar qué pares difieren. En la prueba de Nemenyi \cite{Nemenyi1963}, dos algoritmos difieren significativamente cuando sus rangos medios se separan al menos en la diferencia crítica
+\begin{equation}
+\mathrm{CD}=q_\alpha\sqrt{\frac{k(k+1)}{6N}},
+\label{eq:cd}
+\end{equation}
+donde $q_\alpha$ es el cuantil del rango studentizado dividido por $\sqrt{2}$. El diagrama de diferencia crítica de Demšar \cite{Demsar2006Statistical} sitúa los rangos medios sobre un eje y une con una barra los algoritmos que no se distinguen. Este post-hoc compara todos los pares, por lo que es poco potente cuando el interés se concentra en un algoritmo de control \cite{Garcia2008Extension}, y su resultado para un par depende de qué otros algoritmos integran la comparación \cite{Benavoli2016MeanRanks}; por eso los contrastes de interés se plantean por pares con Wilcoxon y el diagrama se reserva para la visión de conjunto.
+
+\textbf{Corrección de Holm.} Al realizar $m$ contrastes, la probabilidad de al menos un falso positivo crece con $m$. El procedimiento de Holm \cite{Holm1979} ordena los valores $p$ de una familia, $p_{(1)}\leq\cdots\leq p_{(m)}$, y los ajusta como
+\begin{equation}
+\tilde p_{(i)}=\max_{j\leq i}\,\min\left\{1,\;(m-j+1)\,p_{(j)}\right\},
+\label{eq:holm}
+\end{equation}
+lo que controla la tasa de error por familia sin suponer independencia entre contrastes y con más potencia que la corrección de Bonferroni. La familia, es decir el conjunto de contrastes que responden a una misma pregunta, debe declararse antes del análisis, junto con el número total de pruebas realizadas. El capítulo de diseño experimental concreta estos elementos en el protocolo aplicado.
+
+\section{Riesgos metodológicos que aborda este trabajo}
+\label{sec:riesgos_metodologicos}
+
+Las guías para comparar algoritmos estocásticos documentan prácticas que comprometen las conclusiones de una comparación empírica, como omitir los detalles necesarios para replicar el experimento, resumir con un solo valor resultados que son aleatorios o comparar sin algoritmos de referencia adecuados \cite{Crepinsek2014Pitfalls,LaTorre2021Guidelines}. Črepinšek et al. las ilustran con artículos publicados sobre despacho económico de carga, un problema de sistemas eléctricos. A partir de esas guías y de los fundamentos de las secciones anteriores, esta sección enumera seis riesgos que el diseño de esta tesis controla de forma directa. No se estima aquí con qué frecuencia aparecen en la literatura de HRES-H$_2$: hacerlo exige una revisión sistemática de los estudios de dimensionamiento, que queda como trabajo futuro.
+
+\textbf{Ausencia de una línea base no informada.} Una comparación limitada a algoritmos bioinspirados no permite determinar si el método aporta algo sobre el muestreo uniforme bajo el mismo presupuesto \cite{Arcuri2014Hitchhiker}.
+
+\textbf{Reporte de una ejecución sin dispersión.} Un único valor por algoritmo impide distinguir una diferencia sistemática de una fluctuación muestral y compromete la reproducibilidad \cite{Crepinsek2014Pitfalls}.
+
+\textbf{Ausencia de contrastes y tamaños de efecto.} Una comparación limitada al valor medio no controla la variación muestral ni el error por comparaciones múltiples; sin tamaños de efecto ni una tolerancia práctica tampoco permite juzgar la importancia de una diferencia \cite{Derrac2011Tutorial,Arcuri2014Hitchhiker}.
+
+\textbf{Unidad de análisis inadecuada.} Las ejecuciones repetidas sobre una instancia no sustituyen a las instancias: concluir que un algoritmo es mejor en general a partir de muchas corridas sobre un único caso, o agrupando corridas de varios casos como si fueran independientes, es pseudo-replicación \cite{Demsar2006Statistical,Hurlbert1984Pseudoreplication}.
+
+\textbf{Híbridos evaluados sin sus componentes.} Si un método híbrido se compara sólo con terceros, o con un presupuesto distinto del de los métodos que combina, no es posible atribuir su desempeño a la hibridación.
 
 \textbf{Confusión entre instancias de optimización distintas.} Si se contrastan valores provenientes de diferentes variables, restricciones o políticas de operación, la mejora atribuida al método de búsqueda incorpora de forma inseparable el efecto de haber cambiado el problema.

@@ -1,20 +1,31 @@
 % Archivo generado por scripts/generar_tablas_latex.py. No editar manualmente.
 \newcommand{\HoursMain}{8.760}
 \newcommand{\HoursSensitivity}{8.784}
-\newcommand{\NInstances}{4}
-\newcommand{\NAlgorithms}{9}
+\newcommand{\NInstances}{8}
+\newcommand{\NAlgorithms}{7}
 \newcommand{\NClassic}{5}
-\newcommand{\NHybrid}{3}
+\newcommand{\NHybrid}{1}
 \newcommand{\Replicates}{30}
 \newcommand{\Population}{20}
 \newcommand{\Iterations}{30}
 \newcommand{\RequestsPerRun}{600}
-\newcommand{\RequestsPerInstance}{162.000}
-\newcommand{\TotalRuns}{1.080}
-\newcommand{\TotalDesignRequests}{648.000}
-\newcommand{\RequestedHourlySteps}{5.676.480.000}
-\newcommand{\BruteForceDesignsTotal}{67.193.034}
-\newcommand{\BruteForceElapsedHours}{3,0}
+\newcommand{\RequestsPerInstance}{126.000}
+\newcommand{\TotalRuns}{1.680}
+\newcommand{\TotalDesignRequests}{1.008.000}
+\newcommand{\RequestedHourlySteps}{8.830.080.000}
+\newcommand{\BruteForceDesignsTotal}{97.264.398}
+\newcommand{\BruteForceElapsedHours}{4,2}
+\newcommand{\BruteForceMinutesMin}{5}
+\newcommand{\BruteForceMinutesMax}{104}
+\newcommand{\BudgetShareMinPct}{0,0018}
+\newcommand{\BudgetShareMaxPct}{0,032}
+\newcommand{\DesignsPerBudgetMin}{3.100}
+\newcommand{\DesignsPerBudgetMax}{56.703}
+\newcommand{\RunSecondsMedian}{3,8}
+\newcommand{\SimulatorCallMs}{6,5}
+\newcommand{\VectorSpeedup}{43}
+\newcommand{\SecondCoordFactor}{20.001}
+\newcommand{\SecondCoordDays}{246}
 \newcommand{\BaseEvaluated}{420}
 \newcommand{\BaseFeasible}{81}
 \newcommand{\BaseFeasiblePct}{19,3}
@@ -22,25 +33,452 @@
 \newcommand{\BaseBestWind}{130}
 \newcommand{\BaseBestElectrolyzer}{85}
 \newcommand{\BestHorizonDeltaPct}{-0,463}
-\newcommand{\MaxBalanceResidual}{0.00e+00}
-\newcommand{\MaxControlRelDiff}{1.5e-14}
+\newcommand{\MaxBalanceResidual}{0}
+\newcommand{\MaxControlRelDiff}{$1{,}5\times10^{-14}$}
 \newcommand{\MinFeasibleRuns}{30}
+\newcommand{\NeighborPairs}{48}
+\newcommand{\NeighborPairsWithinIqr}{45}
+\newcommand{\DupGaMean}{196}
+\newcommand{\DupGaPct}{32,7}
+\newcommand{\DupGaMin}{180}
+\newcommand{\DupGaMax}{238}
+\newcommand{\DupGaMaxInstance}{I8}
+\newcommand{\DupGwoMean}{20}
+\newcommand{\DupGwoPct}{3,4}
+\newcommand{\DupGwoMin}{0}
+\newcommand{\DupGwoMax}{109}
+\newcommand{\DupGwoMaxInstance}{I8}
+\newcommand{\DupPsoMean}{2}
+\newcommand{\DupPsoPct}{0,3}
+\newcommand{\DupPsoMin}{0}
+\newcommand{\DupPsoMax}{16}
+\newcommand{\DupPsoMaxInstance}{I8}
+\newcommand{\DupPsoGaMean}{40}
+\newcommand{\DupPsoGaPct}{6,6}
+\newcommand{\DupPsoGaMin}{29}
+\newcommand{\DupPsoGaMax}{92}
+\newcommand{\DupPsoGaMaxInstance}{I8}
+\newcommand{\DupRandomMean}{0}
+\newcommand{\DupRandomPct}{0,0}
+\newcommand{\DupRandomMin}{0}
+\newcommand{\DupRandomMax}{0}
+\newcommand{\DupRandomMaxInstance}{I1}
+\newcommand{\DupShoMean}{17}
+\newcommand{\DupShoPct}{2,8}
+\newcommand{\DupShoMin}{0}
+\newcommand{\DupShoMax}{63}
+\newcommand{\DupShoMaxInstance}{I8}
+\newcommand{\DupWoaMean}{39}
+\newcommand{\DupWoaPct}{6,6}
+\newcommand{\DupWoaMin}{24}
+\newcommand{\DupWoaMax}{110}
+\newcommand{\DupWoaMaxInstance}{I8}
+\newcommand{\FeasibleShareTightMin}{4,6}
+\newcommand{\FeasibleShareTightMax}{18,7}
+\newcommand{\FeasibleShareMidMin}{25,4}
+\newcommand{\FeasibleShareMidMax}{45,8}
+\newcommand{\FeasibleShareLooseMin}{69,0}
+\newcommand{\FeasibleShareLooseMax}{69,0}
+\newcommand{\OptimumAgsrSlackBound}{0,00004}
+\newcommand{\BoundaryUnitsInstances}{I2, I6 e I7}
+\newcommand{\BoundaryDurationInstances}{todas las instancias}
 \newcommand{\BestMeanRankAlgorithm}{SHO}
-\newcommand{\BestMeanRank}{1,50}
+\newcommand{\BestMeanRank}{1,62}
 \newcommand{\SecondMeanRankAlgorithm}{GWO}
-\newcommand{\SecondMeanRank}{2,25}
+\newcommand{\SecondMeanRank}{1,75}
 \newcommand{\WorstMeanRankAlgorithm}{RANDOM}
-\newcommand{\RandomMeanRank}{9,00}
-\newcommand{\HybridContrastsTotal}{16}
-\newcommand{\HybridWinsCount}{6}
-\newcommand{\HybridSignificantCount}{2}
-\newcommand{\HybridSignificantWins}{2}
-\newcommand{\HybridSignificantLosses}{0}
+\newcommand{\MeanRankSho}{1,62}
+\newcommand{\MeanRankGwo}{1,75}
+\newcommand{\MeanRankWoa}{3,25}
+\newcommand{\MeanRankPso}{3,62}
+\newcommand{\MeanRankPsoGa}{5,12}
+\newcommand{\MeanRankGa}{5,75}
+\newcommand{\MeanRankRandom}{6,88}
+\newcommand{\ControlRankPosition}{5}
+\newcommand{\ControlRankOrdinalEn}{fifth}
+\newcommand{\StatAlpha}{0,05}
+\newcommand{\StatEpsGapPct}{0,01}
+\newcommand{\StatBootstrap}{5.000}
+\newcommand{\StatTestsPerInstance}{88}
+\newcommand{\StatTestsGlobal}{11}
+\newcommand{\StatTestsTotal}{100}
+\newcommand{\ShapiroRejects}{49}
+\newcommand{\ShapiroTotal}{56}
+\newcommand{\FriedmanChi}{41,14}
+\newcommand{\FriedmanP}{<0,001}
+\newcommand{\ImanDavenportF}{42,00}
+\newcommand{\ImanDavenportDfA}{6}
+\newcommand{\ImanDavenportDfB}{42}
+\newcommand{\ImanDavenportP}{<0,001}
+\newcommand{\FriedmanDecision}{rechaza}
+\newcommand{\NemenyiQ}{2,948}
+\newcommand{\CriticalDifference}{3,18}
+\newcommand{\NemenyiPairsCount}{8}
+\newcommand{\NemenyiPairsTotal}{21}
+\newcommand{\NemenyiPairs}{SHO sobre PSO+GA, SHO sobre GA, SHO sobre RANDOM, GWO sobre PSO+GA, GWO sobre GA, GWO sobre RANDOM, WOA sobre RANDOM y PSO sobre RANDOM}
+\newcommand{\NemenyiControlPairs}{SHO sobre PSO+GA y GWO sobre PSO+GA}
+\newcommand{\PowerReplicatesMedium}{0,48}
+\newcommand{\PowerReplicatesLarge}{0,86}
+\newcommand{\PowerReplicatesDetectable}{0,74}
+\newcommand{\PowerInstancesMedium}{0,23}
+\newcommand{\PowerInstancesLarge}{0,50}
+\newcommand{\PowerInstancesDetectable}{1,16}
+\newcommand{\WilcoxonMinP}{0,008}
+\newcommand{\CtrlGwoPlus}{0}
+\newcommand{\CtrlGwoEqual}{4}
+\newcommand{\CtrlGwoMinus}{4}
+\newcommand{\CtrlGwoPlusInstances}{ninguna}
+\newcommand{\CtrlGwoMinusInstances}{I2, I5, I6 e I7}
+\newcommand{\CtrlGwoMedianWins}{0}
+\newcommand{\CtrlGwoMedianTies}{0}
+\newcommand{\CtrlGwoMedianLosses}{8}
+\newcommand{\CtrlGwoAMin}{0,24}
+\newcommand{\CtrlGwoAMax}{0,54}
+\newcommand{\CtrlGwoWilcoxonP}{0,008}
+\newcommand{\CtrlGwoWilcoxonHolm}{0,047}
+\newcommand{\CtrlGwoWilcoxonHolmEn}{0.047}
+\newcommand{\CtrlGwoRelativeP}{0,008}
+\newcommand{\CtrlGwoSignP}{0,008}
+\newcommand{\CtrlGwoShift}{0,501}
+\newcommand{\CtrlPsoPlus}{0}
+\newcommand{\CtrlPsoEqual}{8}
+\newcommand{\CtrlPsoMinus}{0}
+\newcommand{\CtrlPsoPlusInstances}{ninguna}
+\newcommand{\CtrlPsoMinusInstances}{ninguna}
+\newcommand{\CtrlPsoMedianWins}{1}
+\newcommand{\CtrlPsoMedianTies}{0}
+\newcommand{\CtrlPsoMedianLosses}{7}
+\newcommand{\CtrlPsoAMin}{0,30}
+\newcommand{\CtrlPsoAMax}{0,54}
+\newcommand{\CtrlPsoWilcoxonP}{0,016}
+\newcommand{\CtrlPsoWilcoxonHolm}{0,047}
+\newcommand{\CtrlPsoWilcoxonHolmEn}{0.047}
+\newcommand{\CtrlPsoRelativeP}{0,016}
+\newcommand{\CtrlPsoSignP}{0,070}
+\newcommand{\CtrlPsoShift}{0,115}
+\newcommand{\CtrlGaPlus}{3}
+\newcommand{\CtrlGaEqual}{5}
+\newcommand{\CtrlGaMinus}{0}
+\newcommand{\CtrlGaPlusInstances}{I2, I4 e I7}
+\newcommand{\CtrlGaMinusInstances}{ninguna}
+\newcommand{\CtrlGaMedianWins}{6}
+\newcommand{\CtrlGaMedianTies}{0}
+\newcommand{\CtrlGaMedianLosses}{2}
+\newcommand{\CtrlGaAMin}{0,42}
+\newcommand{\CtrlGaAMax}{0,72}
+\newcommand{\CtrlGaWilcoxonP}{0,055}
+\newcommand{\CtrlGaWilcoxonHolm}{0,055}
+\newcommand{\CtrlGaWilcoxonHolmEn}{0.055}
+\newcommand{\CtrlGaRelativeP}{0,055}
+\newcommand{\CtrlGaSignP}{0,289}
+\newcommand{\CtrlGaShift}{-0,299}
+\newcommand{\CtrlShoPlus}{0}
+\newcommand{\CtrlShoEqual}{6}
+\newcommand{\CtrlShoMinus}{2}
+\newcommand{\CtrlShoPlusInstances}{ninguna}
+\newcommand{\CtrlShoMinusInstances}{I5 e I7}
+\newcommand{\CtrlShoMedianWins}{0}
+\newcommand{\CtrlShoMedianTies}{0}
+\newcommand{\CtrlShoMedianLosses}{8}
+\newcommand{\CtrlShoAMin}{0,18}
+\newcommand{\CtrlShoAMax}{0,50}
+\newcommand{\CtrlShoWilcoxonP}{0,008}
+\newcommand{\CtrlShoWilcoxonHolm}{0,047}
+\newcommand{\CtrlShoWilcoxonHolmEn}{0.047}
+\newcommand{\CtrlShoRelativeP}{0,008}
+\newcommand{\CtrlShoSignP}{0,008}
+\newcommand{\CtrlShoShift}{0,541}
+\newcommand{\CtrlWoaPlus}{0}
+\newcommand{\CtrlWoaEqual}{7}
+\newcommand{\CtrlWoaMinus}{1}
+\newcommand{\CtrlWoaPlusInstances}{ninguna}
+\newcommand{\CtrlWoaMinusInstances}{I6}
+\newcommand{\CtrlWoaMedianWins}{0}
+\newcommand{\CtrlWoaMedianTies}{0}
+\newcommand{\CtrlWoaMedianLosses}{8}
+\newcommand{\CtrlWoaAMin}{0,29}
+\newcommand{\CtrlWoaAMax}{0,62}
+\newcommand{\CtrlWoaWilcoxonP}{0,008}
+\newcommand{\CtrlWoaWilcoxonHolm}{0,047}
+\newcommand{\CtrlWoaWilcoxonHolmEn}{0.047}
+\newcommand{\CtrlWoaRelativeP}{0,008}
+\newcommand{\CtrlWoaSignP}{0,008}
+\newcommand{\CtrlWoaShift}{0,304}
+\newcommand{\CtrlRandomPlus}{8}
+\newcommand{\CtrlRandomEqual}{0}
+\newcommand{\CtrlRandomMinus}{0}
+\newcommand{\CtrlRandomPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\CtrlRandomMinusInstances}{ninguna}
+\newcommand{\CtrlRandomMedianWins}{8}
+\newcommand{\CtrlRandomMedianTies}{0}
+\newcommand{\CtrlRandomMedianLosses}{0}
+\newcommand{\CtrlRandomAMin}{0,65}
+\newcommand{\CtrlRandomAMax}{0,84}
+\newcommand{\CtrlRandomWilcoxonP}{0,008}
+\newcommand{\CtrlRandomWilcoxonHolm}{0,047}
+\newcommand{\CtrlRandomWilcoxonHolmEn}{0.047}
+\newcommand{\CtrlRandomRelativeP}{0,008}
+\newcommand{\CtrlRandomSignP}{0,008}
+\newcommand{\CtrlRandomShift}{-0,753}
+\newcommand{\BaseGwoPlus}{8}
+\newcommand{\BaseGwoEqual}{0}
+\newcommand{\BaseGwoMinus}{0}
+\newcommand{\BaseGwoPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\BaseGwoMinusInstances}{ninguna}
+\newcommand{\BaseGwoMedianWins}{8}
+\newcommand{\BaseGwoMedianTies}{0}
+\newcommand{\BaseGwoMedianLosses}{0}
+\newcommand{\BaseGwoAMin}{0,84}
+\newcommand{\BaseGwoAMax}{0,99}
+\newcommand{\BaseGwoWilcoxonP}{0,008}
+\newcommand{\BaseGwoWilcoxonHolm}{0,039}
+\newcommand{\BaseGwoWilcoxonHolmEn}{0.039}
+\newcommand{\BaseGwoRelativeP}{0,008}
+\newcommand{\BaseGwoSignP}{0,008}
+\newcommand{\BaseGwoShift}{-1,431}
+\newcommand{\BasePsoPlus}{8}
+\newcommand{\BasePsoEqual}{0}
+\newcommand{\BasePsoMinus}{0}
+\newcommand{\BasePsoPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\BasePsoMinusInstances}{ninguna}
+\newcommand{\BasePsoMedianWins}{8}
+\newcommand{\BasePsoMedianTies}{0}
+\newcommand{\BasePsoMedianLosses}{0}
+\newcommand{\BasePsoAMin}{0,78}
+\newcommand{\BasePsoAMax}{0,92}
+\newcommand{\BasePsoWilcoxonP}{0,008}
+\newcommand{\BasePsoWilcoxonHolm}{0,039}
+\newcommand{\BasePsoWilcoxonHolmEn}{0.039}
+\newcommand{\BasePsoRelativeP}{0,008}
+\newcommand{\BasePsoSignP}{0,008}
+\newcommand{\BasePsoShift}{-1,009}
+\newcommand{\BaseGaPlus}{4}
+\newcommand{\BaseGaEqual}{4}
+\newcommand{\BaseGaMinus}{0}
+\newcommand{\BaseGaPlusInstances}{I3, I5, I7 e I8}
+\newcommand{\BaseGaMinusInstances}{ninguna}
+\newcommand{\BaseGaMedianWins}{7}
+\newcommand{\BaseGaMedianTies}{0}
+\newcommand{\BaseGaMedianLosses}{1}
+\newcommand{\BaseGaAMin}{0,49}
+\newcommand{\BaseGaAMax}{0,76}
+\newcommand{\BaseGaWilcoxonP}{0,109}
+\newcommand{\BaseGaWilcoxonHolm}{0,109}
+\newcommand{\BaseGaWilcoxonHolmEn}{0.109}
+\newcommand{\BaseGaRelativeP}{0,109}
+\newcommand{\BaseGaSignP}{0,070}
+\newcommand{\BaseGaShift}{-0,535}
+\newcommand{\BaseShoPlus}{8}
+\newcommand{\BaseShoEqual}{0}
+\newcommand{\BaseShoMinus}{0}
+\newcommand{\BaseShoPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\BaseShoMinusInstances}{ninguna}
+\newcommand{\BaseShoMedianWins}{8}
+\newcommand{\BaseShoMedianTies}{0}
+\newcommand{\BaseShoMedianLosses}{0}
+\newcommand{\BaseShoAMin}{0,81}
+\newcommand{\BaseShoAMax}{0,97}
+\newcommand{\BaseShoWilcoxonP}{0,008}
+\newcommand{\BaseShoWilcoxonHolm}{0,039}
+\newcommand{\BaseShoWilcoxonHolmEn}{0.039}
+\newcommand{\BaseShoRelativeP}{0,008}
+\newcommand{\BaseShoSignP}{0,008}
+\newcommand{\BaseShoShift}{-1,320}
+\newcommand{\BaseWoaPlus}{8}
+\newcommand{\BaseWoaEqual}{0}
+\newcommand{\BaseWoaMinus}{0}
+\newcommand{\BaseWoaPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\BaseWoaMinusInstances}{ninguna}
+\newcommand{\BaseWoaMedianWins}{8}
+\newcommand{\BaseWoaMedianTies}{0}
+\newcommand{\BaseWoaMedianLosses}{0}
+\newcommand{\BaseWoaAMin}{0,69}
+\newcommand{\BaseWoaAMax}{1,00}
+\newcommand{\BaseWoaWilcoxonP}{0,008}
+\newcommand{\BaseWoaWilcoxonHolm}{0,039}
+\newcommand{\BaseWoaWilcoxonHolmEn}{0.039}
+\newcommand{\BaseWoaRelativeP}{0,008}
+\newcommand{\BaseWoaSignP}{0,008}
+\newcommand{\BaseWoaShift}{-1,202}
+\newcommand{\UniqueCutMin}{414}
+\newcommand{\UniqueCutMax}{440}
+\newcommand{\UniqueCutRequestsMin}{420}
+\newcommand{\UniqueCutRequestsMax}{450}
+\newcommand{\UniqueMeanRankSho}{1,75}
+\newcommand{\UniqueMeanRankGwo}{1,88}
+\newcommand{\UniqueMeanRankPso}{3,50}
+\newcommand{\UniqueMeanRankWoa}{3,50}
+\newcommand{\UniqueMeanRankPsoGa}{4,88}
+\newcommand{\UniqueMeanRankGa}{5,62}
+\newcommand{\UniqueMeanRankRandom}{6,88}
+\newcommand{\UniqueGaRankPosition}{6}
+\newcommand{\UniqueImanDavenportF}{24,36}
+\newcommand{\UniqueImanDavenportP}{<0,001}
+\newcommand{\UniqueCtrlGwoPlus}{0}
+\newcommand{\UniqueCtrlGwoEqual}{8}
+\newcommand{\UniqueCtrlGwoMinus}{0}
+\newcommand{\UniqueCtrlGwoPlusInstances}{ninguna}
+\newcommand{\UniqueCtrlGwoMedianWins}{1}
+\newcommand{\UniqueCtrlGwoMedianLosses}{7}
+\newcommand{\UniqueCtrlGwoWilcoxonP}{0,023}
+\newcommand{\UniqueCtrlGwoWilcoxonHolm}{0,070}
+\newcommand{\UniqueCtrlGwoWilcoxonHolmEn}{0.070}
+\newcommand{\UniqueCtrlGwoRelativeP}{0,023}
+\newcommand{\UniqueCtrlGwoSignP}{0,070}
+\newcommand{\UniqueCtrlPsoPlus}{0}
+\newcommand{\UniqueCtrlPsoEqual}{8}
+\newcommand{\UniqueCtrlPsoMinus}{0}
+\newcommand{\UniqueCtrlPsoPlusInstances}{ninguna}
+\newcommand{\UniqueCtrlPsoMedianWins}{1}
+\newcommand{\UniqueCtrlPsoMedianLosses}{7}
+\newcommand{\UniqueCtrlPsoWilcoxonP}{0,016}
+\newcommand{\UniqueCtrlPsoWilcoxonHolm}{0,062}
+\newcommand{\UniqueCtrlPsoWilcoxonHolmEn}{0.062}
+\newcommand{\UniqueCtrlPsoRelativeP}{0,016}
+\newcommand{\UniqueCtrlPsoSignP}{0,070}
+\newcommand{\UniqueCtrlGaPlus}{3}
+\newcommand{\UniqueCtrlGaEqual}{5}
+\newcommand{\UniqueCtrlGaMinus}{0}
+\newcommand{\UniqueCtrlGaPlusInstances}{I2, I4 e I7}
+\newcommand{\UniqueCtrlGaMedianWins}{6}
+\newcommand{\UniqueCtrlGaMedianLosses}{2}
+\newcommand{\UniqueCtrlGaWilcoxonP}{0,055}
+\newcommand{\UniqueCtrlGaWilcoxonHolm}{0,109}
+\newcommand{\UniqueCtrlGaWilcoxonHolmEn}{0.109}
+\newcommand{\UniqueCtrlGaRelativeP}{0,055}
+\newcommand{\UniqueCtrlGaSignP}{0,289}
+\newcommand{\UniqueCtrlShoPlus}{0}
+\newcommand{\UniqueCtrlShoEqual}{7}
+\newcommand{\UniqueCtrlShoMinus}{1}
+\newcommand{\UniqueCtrlShoPlusInstances}{ninguna}
+\newcommand{\UniqueCtrlShoMedianWins}{0}
+\newcommand{\UniqueCtrlShoMedianLosses}{8}
+\newcommand{\UniqueCtrlShoWilcoxonP}{0,008}
+\newcommand{\UniqueCtrlShoWilcoxonHolm}{0,047}
+\newcommand{\UniqueCtrlShoWilcoxonHolmEn}{0.047}
+\newcommand{\UniqueCtrlShoRelativeP}{0,008}
+\newcommand{\UniqueCtrlShoSignP}{0,008}
+\newcommand{\UniqueCtrlWoaPlus}{0}
+\newcommand{\UniqueCtrlWoaEqual}{8}
+\newcommand{\UniqueCtrlWoaMinus}{0}
+\newcommand{\UniqueCtrlWoaPlusInstances}{ninguna}
+\newcommand{\UniqueCtrlWoaMedianWins}{1}
+\newcommand{\UniqueCtrlWoaMedianLosses}{7}
+\newcommand{\UniqueCtrlWoaWilcoxonP}{0,055}
+\newcommand{\UniqueCtrlWoaWilcoxonHolm}{0,109}
+\newcommand{\UniqueCtrlWoaWilcoxonHolmEn}{0.109}
+\newcommand{\UniqueCtrlWoaRelativeP}{0,055}
+\newcommand{\UniqueCtrlWoaSignP}{0,070}
+\newcommand{\UniqueCtrlRandomPlus}{8}
+\newcommand{\UniqueCtrlRandomEqual}{0}
+\newcommand{\UniqueCtrlRandomMinus}{0}
+\newcommand{\UniqueCtrlRandomPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\UniqueCtrlRandomMedianWins}{8}
+\newcommand{\UniqueCtrlRandomMedianLosses}{0}
+\newcommand{\UniqueCtrlRandomWilcoxonP}{0,008}
+\newcommand{\UniqueCtrlRandomWilcoxonHolm}{0,047}
+\newcommand{\UniqueCtrlRandomWilcoxonHolmEn}{0.047}
+\newcommand{\UniqueCtrlRandomRelativeP}{0,008}
+\newcommand{\UniqueCtrlRandomSignP}{0,008}
+\newcommand{\UniqueBaseGwoPlus}{8}
+\newcommand{\UniqueBaseGwoEqual}{0}
+\newcommand{\UniqueBaseGwoMinus}{0}
+\newcommand{\UniqueBaseGwoPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\UniqueBaseGwoMedianWins}{8}
+\newcommand{\UniqueBaseGwoMedianLosses}{0}
+\newcommand{\UniqueBaseGwoWilcoxonP}{0,008}
+\newcommand{\UniqueBaseGwoWilcoxonHolm}{0,039}
+\newcommand{\UniqueBaseGwoWilcoxonHolmEn}{0.039}
+\newcommand{\UniqueBaseGwoRelativeP}{0,008}
+\newcommand{\UniqueBaseGwoSignP}{0,008}
+\newcommand{\UniqueBasePsoPlus}{8}
+\newcommand{\UniqueBasePsoEqual}{0}
+\newcommand{\UniqueBasePsoMinus}{0}
+\newcommand{\UniqueBasePsoPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\UniqueBasePsoMedianWins}{8}
+\newcommand{\UniqueBasePsoMedianLosses}{0}
+\newcommand{\UniqueBasePsoWilcoxonP}{0,008}
+\newcommand{\UniqueBasePsoWilcoxonHolm}{0,039}
+\newcommand{\UniqueBasePsoWilcoxonHolmEn}{0.039}
+\newcommand{\UniqueBasePsoRelativeP}{0,008}
+\newcommand{\UniqueBasePsoSignP}{0,008}
+\newcommand{\UniqueBaseGaPlus}{5}
+\newcommand{\UniqueBaseGaEqual}{3}
+\newcommand{\UniqueBaseGaMinus}{0}
+\newcommand{\UniqueBaseGaPlusInstances}{I1, I3, I5, I7 e I8}
+\newcommand{\UniqueBaseGaMedianWins}{7}
+\newcommand{\UniqueBaseGaMedianLosses}{1}
+\newcommand{\UniqueBaseGaWilcoxonP}{0,023}
+\newcommand{\UniqueBaseGaWilcoxonHolm}{0,039}
+\newcommand{\UniqueBaseGaWilcoxonHolmEn}{0.039}
+\newcommand{\UniqueBaseGaRelativeP}{0,016}
+\newcommand{\UniqueBaseGaSignP}{0,070}
+\newcommand{\UniqueBaseShoPlus}{8}
+\newcommand{\UniqueBaseShoEqual}{0}
+\newcommand{\UniqueBaseShoMinus}{0}
+\newcommand{\UniqueBaseShoPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\UniqueBaseShoMedianWins}{8}
+\newcommand{\UniqueBaseShoMedianLosses}{0}
+\newcommand{\UniqueBaseShoWilcoxonP}{0,008}
+\newcommand{\UniqueBaseShoWilcoxonHolm}{0,039}
+\newcommand{\UniqueBaseShoWilcoxonHolmEn}{0.039}
+\newcommand{\UniqueBaseShoRelativeP}{0,008}
+\newcommand{\UniqueBaseShoSignP}{0,008}
+\newcommand{\UniqueBaseWoaPlus}{8}
+\newcommand{\UniqueBaseWoaEqual}{0}
+\newcommand{\UniqueBaseWoaMinus}{0}
+\newcommand{\UniqueBaseWoaPlusInstances}{I1, I2, I3, I4, I5, I6, I7 e I8}
+\newcommand{\UniqueBaseWoaMedianWins}{8}
+\newcommand{\UniqueBaseWoaMedianLosses}{0}
+\newcommand{\UniqueBaseWoaWilcoxonP}{0,008}
+\newcommand{\UniqueBaseWoaWilcoxonHolm}{0,039}
+\newcommand{\UniqueBaseWoaWilcoxonHolmEn}{0.039}
+\newcommand{\UniqueBaseWoaRelativeP}{0,008}
+\newcommand{\UniqueBaseWoaSignP}{0,008}
+\newcommand{\ConvHalfRequests}{300}
+\newcommand{\ConvHalfLeader}{PSO}
+\newcommand{\ConvHalfLeaderFinalPosition}{4}
+\newcommand{\ConvHalfControlPosition}{3}
+\newcommand{\ConvTauHalf}{0,52}
+\newcommand{\ConvControlLeadFrom}{40}
+\newcommand{\ConvControlLeadTo}{260}
+\newcommand{\ConvSettleFrom}{400}
+\newcommand{\ConvTauSettle}{0,90}
+\newcommand{\ConvEarlyRequests}{100}
+\newcommand{\ConvReductionGa}{14}
+\newcommand{\ConvGapHalfGa}{1,34}
+\newcommand{\ConvGapFinalGa}{1,15}
+\newcommand{\ConvRankEarlyGa}{5,12}
+\newcommand{\ConvReductionGwo}{75}
+\newcommand{\ConvGapHalfGwo}{0,84}
+\newcommand{\ConvGapFinalGwo}{0,21}
+\newcommand{\ConvRankEarlyGwo}{3,94}
+\newcommand{\ConvReductionPso}{18}
+\newcommand{\ConvGapHalfPso}{0,71}
+\newcommand{\ConvGapFinalPso}{0,58}
+\newcommand{\ConvRankEarlyPso}{2,75}
+\newcommand{\ConvReductionPsoGa}{3}
+\newcommand{\ConvGapHalfPsoGa}{0,82}
+\newcommand{\ConvGapFinalPsoGa}{0,79}
+\newcommand{\ConvRankEarlyPsoGa}{1,12}
+\newcommand{\ConvReductionRandom}{28}
+\newcommand{\ConvGapHalfRandom}{2,25}
+\newcommand{\ConvGapFinalRandom}{1,62}
+\newcommand{\ConvRankEarlyRandom}{7,00}
+\newcommand{\ConvReductionSho}{65}
+\newcommand{\ConvGapHalfSho}{0,71}
+\newcommand{\ConvGapFinalSho}{0,25}
+\newcommand{\ConvRankEarlySho}{3,69}
+\newcommand{\ConvReductionWoa}{55}
+\newcommand{\ConvGapHalfWoa}{0,90}
+\newcommand{\ConvGapFinalWoa}{0,41}
+\newcommand{\ConvRankEarlyWoa}{4,38}
 \newcommand{\InstLabelA}{base mixta}
 \newcommand{\InstCapacityA}{200}
 \newcommand{\InstAGSRA}{0,20}
 \newcommand{\InstCatalogsA}{341}
 \newcommand{\BFADesigns}{6.820.341}
+\newcommand{\BFADesignsEn}{6,820,341}
 \newcommand{\BFAFeasible}{2.583.634}
 \newcommand{\BFAFeasiblePct}{37,9}
 \newcommand{\BFACatalogs}{341}
@@ -55,29 +493,24 @@
 \newcommand{\BFADuration}{1}
 \newcommand{\BFAAGSR}{0,2000}
 \newcommand{\BFALCOH}{19,63}
-\newcommand{\BFAControlLCOE}{1.3e-14}
+\newcommand{\BFAControlLCOE}{$1{,}3\times10^{-14}$}
 \newcommand{\TopMedianA}{SHO}
 \newcommand{\TopMedianLCOEA}{0,284304}
 \newcommand{\TopMedianGapA}{0,217}
 \newcommand{\SecondMedianA}{GWO}
 \newcommand{\BottomMedianA}{RANDOM}
-\newcommand{\RandomRankA}{9}
+\newcommand{\RandomRankA}{7}
 \newcommand{\RandomMedianGapA}{1,349}
 \newcommand{\FeasibleRunsMinA}{30}
 \newcommand{\BestRunAAlgorithm}{PSO+GA}
 \newcommand{\BestRunALCOE}{0,283685}
 \newcommand{\BestRunAGapPct}{-0,0014}
-\newcommand{\BetterThanRandomA}{GWO, PSO, SHO, WOA, PSO+GA y SHO+LS}
-\newcommand{\WorseThanRandomA}{ninguno}
-\newcommand{\NoDifferenceFromRandomA}{GA y GA+LS}
-\newcommand{\BetterThanRandomCountA}{6}
-\newcommand{\HybridsBeatParentA}{PSO+GA (PSO)}
-\newcommand{\HybridsSignificantA}{ninguno}
 \newcommand{\InstLabelB}{AGSR 0,10}
 \newcommand{\InstCapacityB}{200}
 \newcommand{\InstAGSRB}{0,10}
 \newcommand{\InstCatalogsB}{341}
 \newcommand{\BFBDesigns}{6.820.341}
+\newcommand{\BFBDesignsEn}{6,820,341}
 \newcommand{\BFBFeasible}{690.561}
 \newcommand{\BFBFeasiblePct}{10,1}
 \newcommand{\BFBCatalogs}{341}
@@ -92,29 +525,24 @@
 \newcommand{\BFBDuration}{1}
 \newcommand{\BFBAGSR}{0,1000}
 \newcommand{\BFBLCOH}{20,05}
-\newcommand{\BFBControlLCOE}{1.3e-14}
-\newcommand{\TopMedianB}{SHO+LS}
-\newcommand{\TopMedianLCOEB}{0,326062}
-\newcommand{\TopMedianGapB}{0,010}
-\newcommand{\SecondMedianB}{GWO}
+\newcommand{\BFBControlLCOE}{$1{,}3\times10^{-14}$}
+\newcommand{\TopMedianB}{GWO}
+\newcommand{\TopMedianLCOEB}{0,326116}
+\newcommand{\TopMedianGapB}{0,026}
+\newcommand{\SecondMedianB}{SHO}
 \newcommand{\BottomMedianB}{RANDOM}
-\newcommand{\RandomRankB}{9}
+\newcommand{\RandomRankB}{7}
 \newcommand{\RandomMedianGapB}{1,817}
 \newcommand{\FeasibleRunsMinB}{30}
 \newcommand{\BestRunBAlgorithm}{PSO+GA}
 \newcommand{\BestRunBLCOE}{0,326026}
 \newcommand{\BestRunBGapPct}{-0,0017}
-\newcommand{\BetterThanRandomB}{GWO, PSO, SHO, WOA, PSO+GA y SHO+LS}
-\newcommand{\WorseThanRandomB}{ninguno}
-\newcommand{\NoDifferenceFromRandomB}{GA y GA+LS}
-\newcommand{\BetterThanRandomCountB}{6}
-\newcommand{\HybridsBeatParentB}{PSO+GA (GA) y SHO+LS (SHO)}
-\newcommand{\HybridsSignificantB}{PSO+GA vs GA}
-\newcommand{\InstLabelC}{catalogo fino}
+\newcommand{\InstLabelC}{catálogo fino}
 \newcommand{\InstCapacityC}{200}
 \newcommand{\InstAGSRC}{0,20}
 \newcommand{\InstCatalogsC}{1.701}
 \newcommand{\BFCDesigns}{34.021.701}
+\newcommand{\BFCDesignsEn}{34,021,701}
 \newcommand{\BFCFeasible}{13.727.712}
 \newcommand{\BFCFeasiblePct}{40,3}
 \newcommand{\BFCCatalogs}{1.701}
@@ -129,29 +557,24 @@
 \newcommand{\BFCDuration}{1}
 \newcommand{\BFCAGSR}{0,2000}
 \newcommand{\BFCLCOH}{19,63}
-\newcommand{\BFCControlLCOE}{1.3e-14}
+\newcommand{\BFCControlLCOE}{$1{,}3\times10^{-14}$}
 \newcommand{\TopMedianC}{SHO}
 \newcommand{\TopMedianLCOEC}{0,284376}
 \newcommand{\TopMedianGapC}{0,263}
 \newcommand{\SecondMedianC}{PSO}
 \newcommand{\BottomMedianC}{RANDOM}
-\newcommand{\RandomRankC}{9}
+\newcommand{\RandomRankC}{7}
 \newcommand{\RandomMedianGapC}{1,438}
 \newcommand{\FeasibleRunsMinC}{30}
 \newcommand{\BestRunCAlgorithm}{PSO}
 \newcommand{\BestRunCLCOE}{0,283629}
 \newcommand{\BestRunCGapPct}{-0,0006}
-\newcommand{\BetterThanRandomC}{GWO, PSO, SHO, WOA, PSO+GA y SHO+LS}
-\newcommand{\WorseThanRandomC}{ninguno}
-\newcommand{\NoDifferenceFromRandomC}{GA y GA+LS}
-\newcommand{\BetterThanRandomCountC}{6}
-\newcommand{\HybridsBeatParentC}{GA+LS (GA) y PSO+GA (GA)}
-\newcommand{\HybridsSignificantC}{ninguno}
 \newcommand{\InstLabelD}{300 MW}
 \newcommand{\InstCapacityD}{300}
 \newcommand{\InstAGSRD}{0,20}
 \newcommand{\InstCatalogsD}{651}
 \newcommand{\BFDDesigns}{19.530.651}
+\newcommand{\BFDDesignsEn}{19,530,651}
 \newcommand{\BFDFeasible}{4.951.441}
 \newcommand{\BFDFeasiblePct}{25,4}
 \newcommand{\BFDCatalogs}{651}
@@ -166,24 +589,146 @@
 \newcommand{\BFDDuration}{1}
 \newcommand{\BFDAGSR}{0,2000}
 \newcommand{\BFDLCOH}{19,40}
-\newcommand{\BFDControlLCOE}{1.5e-14}
+\newcommand{\BFDControlLCOE}{$1{,}5\times10^{-14}$}
 \newcommand{\TopMedianD}{SHO}
 \newcommand{\TopMedianLCOED}{0,281172}
 \newcommand{\TopMedianGapD}{0,286}
 \newcommand{\SecondMedianD}{GWO}
 \newcommand{\BottomMedianD}{RANDOM}
-\newcommand{\RandomRankD}{9}
+\newcommand{\RandomRankD}{7}
 \newcommand{\RandomMedianGapD}{1,341}
 \newcommand{\FeasibleRunsMinD}{30}
 \newcommand{\BestRunDAlgorithm}{PSO+GA}
 \newcommand{\BestRunDLCOE}{0,280367}
 \newcommand{\BestRunDGapPct}{-0,0014}
-\newcommand{\BetterThanRandomD}{GWO, PSO, SHO, WOA, PSO+GA y SHO+LS}
-\newcommand{\WorseThanRandomD}{ninguno}
-\newcommand{\NoDifferenceFromRandomD}{GA y GA+LS}
-\newcommand{\BetterThanRandomCountD}{6}
-\newcommand{\HybridsBeatParentD}{PSO+GA (GA)}
-\newcommand{\HybridsSignificantD}{PSO+GA vs GA}
+\newcommand{\InstLabelE}{100 MW}
+\newcommand{\InstCapacityE}{100}
+\newcommand{\InstAGSRE}{0,20}
+\newcommand{\InstCatalogsE}{186}
+\newcommand{\BFEDesigns}{1.860.186}
+\newcommand{\BFEDesignsEn}{1,860,186}
+\newcommand{\BFEFeasible}{852.774}
+\newcommand{\BFEFeasiblePct}{45,8}
+\newcommand{\BFECatalogs}{186}
+\newcommand{\BFEStep}{0,01}
+\newcommand{\BFEElapsedMin}{5}
+\newcommand{\BFELCOE}{0,293644}
+\newcommand{\BFEWind}{70,85}
+\newcommand{\BFEPV}{29,15}
+\newcommand{\BFEElectrolyzer}{45,0}
+\newcommand{\BFEUnits}{9}
+\newcommand{\BFEBattery}{10,0}
+\newcommand{\BFEDuration}{1}
+\newcommand{\BFEAGSR}{0,2000}
+\newcommand{\BFELCOH}{20,32}
+\newcommand{\BFEControlLCOE}{$1{,}4\times10^{-14}$}
+\newcommand{\TopMedianE}{GWO}
+\newcommand{\TopMedianLCOEE}{0,294321}
+\newcommand{\TopMedianGapE}{0,230}
+\newcommand{\SecondMedianE}{SHO}
+\newcommand{\BottomMedianE}{RANDOM}
+\newcommand{\RandomRankE}{7}
+\newcommand{\RandomMedianGapE}{1,735}
+\newcommand{\FeasibleRunsMinE}{30}
+\newcommand{\BestRunEAlgorithm}{PSO+GA}
+\newcommand{\BestRunELCOE}{0,293640}
+\newcommand{\BestRunEGapPct}{-0,0014}
+\newcommand{\InstLabelF}{100 MW, AGSR 0,10}
+\newcommand{\InstCapacityF}{100}
+\newcommand{\InstAGSRF}{0,10}
+\newcommand{\InstCatalogsF}{186}
+\newcommand{\BFFDesigns}{1.860.186}
+\newcommand{\BFFDesignsEn}{1,860,186}
+\newcommand{\BFFFeasible}{348.061}
+\newcommand{\BFFFeasiblePct}{18,7}
+\newcommand{\BFFCatalogs}{186}
+\newcommand{\BFFStep}{0,01}
+\newcommand{\BFFElapsedMin}{5}
+\newcommand{\BFFLCOE}{0,336994}
+\newcommand{\BFFWind}{56,61}
+\newcommand{\BFFPV}{43,39}
+\newcommand{\BFFElectrolyzer}{50,0}
+\newcommand{\BFFUnits}{10}
+\newcommand{\BFFBattery}{15,0}
+\newcommand{\BFFDuration}{1}
+\newcommand{\BFFAGSR}{0,1000}
+\newcommand{\BFFLCOH}{20,72}
+\newcommand{\BFFControlLCOE}{$1{,}4\times10^{-14}$}
+\newcommand{\TopMedianF}{GWO}
+\newcommand{\TopMedianLCOEF}{0,337037}
+\newcommand{\TopMedianGapF}{0,013}
+\newcommand{\SecondMedianF}{WOA}
+\newcommand{\BottomMedianF}{GA}
+\newcommand{\RandomRankF}{6}
+\newcommand{\RandomMedianGapF}{1,867}
+\newcommand{\FeasibleRunsMinF}{30}
+\newcommand{\BestRunFAlgorithm}{PSO+GA}
+\newcommand{\BestRunFLCOE}{0,336979}
+\newcommand{\BestRunFGapPct}{-0,0045}
+\newcommand{\InstLabelG}{300 MW, AGSR 0,10}
+\newcommand{\InstCapacityG}{300}
+\newcommand{\InstAGSRG}{0,10}
+\newcommand{\InstCatalogsG}{651}
+\newcommand{\BFGDesigns}{19.530.651}
+\newcommand{\BFGDesignsEn}{19,530,651}
+\newcommand{\BFGFeasible}{902.881}
+\newcommand{\BFGFeasiblePct}{4,6}
+\newcommand{\BFGCatalogs}{651}
+\newcommand{\BFGStep}{0,01}
+\newcommand{\BFGElapsedMin}{48}
+\newcommand{\BFGLCOE}{0,322266}
+\newcommand{\BFGWind}{167,61}
+\newcommand{\BFGPV}{132,39}
+\newcommand{\BFGElectrolyzer}{150,0}
+\newcommand{\BFGUnits}{30}
+\newcommand{\BFGBattery}{40,0}
+\newcommand{\BFGDuration}{1}
+\newcommand{\BFGAGSR}{0,1000}
+\newcommand{\BFGLCOH}{19,82}
+\newcommand{\BFGControlLCOE}{$1{,}5\times10^{-14}$}
+\newcommand{\TopMedianG}{SHO}
+\newcommand{\TopMedianLCOEG}{0,322442}
+\newcommand{\TopMedianGapG}{0,055}
+\newcommand{\SecondMedianG}{GWO}
+\newcommand{\BottomMedianG}{RANDOM}
+\newcommand{\RandomRankG}{7}
+\newcommand{\RandomMedianGapG}{2,358}
+\newcommand{\FeasibleRunsMinG}{30}
+\newcommand{\BestRunGAlgorithm}{PSO+GA}
+\newcommand{\BestRunGLCOE}{0,322266}
+\newcommand{\BestRunGGapPct}{-0,0000}
+\newcommand{\InstLabelH}{AGSR 0,30}
+\newcommand{\InstCapacityH}{200}
+\newcommand{\InstAGSRH}{0,30}
+\newcommand{\InstCatalogsH}{341}
+\newcommand{\BFHDesigns}{6.820.341}
+\newcommand{\BFHDesignsEn}{6,820,341}
+\newcommand{\BFHFeasible}{4.703.774}
+\newcommand{\BFHFeasiblePct}{69,0}
+\newcommand{\BFHCatalogs}{341}
+\newcommand{\BFHStep}{0,01}
+\newcommand{\BFHElapsedMin}{16}
+\newcommand{\BFHLCOE}{0,253476}
+\newcommand{\BFHWind}{152,52}
+\newcommand{\BFHPV}{47,48}
+\newcommand{\BFHElectrolyzer}{75,0}
+\newcommand{\BFHUnits}{15}
+\newcommand{\BFHBattery}{15,0}
+\newcommand{\BFHDuration}{1}
+\newcommand{\BFHAGSR}{0,3000}
+\newcommand{\BFHLCOH}{20,05}
+\newcommand{\BFHControlLCOE}{$1{,}3\times10^{-14}$}
+\newcommand{\TopMedianH}{SHO}
+\newcommand{\TopMedianLCOEH}{0,254382}
+\newcommand{\TopMedianGapH}{0,358}
+\newcommand{\SecondMedianH}{GWO}
+\newcommand{\BottomMedianH}{RANDOM}
+\newcommand{\RandomRankH}{7}
+\newcommand{\RandomMedianGapH}{1,035}
+\newcommand{\FeasibleRunsMinH}{30}
+\newcommand{\BestRunHAlgorithm}{PSO+GA}
+\newcommand{\BestRunHLCOE}{0,253472}
+\newcommand{\BestRunHGapPct}{-0,0013}
 
 \newcommand{\TablaValidacionAuto}{%
 \begin{table}[H]
@@ -283,9 +828,9 @@ extrapolada 105 m & 8,661 & 0,5612 & 0,186545 & 0,3691 \\
 preliminar & W190 & -1,31 & modelo inicial conservado como antecedente \\
 preliminar & W120 & 26,46 & modelo inicial conservado como antecedente \\
 preliminar & W60 & 95,16 & modelo inicial conservado como antecedente \\
-reconstruccion final 8760 & W190 & -2,04 & 8760 h, capacidad eolica continua y supuestos auditados \\
-reconstruccion final 8760 & W120 & -0,89 & 8760 h, capacidad eolica continua y supuestos auditados \\
-reconstruccion final 8760 & W60 & -2,04 & 8760 h, capacidad eolica continua y supuestos auditados \\
+reconstrucción final 8.760 & W190 & -2,04 & 8.760 h, capacidad eólica continua y supuestos auditados \\
+reconstrucción final 8.760 & W120 & -0,89 & 8.760 h, capacidad eólica continua y supuestos auditados \\
+reconstrucción final 8.760 & W60 & -2,04 & 8.760 h, capacidad eólica continua y supuestos auditados \\
 \hline
 \end{tabular}
 \end{table}
@@ -295,7 +840,8 @@ reconstruccion final 8760 & W60 & -2,04 & 8760 h, capacidad eolica continua y su
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Las cuatro instancias del problema de dimensionamiento}
+\setlength{\tabcolsep}{5pt}
+\caption{Las instancias del problema de dimensionamiento}
 \label{tab:instancias_auto}
 \renewcommand{\arraystretch}{1.15}
 \begin{tabular}{l l r r r r r r l r r}
@@ -305,8 +851,12 @@ reconstruccion final 8760 & W60 & -2,04 & 8760 h, capacidad eolica continua y su
 \hline
 I1 & base mixta & 200 & 0,20 & 5,0 & 10--20 & 5,0 & 50 & 1/2/4 & 341 & 6.820.341 (0,01) \\
 I2 & AGSR 0,10 & 200 & 0,10 & 5,0 & 10--20 & 5,0 & 50 & 1/2/4 & 341 & 6.820.341 (0,01) \\
-I3 & catalogo fino & 200 & 0,20 & 2,5 & 20--40 & 2,5 & 50 & 1/2/4/8 & 1.701 & 34.021.701 (0,01) \\
+I3 & catálogo fino & 200 & 0,20 & 2,5 & 20--40 & 2,5 & 50 & 1/2/4/8 & 1.701 & 34.021.701 (0,01) \\
 I4 & 300 MW & 300 & 0,20 & 5,0 & 10--30 & 5,0 & 50 & 1/2/4 & 651 & 19.530.651 (0,01) \\
+I5 & 100 MW & 100 & 0,20 & 5,0 & 5--10 & 5,0 & 50 & 1/2/4 & 186 & 1.860.186 (0,01) \\
+I6 & 100 MW, AGSR 0,10 & 100 & 0,10 & 5,0 & 5--10 & 5,0 & 50 & 1/2/4 & 186 & 1.860.186 (0,01) \\
+I7 & 300 MW, AGSR 0,10 & 300 & 0,10 & 5,0 & 10--30 & 5,0 & 50 & 1/2/4 & 651 & 19.530.651 (0,01) \\
+I8 & AGSR 0,30 & 200 & 0,30 & 5,0 & 10--20 & 5,0 & 50 & 1/2/4 & 341 & 6.820.341 (0,01) \\
 \hline
 \end{tabular}
 \end{table}
@@ -328,6 +878,10 @@ I1 & 6.820.341 & 37,9 & 141,70 & 90,0 & 20,0 & 1 & 0,2000 & 0,283689 & 18 \\
 I2 & 6.820.341 & 10,1 & 113,23 & 100,0 & 30,0 & 1 & 0,1000 & 0,326031 & 17 \\
 I3 & 34.021.701 & 40,3 & 148,49 & 92,5 & 22,5 & 1 & 0,2000 & 0,283631 & 104 \\
 I4 & 19.530.651 & 25,4 & 212,55 & 135,0 & 30,0 & 1 & 0,2000 & 0,280371 & 42 \\
+I5 & 1.860.186 & 45,8 & 70,85 & 45,0 & 10,0 & 1 & 0,2000 & 0,293644 & 5 \\
+I6 & 1.860.186 & 18,7 & 56,61 & 50,0 & 15,0 & 1 & 0,1000 & 0,336994 & 5 \\
+I7 & 19.530.651 & 4,6 & 167,61 & 150,0 & 40,0 & 1 & 0,1000 & 0,322266 & 48 \\
+I8 & 6.820.341 & 69,0 & 152,52 & 75,0 & 15,0 & 1 & 0,3000 & 0,253476 & 16 \\
 \hline
 \end{tabular}
 \end{table}
@@ -352,6 +906,14 @@ I3 & óptimo exacto & 148,49 & 92,5 & 22,5 & 1 & 0,283631 & 0,0000 \\
 I3 & mejor corrida (PSO) & 148,49 & 92,5 & 22,5 & 1 & 0,283629 & -0,0006 \\
 I4 & óptimo exacto & 212,55 & 135,0 & 30,0 & 1 & 0,280371 & 0,0000 \\
 I4 & mejor corrida (PSO+GA) & 212,56 & 135,0 & 30,0 & 1 & 0,280367 & -0,0014 \\
+I5 & óptimo exacto & 70,85 & 45,0 & 10,0 & 1 & 0,293644 & 0,0000 \\
+I5 & mejor corrida (PSO+GA) & 70,85 & 45,0 & 10,0 & 1 & 0,293640 & -0,0014 \\
+I6 & óptimo exacto & 56,61 & 50,0 & 15,0 & 1 & 0,336994 & 0,0000 \\
+I6 & mejor corrida (PSO+GA) & 56,62 & 50,0 & 15,0 & 1 & 0,336979 & -0,0045 \\
+I7 & óptimo exacto & 167,61 & 150,0 & 40,0 & 1 & 0,322266 & 0,0000 \\
+I7 & mejor corrida (PSO+GA) & 167,61 & 150,0 & 40,0 & 1 & 0,322266 & -0,0000 \\
+I8 & óptimo exacto & 152,52 & 75,0 & 15,0 & 1 & 0,253476 & 0,0000 \\
+I8 & mejor corrida (PSO+GA) & 152,53 & 75,0 & 15,0 & 1 & 0,253472 & -0,0013 \\
 \hline
 \end{tabular}
 \end{table}
@@ -368,15 +930,13 @@ I4 & mejor corrida (PSO+GA) & 212,56 & 135,0 & 30,0 & 1 & 0,280367 & -0,0014 \\
 \hline
 \textbf{Código} & \textbf{Nombre} & \textbf{Familia} & \textbf{Configuración} & \textbf{Fuente} \\
 \hline
-\texttt{gwo} & Grey Wolf Optimizer & enjambre jerarquico & a decae 2 -> 0; lideres alfa, beta, delta & Mirjalili et al. (2014) \\
-\texttt{pso} & Particle Swarm Optimization & enjambre & chi=0.729; c1=c2=1.49445; |v| <= 20\% del rango & Clerc \& Kennedy (2002) \\
-\texttt{ga} & Genetic Algorithm & evolutivo & torneo k=3; BLX-0.5 p=0.9; mutacion p=0.1 sigma=10\%; elite=2 & real-coded GA estandar \\
-\texttt{sho} & Spotted Hyena Optimizer & enjambre jerarquico & h decae 5.0 -> 0; grupo de confianza y ataque promedio & Dhiman \& Kumar (2017) \\
-\texttt{woa} & Whale Optimization Algorithm & enjambre & encierro/espiral 50/50; b=1.0; a decae 2 -> 0 & Mirjalili \& Lewis (2016) \\
-\texttt{ga\_ls} & GA memetico (GA + búsqueda local) & híbrido LTH evolutivo & GA identico + LS primera mejora sobre el mejor: 4 solicitudes/generacion; delta\_W 1\% del rango -> 0.01 MW (x0.5); 25 generaciones & Moscato (1989); Talbi (2002) \\
-\texttt{pso\_ga} & PSO con operadores genéticos & híbrido LTH heterogeneo & PSO identico + 5 hijos/iteracion (torneo k=3 sobre pbest, BLX-0.5, mutacion GA); hijos sin memoria & Kao \& Zahara (2008); Talbi (2002) \\
-\texttt{sho\_ls} & SHO + búsqueda local & híbrido LTH enjambre & SHO identico + LS sobre la presa: 4 solicitudes/generacion; h decae 5.0 -> 0 en 25 generaciones & Dhiman \& Kumar (2017); Talbi (2002) \\
-\texttt{random} & Random Search & linea base & muestreo uniforme sobre el dominio mixto & -- \\
+\texttt{gwo} & Grey Wolf Optimizer & enjambre jerárquico & $a$ decae 2 $\rightarrow$ 0; líderes alfa, beta, delta & Mirjalili et al. (2014) \\
+\texttt{pso} & Particle Swarm Optimization & enjambre & $\chi$=0,729; $c_1$=$c_2$=1,49445; $|v|$ $\leq$ 20\% del rango & Clerc \& Kennedy (2002) \\
+\texttt{ga} & Genetic Algorithm & evolutivo & torneo k=3; BLX-0,5 p=0,9; mutación p=0,1 $\sigma$=10\%; élite=2 & GA de codificación real estándar \\
+\texttt{sho} & Spotted Hyena Optimizer & enjambre jerárquico & $h$ decae 5,0 $\rightarrow$ 0; grupo de confianza y ataque promedio & Dhiman \& Kumar (2017) \\
+\texttt{woa} & Whale Optimization Algorithm & enjambre & encierro/espiral 50/50; b=1,0; $a$ decae 2 $\rightarrow$ 0 & Mirjalili \& Lewis (2016) \\
+\texttt{pso\_ga} & PSO con operadores genéticos & híbrido LTH heterogéneo & PSO idéntico + 5 hijos/iteración (torneo k=3 sobre pbest, BLX-0,5, mutación GA); hijos sin memoria & Kao \& Zahara (2008); Talbi (2002) \\
+\texttt{random} & Random Search & línea base & muestreo uniforme sobre el dominio mixto & -- \\
 \hline
 \end{tabular}
 \end{table}
@@ -396,12 +956,10 @@ I4 & mejor corrida (PSO+GA) & 212,56 & 135,0 & 30,0 & 1 & 0,280367 & -0,0014 \\
 1 & SHO & 0,284304 & 0,002291 & 0,283721 & 0,295350 & 0,217 \\
 2 & GWO & 0,284358 & 0,001628 & 0,283704 & 0,287132 & 0,236 \\
 3 & WOA & 0,284568 & 0,002191 & 0,283694 & 0,295344 & 0,310 \\
-4 & SHO+LS & 0,284639 & 0,002172 & 0,283686 & 0,289878 & 0,335 \\
-5 & GA & 0,285718 & 0,002882 & 0,283688 & 0,325011 & 0,715 \\
-6 & PSO+GA & 0,285778 & 0,002019 & 0,283685 & 0,288495 & 0,737 \\
-7 & PSO & 0,285781 & 0,001832 & 0,283691 & 0,287585 & 0,737 \\
-8 & GA+LS & 0,287156 & 0,004417 & 0,283686 & 0,292419 & 1,222 \\
-9 & RANDOM & 0,287517 & 0,002741 & 0,284415 & 0,291127 & 1,349 \\
+4 & GA & 0,285718 & 0,002882 & 0,283688 & 0,325011 & 0,715 \\
+5 & PSO+GA & 0,285778 & 0,002019 & 0,283685 & 0,288495 & 0,737 \\
+6 & PSO & 0,285781 & 0,001832 & 0,283691 & 0,287585 & 0,737 \\
+7 & RANDOM & 0,287517 & 0,002741 & 0,284415 & 0,291127 & 1,349 \\
 \hline
 \end{tabular}
 \end{table}
@@ -421,117 +979,10 @@ I4 & mejor corrida (PSO+GA) & 212,56 & 135,0 & 30,0 & 1 & 0,280367 & -0,0014 \\
 SHO & 30/30 & 26,7\% & 66,7\% & 76,7\% \\
 GWO & 30/30 & 20,0\% & 70,0\% & 90,0\% \\
 WOA & 30/30 & 16,7\% & 60,0\% & 86,7\% \\
-SHO+LS & 30/30 & 26,7\% & 60,0\% & 83,3\% \\
 GA & 30/30 & 16,7\% & 40,0\% & 56,7\% \\
 PSO+GA & 30/30 & 10,0\% & 40,0\% & 83,3\% \\
 PSO & 30/30 & 13,3\% & 36,7\% & 90,0\% \\
-GA+LS & 30/30 & 6,7\% & 30,0\% & 40,0\% \\
 RANDOM & 30/30 & 0,0\% & 16,7\% & 30,0\% \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaComputoAutoA}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Uso del presupuesto y costo de cómputo por algoritmo en I1 (base mixta)}
-\label{tab:computo_auto_i1}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l r r r r r}
-\hline
-\textbf{Alg.} & \textbf{Factibles} & \textbf{Únicas (media)} & \textbf{Duplicadas (media)} & \textbf{Solic. LS (media)} & \textbf{Tiempo [s]} \\
-\hline
-SHO & 30/30 & 582,5 & 17,5 & -- & 3,59 \\
-GWO & 30/30 & 586,5 & 13,5 & -- & 3,63 \\
-WOA & 30/30 & 566,5 & 33,5 & -- & 3,47 \\
-SHO+LS & 30/30 & 551,7 & 48,3 & 66,2 & 3,41 \\
-GA & 30/30 & 392,5 & 207,5 & -- & 2,42 \\
-PSO+GA & 30/30 & 569,4 & 30,6 & -- & 3,48 \\
-PSO & 30/30 & 600,0 & 0,0 & -- & 3,69 \\
-GA+LS & 30/30 & 447,2 & 152,8 & 96,7 & 2,76 \\
-RANDOM & 30/30 & 600,0 & 0,0 & -- & 3,75 \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaParesPlanificadosAutoA}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Contrastes planificados en I1 (base mixta): Mann--Whitney bilateral, Holm dentro de la familia y $A_{12}$ (A frente a B)}
-\label{tab:pares_planned_i1}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r l}
-\hline
-\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Sig.} \\
-\hline
-GWO & RANDOM & 4,76e-07 & 0,913 & [0,838; 0,969] & sí \\
-PSO & RANDOM & 2,55e-05 & 0,856 & [0,744; 0,942] & sí \\
-GA & RANDOM & 0,151 & 0,669 & [0,533; 0,803] & no \\
-SHO & RANDOM & 0,000117 & 0,830 & [0,714; 0,926] & sí \\
-WOA & RANDOM & 0,000182 & 0,817 & [0,697; 0,917] & sí \\
-GA+LS & RANDOM & 1 & 0,571 & [0,428; 0,714] & no \\
-PSO+GA & RANDOM & 0,000131 & 0,824 & [0,714; 0,921] & sí \\
-SHO+LS & RANDOM & 0,000129 & 0,827 & [0,709; 0,928] & sí \\
-GA+LS & GA & 0,983 & 0,412 & [0,268; 0,556] & no \\
-PSO+GA & PSO & 1 & 0,520 & [0,370; 0,679] & no \\
-PSO+GA & GA & 0,881 & 0,602 & [0,449; 0,742] & no \\
-SHO+LS & SHO & 1 & 0,492 & [0,344; 0,639] & no \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaParesCompletaAutoA}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Todos los pares en I1 (base mixta): Mann--Whitney bilateral, Holm sobre los 36 pares y $A_{12}$ (A frente a B)}
-\label{tab:pares_all_i1}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r l}
-\hline
-\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Sig.} \\
-\hline
-GA & GA+LS & 1 & 0,588 & [0,441; 0,732] & no \\
-GA & GWO & 0,183 & 0,299 & [0,164; 0,437] & no \\
-GA & PSO & 1 & 0,394 & [0,247; 0,560] & no \\
-GA & PSO+GA & 1 & 0,398 & [0,256; 0,554] & no \\
-GA & RANDOM & 0,577 & 0,669 & [0,527; 0,802] & no \\
-GA & SHO & 0,959 & 0,348 & [0,208; 0,493] & no \\
-GA & SHO+LS & 1 & 0,356 & [0,219; 0,504] & no \\
-GA & WOA & 1 & 0,378 & [0,237; 0,521] & no \\
-GA+LS & GWO & 0,00397 & 0,212 & [0,099; 0,338] & sí \\
-GA+LS & PSO & 0,0377 & 0,258 & [0,139; 0,394] & sí \\
-GA+LS & PSO+GA & 0,0582 & 0,269 & [0,147; 0,410] & no \\
-GA+LS & RANDOM & 1 & 0,571 & [0,420; 0,712] & no \\
-GA+LS & SHO & 0,047 & 0,263 & [0,142; 0,393] & sí \\
-GA+LS & SHO+LS & 0,065 & 0,272 & [0,149; 0,412] & no \\
-GA+LS & WOA & 0,167 & 0,296 & [0,163; 0,432] & no \\
-GWO & PSO & 1 & 0,608 & [0,461; 0,753] & no \\
-GWO & PSO+GA & 1 & 0,606 & [0,453; 0,749] & no \\
-GWO & RANDOM & 1,43e-06 & 0,913 & [0,836; 0,970] & sí \\
-GWO & SHO & 1 & 0,499 & [0,351; 0,654] & no \\
-GWO & SHO+LS & 1 & 0,536 & [0,381; 0,686] & no \\
-GWO & WOA & 1 & 0,571 & [0,423; 0,714] & no \\
-PSO & PSO+GA & 1 & 0,480 & [0,340; 0,629] & no \\
-PSO & RANDOM & 8,11e-05 & 0,856 & [0,744; 0,946] & sí \\
-PSO & SHO & 1 & 0,430 & [0,280; 0,577] & no \\
-PSO & SHO+LS & 1 & 0,460 & [0,316; 0,602] & no \\
-PSO & WOA & 1 & 0,497 & [0,350; 0,636] & no \\
-PSO+GA & RANDOM & 0,000523 & 0,824 & [0,704; 0,918] & sí \\
-PSO+GA & SHO & 1 & 0,418 & [0,269; 0,567] & no \\
-PSO+GA & SHO+LS & 1 & 0,464 & [0,311; 0,614] & no \\
-PSO+GA & WOA & 1 & 0,490 & [0,334; 0,638] & no \\
-RANDOM & SHO & 0,000397 & 0,170 & [0,073; 0,286] & sí \\
-RANDOM & SHO+LS & 0,000472 & 0,173 & [0,079; 0,286] & sí \\
-RANDOM & WOA & 0,000805 & 0,183 & [0,080; 0,300] & sí \\
-SHO & SHO+LS & 1 & 0,508 & [0,368; 0,659] & no \\
-SHO & WOA & 1 & 0,544 & [0,391; 0,699] & no \\
-SHO+LS & WOA & 1 & 0,531 & [0,378; 0,683] & no \\
 \hline
 \end{tabular}
 \end{table}
@@ -548,15 +999,13 @@ SHO+LS & WOA & 1 & 0,531 & [0,378; 0,683] & no \\
 \hline
 \textbf{\#} & \textbf{Alg.} & \textbf{Mediana} & \textbf{IQR} & \textbf{Mejor} & \textbf{Peor} & \textbf{Brecha med. [\%]} \\
 \hline
-1 & SHO+LS & 0,326062 & 0,001817 & 0,326026 & 0,328761 & 0,010 \\
-2 & GWO & 0,326116 & 0,000292 & 0,326036 & 0,328837 & 0,026 \\
-3 & SHO & 0,326188 & 0,001829 & 0,326041 & 0,328849 & 0,048 \\
-4 & WOA & 0,327851 & 0,001855 & 0,326026 & 0,335749 & 0,558 \\
-5 & PSO & 0,327859 & 0,002487 & 0,326026 & 0,337925 & 0,561 \\
-6 & PSO+GA & 0,328100 & 0,002754 & 0,326026 & 0,365220 & 0,635 \\
-7 & GA & 0,330149 & 0,006007 & 0,326750 & 0,350533 & 1,263 \\
-8 & GA+LS & 0,330609 & 0,005246 & 0,326027 & 0,347766 & 1,404 \\
-9 & RANDOM & 0,331954 & 0,004422 & 0,326147 & 0,342124 & 1,817 \\
+1 & GWO & 0,326116 & 0,000292 & 0,326036 & 0,328837 & 0,026 \\
+2 & SHO & 0,326188 & 0,001829 & 0,326041 & 0,328849 & 0,048 \\
+3 & WOA & 0,327851 & 0,001855 & 0,326026 & 0,335749 & 0,558 \\
+4 & PSO & 0,327859 & 0,002487 & 0,326026 & 0,337925 & 0,561 \\
+5 & PSO+GA & 0,328100 & 0,002754 & 0,326026 & 0,365220 & 0,635 \\
+6 & GA & 0,330149 & 0,006007 & 0,326750 & 0,350533 & 1,263 \\
+7 & RANDOM & 0,331954 & 0,004422 & 0,326147 & 0,342124 & 1,817 \\
 \hline
 \end{tabular}
 \end{table}
@@ -573,120 +1022,13 @@ SHO+LS & WOA & 1 & 0,531 & [0,378; 0,683] & no \\
 \hline
 \textbf{Alg.} & \textbf{Factibles} & \textbf{Brecha $\leq$0,1\%} & \textbf{Brecha $\leq$0,5\%} & \textbf{Brecha $\leq$1\%} \\
 \hline
-SHO+LS & 30/30 & 53,3\% & 53,3\% & 100,0\% \\
 GWO & 30/30 & 73,3\% & 80,0\% & 100,0\% \\
 SHO & 30/30 & 56,7\% & 56,7\% & 100,0\% \\
 WOA & 30/30 & 33,3\% & 46,7\% & 90,0\% \\
 PSO & 30/30 & 30,0\% & 30,0\% & 80,0\% \\
 PSO+GA & 30/30 & 26,7\% & 33,3\% & 76,7\% \\
 GA & 30/30 & 0,0\% & 16,7\% & 46,7\% \\
-GA+LS & 30/30 & 13,3\% & 23,3\% & 40,0\% \\
 RANDOM & 30/30 & 3,3\% & 10,0\% & 13,3\% \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaComputoAutoB}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Uso del presupuesto y costo de cómputo por algoritmo en I2 (AGSR 0,10)}
-\label{tab:computo_auto_i2}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l r r r r r}
-\hline
-\textbf{Alg.} & \textbf{Factibles} & \textbf{Únicas (media)} & \textbf{Duplicadas (media)} & \textbf{Solic. LS (media)} & \textbf{Tiempo [s]} \\
-\hline
-SHO+LS & 30/30 & 565,3 & 34,7 & 65,6 & 3,48 \\
-GWO & 30/30 & 599,7 & 0,3 & -- & 3,67 \\
-SHO & 30/30 & 599,7 & 0,3 & -- & 3,69 \\
-WOA & 30/30 & 576,4 & 23,6 & -- & 3,50 \\
-PSO & 30/30 & 600,0 & 0,0 & -- & 3,65 \\
-PSO+GA & 30/30 & 571,0 & 29,0 & -- & 3,47 \\
-GA & 30/30 & 420,0 & 180,0 & -- & 2,60 \\
-GA+LS & 30/30 & 451,6 & 148,4 & 97,5 & 2,78 \\
-RANDOM & 30/30 & 600,0 & 0,0 & -- & 3,76 \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaParesPlanificadosAutoB}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Contrastes planificados en I2 (AGSR 0,10): Mann--Whitney bilateral, Holm dentro de la familia y $A_{12}$ (A frente a B)}
-\label{tab:pares_planned_i2}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r l}
-\hline
-\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Sig.} \\
-\hline
-GWO & RANDOM & 4,17e-09 & 0,972 & [0,929; 1,000] & sí \\
-PSO & RANDOM & 0,00014 & 0,823 & [0,706; 0,928] & sí \\
-GA & RANDOM & 0,667 & 0,596 & [0,443; 0,732] & no \\
-SHO & RANDOM & 2,45e-08 & 0,950 & [0,884; 0,999] & sí \\
-WOA & RANDOM & 6,84e-06 & 0,872 & [0,765; 0,959] & sí \\
-GA+LS & RANDOM & 0,667 & 0,604 & [0,458; 0,747] & no \\
-PSO+GA & RANDOM & 0,000474 & 0,800 & [0,679; 0,907] & sí \\
-SHO+LS & RANDOM & 3,2e-08 & 0,946 & [0,880; 0,992] & sí \\
-GA+LS & GA & 1 & 0,513 & [0,368; 0,659] & no \\
-PSO+GA & PSO & 1 & 0,498 & [0,342; 0,649] & no \\
-PSO+GA & GA & 0,0254 & 0,716 & [0,580; 0,838] & sí \\
-SHO+LS & SHO & 0,287 & 0,643 & [0,487; 0,782] & no \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaParesCompletaAutoB}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Todos los pares en I2 (AGSR 0,10): Mann--Whitney bilateral, Holm sobre los 36 pares y $A_{12}$ (A frente a B)}
-\label{tab:pares_all_i2}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r l}
-\hline
-\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Sig.} \\
-\hline
-GA & GA+LS & 1 & 0,487 & [0,349; 0,646] & no \\
-GA & GWO & 7,12e-08 & 0,049 & [0,012; 0,104] & sí \\
-GA & PSO & 0,0128 & 0,240 & [0,132; 0,366] & sí \\
-GA & PSO+GA & 0,0887 & 0,284 & [0,163; 0,423] & no \\
-GA & RANDOM & 1 & 0,596 & [0,446; 0,733] & no \\
-GA & SHO & 7,03e-06 & 0,110 & [0,043; 0,199] & sí \\
-GA & SHO+LS & 1,49e-05 & 0,121 & [0,050; 0,216] & sí \\
-GA & WOA & 0,0014 & 0,197 & [0,091; 0,318] & sí \\
-GA+LS & GWO & 7,77e-05 & 0,147 & [0,043; 0,272] & sí \\
-GA+LS & PSO & 0,0887 & 0,284 & [0,151; 0,426] & no \\
-GA+LS & PSO+GA & 0,0966 & 0,289 & [0,162; 0,431] & no \\
-GA+LS & RANDOM & 1 & 0,604 & [0,451; 0,746] & no \\
-GA+LS & SHO & 0,000486 & 0,178 & [0,066; 0,307] & sí \\
-GA+LS & SHO+LS & 0,000305 & 0,169 & [0,062; 0,290] & sí \\
-GA+LS & WOA & 0,016 & 0,246 & [0,117; 0,380] & sí \\
-GWO & PSO & 0,46 & 0,666 & [0,506; 0,813] & no \\
-GWO & PSO+GA & 0,229 & 0,688 & [0,529; 0,827] & no \\
-GWO & RANDOM & 1,25e-08 & 0,972 & [0,933; 1,000] & sí \\
-GWO & SHO & 1 & 0,603 & [0,447; 0,751] & no \\
-GWO & SHO+LS & 1 & 0,443 & [0,279; 0,607] & no \\
-GWO & WOA & 0,631 & 0,653 & [0,500; 0,791] & no \\
-PSO & PSO+GA & 1 & 0,502 & [0,349; 0,648] & no \\
-PSO & RANDOM & 0,000472 & 0,823 & [0,707; 0,931] & sí \\
-PSO & SHO & 1 & 0,447 & [0,292; 0,601] & no \\
-PSO & SHO+LS & 0,46 & 0,333 & [0,199; 0,476] & no \\
-PSO & WOA & 1 & 0,476 & [0,320; 0,632] & no \\
-PSO+GA & RANDOM & 0,00162 & 0,800 & [0,676; 0,906] & sí \\
-PSO+GA & SHO & 1 & 0,367 & [0,213; 0,527] & no \\
-PSO+GA & SHO+LS & 1 & 0,382 & [0,238; 0,536] & no \\
-PSO+GA & WOA & 1 & 0,429 & [0,278; 0,577] & no \\
-RANDOM & SHO & 7,57e-08 & 0,050 & [0,002; 0,113] & sí \\
-RANDOM & SHO+LS & 1,05e-07 & 0,054 & [0,009; 0,116] & sí \\
-RANDOM & WOA & 2,28e-05 & 0,128 & [0,040; 0,230] & sí \\
-SHO & SHO+LS & 0,804 & 0,357 & [0,214; 0,513] & no \\
-SHO & WOA & 1 & 0,536 & [0,386; 0,690] & no \\
-SHO+LS & WOA & 1 & 0,622 & [0,474; 0,776] & no \\
 \hline
 \end{tabular}
 \end{table}
@@ -696,7 +1038,7 @@ SHO+LS & WOA & 1 & 0,622 & [0,474; 0,776] & no \\
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Calidad final por algoritmo en I3 (catalogo fino), 30 ejecuciones; brecha respecto del óptimo exacto}
+\caption{Calidad final por algoritmo en I3 (catálogo fino), 30 ejecuciones; brecha respecto del óptimo exacto}
 \label{tab:ranking_auto_i3}
 \renewcommand{\arraystretch}{1.15}
 \begin{tabular}{l l r r r r r}
@@ -708,10 +1050,8 @@ SHO+LS & WOA & 1 & 0,622 & [0,474; 0,776] & no \\
 3 & GWO & 0,284580 & 0,001889 & 0,283638 & 0,289624 & 0,335 \\
 4 & WOA & 0,284735 & 0,002015 & 0,283645 & 0,290454 & 0,389 \\
 5 & PSO+GA & 0,285629 & 0,002192 & 0,283685 & 0,290518 & 0,704 \\
-6 & SHO+LS & 0,285900 & 0,002121 & 0,283888 & 0,292198 & 0,800 \\
-7 & GA+LS & 0,286101 & 0,004184 & 0,283856 & 0,307552 & 0,871 \\
-8 & GA & 0,286228 & 0,001919 & 0,283679 & 0,294201 & 0,916 \\
-9 & RANDOM & 0,287709 & 0,002135 & 0,284272 & 0,290085 & 1,438 \\
+6 & GA & 0,286228 & 0,001919 & 0,283679 & 0,294201 & 0,916 \\
+7 & RANDOM & 0,287709 & 0,002135 & 0,284272 & 0,290085 & 1,438 \\
 \hline
 \end{tabular}
 \end{table}
@@ -721,7 +1061,7 @@ SHO+LS & WOA & 1 & 0,622 & [0,474; 0,776] & no \\
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Probabilidad empírica de proximidad al óptimo exacto en I3 (catalogo fino)}
+\caption{Probabilidad empírica de proximidad al óptimo exacto en I3 (catálogo fino)}
 \label{tab:exito_auto_i3}
 \renewcommand{\arraystretch}{1.15}
 \begin{tabular}{l r r r r}
@@ -733,115 +1073,8 @@ PSO & 30/30 & 30,0\% & 56,7\% & 90,0\% \\
 GWO & 30/30 & 13,3\% & 56,7\% & 86,7\% \\
 WOA & 30/30 & 23,3\% & 53,3\% & 86,7\% \\
 PSO+GA & 30/30 & 13,3\% & 33,3\% & 73,3\% \\
-SHO+LS & 30/30 & 3,3\% & 36,7\% & 70,0\% \\
-GA+LS & 30/30 & 3,3\% & 33,3\% & 53,3\% \\
 GA & 30/30 & 13,3\% & 23,3\% & 60,0\% \\
 RANDOM & 30/30 & 0,0\% & 10,0\% & 16,7\% \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaComputoAutoC}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Uso del presupuesto y costo de cómputo por algoritmo en I3 (catalogo fino)}
-\label{tab:computo_auto_i3}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l r r r r r}
-\hline
-\textbf{Alg.} & \textbf{Factibles} & \textbf{Únicas (media)} & \textbf{Duplicadas (media)} & \textbf{Solic. LS (media)} & \textbf{Tiempo [s]} \\
-\hline
-SHO & 30/30 & 589,4 & 10,6 & -- & 3,63 \\
-PSO & 30/30 & 600,0 & 0,0 & -- & 3,69 \\
-GWO & 30/30 & 593,6 & 6,4 & -- & 3,69 \\
-WOA & 30/30 & 573,2 & 26,8 & -- & 3,51 \\
-PSO+GA & 30/30 & 570,2 & 29,8 & -- & 3,51 \\
-SHO+LS & 30/30 & 557,9 & 42,1 & 65,7 & 3,47 \\
-GA+LS & 30/30 & 456,9 & 143,1 & 97,9 & 2,84 \\
-GA & 30/30 & 419,0 & 181,0 & -- & 2,60 \\
-RANDOM & 30/30 & 600,0 & 0,0 & -- & 3,78 \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaParesPlanificadosAutoC}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Contrastes planificados en I3 (catalogo fino): Mann--Whitney bilateral, Holm dentro de la familia y $A_{12}$ (A frente a B)}
-\label{tab:pares_planned_i3}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r l}
-\hline
-\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Sig.} \\
-\hline
-GWO & RANDOM & 8,45e-06 & 0,873 & [0,773; 0,956] & sí \\
-PSO & RANDOM & 1,19e-05 & 0,866 & [0,751; 0,953] & sí \\
-GA & RANDOM & 0,0568 & 0,696 & [0,557; 0,828] & no \\
-SHO & RANDOM & 2,24e-05 & 0,854 & [0,742; 0,944] & sí \\
-WOA & RANDOM & 1,13e-05 & 0,868 & [0,760; 0,950] & sí \\
-GA+LS & RANDOM & 0,436 & 0,610 & [0,448; 0,757] & no \\
-PSO+GA & RANDOM & 0,000885 & 0,791 & [0,670; 0,909] & sí \\
-SHO+LS & RANDOM & 0,00279 & 0,767 & [0,627; 0,892] & sí \\
-GA+LS & GA & 0,568 & 0,441 & [0,294; 0,586] & no \\
-PSO+GA & PSO & 0,351 & 0,370 & [0,233; 0,514] & no \\
-PSO+GA & GA & 0,568 & 0,581 & [0,431; 0,727] & no \\
-SHO+LS & SHO & 0,351 & 0,363 & [0,230; 0,509] & no \\
-\hline
-\end{tabular}
-\end{table}
-}
-
-\newcommand{\TablaParesCompletaAutoC}{%
-\begin{table}[H]
-\centering
-\scriptsize
-\caption{Todos los pares en I3 (catalogo fino): Mann--Whitney bilateral, Holm sobre los 36 pares y $A_{12}$ (A frente a B)}
-\label{tab:pares_all_i3}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r l}
-\hline
-\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Sig.} \\
-\hline
-GA & GA+LS & 1 & 0,559 & [0,413; 0,700] & no \\
-GA & GWO & 0,959 & 0,348 & [0,210; 0,494] & no \\
-GA & PSO & 0,459 & 0,322 & [0,189; 0,462] & no \\
-GA & PSO+GA & 1 & 0,419 & [0,271; 0,560] & no \\
-GA & RANDOM & 0,256 & 0,696 & [0,550; 0,832] & no \\
-GA & SHO & 1 & 0,364 & [0,213; 0,509] & no \\
-GA & SHO+LS & 1 & 0,469 & [0,312; 0,617] & no \\
-GA & WOA & 0,724 & 0,338 & [0,199; 0,482] & no \\
-GA+LS & GWO & 0,345 & 0,313 & [0,187; 0,452] & no \\
-GA+LS & PSO & 0,091 & 0,277 & [0,159; 0,422] & no \\
-GA+LS & PSO+GA & 1 & 0,373 & [0,242; 0,527] & no \\
-GA+LS & RANDOM & 1 & 0,610 & [0,457; 0,756] & no \\
-GA+LS & SHO & 0,195 & 0,297 & [0,164; 0,440] & no \\
-GA+LS & SHO+LS & 1 & 0,408 & [0,269; 0,556] & no \\
-GA+LS & WOA & 0,162 & 0,291 & [0,164; 0,420] & no \\
-GWO & PSO & 1 & 0,437 & [0,288; 0,584] & no \\
-GWO & PSO+GA & 1 & 0,586 & [0,434; 0,728] & no \\
-GWO & RANDOM & 2,54e-05 & 0,873 & [0,774; 0,956] & sí \\
-GWO & SHO & 1 & 0,470 & [0,322; 0,616] & no \\
-GWO & SHO+LS & 1 & 0,620 & [0,480; 0,759] & no \\
-GWO & WOA & 1 & 0,472 & [0,322; 0,620] & no \\
-PSO & PSO+GA & 1 & 0,630 & [0,490; 0,774] & no \\
-PSO & RANDOM & 4,06e-05 & 0,866 & [0,753; 0,954] & sí \\
-PSO & SHO & 1 & 0,563 & [0,408; 0,707] & no \\
-PSO & SHO+LS & 0,477 & 0,676 & [0,538; 0,810] & no \\
-PSO & WOA & 1 & 0,536 & [0,384; 0,687] & no \\
-PSO+GA & RANDOM & 0,00354 & 0,791 & [0,667; 0,904] & sí \\
-PSO+GA & SHO & 1 & 0,406 & [0,257; 0,553] & no \\
-PSO+GA & SHO+LS & 1 & 0,547 & [0,392; 0,692] & no \\
-PSO+GA & WOA & 1 & 0,402 & [0,259; 0,550] & no \\
-RANDOM & SHO & 8,22e-05 & 0,146 & [0,052; 0,261] & sí \\
-RANDOM & SHO+LS & 0,0124 & 0,233 & [0,100; 0,376] & sí \\
-RANDOM & WOA & 3,6e-05 & 0,132 & [0,048; 0,227] & sí \\
-SHO & SHO+LS & 1 & 0,637 & [0,488; 0,770] & no \\
-SHO & WOA & 1 & 0,497 & [0,349; 0,647] & no \\
-SHO+LS & WOA & 1 & 0,351 & [0,214; 0,499] & no \\
 \hline
 \end{tabular}
 \end{table}
@@ -863,10 +1096,8 @@ SHO+LS & WOA & 1 & 0,351 & [0,214; 0,499] & no \\
 3 & WOA & 0,281786 & 0,001845 & 0,280383 & 0,286649 & 0,505 \\
 4 & PSO & 0,282232 & 0,001929 & 0,280367 & 0,286296 & 0,664 \\
 5 & PSO+GA & 0,282299 & 0,002131 & 0,280367 & 0,288634 & 0,688 \\
-6 & SHO+LS & 0,282639 & 0,002310 & 0,280374 & 0,287778 & 0,809 \\
-7 & GA & 0,282927 & 0,002712 & 0,280639 & 0,288740 & 0,912 \\
-8 & GA+LS & 0,283001 & 0,002708 & 0,280557 & 0,289733 & 0,938 \\
-9 & RANDOM & 0,284130 & 0,001625 & 0,281219 & 0,288928 & 1,341 \\
+6 & GA & 0,282927 & 0,002712 & 0,280639 & 0,288740 & 0,912 \\
+7 & RANDOM & 0,284130 & 0,001625 & 0,281219 & 0,288928 & 1,341 \\
 \hline
 \end{tabular}
 \end{table}
@@ -888,147 +1119,526 @@ GWO & 30/30 & 23,3\% & 53,3\% & 80,0\% \\
 WOA & 30/30 & 23,3\% & 50,0\% & 93,3\% \\
 PSO & 30/30 & 40,0\% & 46,7\% & 96,7\% \\
 PSO+GA & 30/30 & 26,7\% & 40,0\% & 80,0\% \\
-SHO+LS & 30/30 & 13,3\% & 43,3\% & 66,7\% \\
 GA & 30/30 & 6,7\% & 23,3\% & 53,3\% \\
-GA+LS & 30/30 & 3,3\% & 20,0\% & 53,3\% \\
 RANDOM & 30/30 & 0,0\% & 10,0\% & 33,3\% \\
 \hline
 \end{tabular}
 \end{table}
 }
 
-\newcommand{\TablaComputoAutoD}{%
+\newcommand{\TablaRankingAutoE}{%
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Uso del presupuesto y costo de cómputo por algoritmo en I4 (300 MW)}
-\label{tab:computo_auto_i4}
+\caption{Calidad final por algoritmo en I5 (100 MW), 30 ejecuciones; brecha respecto del óptimo exacto}
+\label{tab:ranking_auto_i5}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l r r r r r}
+\begin{tabular}{l l r r r r r}
 \hline
-\textbf{Alg.} & \textbf{Factibles} & \textbf{Únicas (media)} & \textbf{Duplicadas (media)} & \textbf{Solic. LS (media)} & \textbf{Tiempo [s]} \\
+\textbf{\#} & \textbf{Alg.} & \textbf{Mediana} & \textbf{IQR} & \textbf{Mejor} & \textbf{Peor} & \textbf{Brecha med. [\%]} \\
 \hline
-SHO & 30/30 & 587,8 & 12,2 & -- & 3,65 \\
-GWO & 30/30 & 591,7 & 8,3 & -- & 3,65 \\
-WOA & 30/30 & 568,0 & 32,0 & -- & 3,50 \\
-PSO & 30/30 & 600,0 & 0,0 & -- & 3,73 \\
-PSO+GA & 30/30 & 568,5 & 31,5 & -- & 3,51 \\
-SHO+LS & 30/30 & 558,5 & 41,5 & 69,1 & 3,48 \\
-GA & 30/30 & 398,8 & 201,2 & -- & 2,49 \\
-GA+LS & 30/30 & 456,0 & 144,0 & 99,1 & 2,84 \\
-RANDOM & 30/30 & 600,0 & 0,0 & -- & 3,81 \\
+1 & GWO & 0,294321 & 0,001529 & 0,293669 & 0,305900 & 0,230 \\
+2 & SHO & 0,294349 & 0,001951 & 0,293646 & 0,305889 & 0,240 \\
+3 & WOA & 0,294451 & 0,001986 & 0,293646 & 0,305884 & 0,275 \\
+4 & PSO & 0,295753 & 0,002528 & 0,293641 & 0,299035 & 0,718 \\
+5 & GA & 0,295898 & 0,002416 & 0,293641 & 0,313903 & 0,768 \\
+6 & PSO+GA & 0,296178 & 0,003045 & 0,293640 & 0,301177 & 0,863 \\
+7 & RANDOM & 0,298739 & 0,004207 & 0,294954 & 0,305752 & 1,735 \\
 \hline
 \end{tabular}
 \end{table}
 }
 
-\newcommand{\TablaParesPlanificadosAutoD}{%
+\newcommand{\TablaExitoAutoE}{%
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Contrastes planificados en I4 (300 MW): Mann--Whitney bilateral, Holm dentro de la familia y $A_{12}$ (A frente a B)}
-\label{tab:pares_planned_i4}
+\caption{Probabilidad empírica de proximidad al óptimo exacto en I5 (100 MW)}
+\label{tab:exito_auto_i5}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r l}
+\begin{tabular}{l r r r r}
 \hline
-\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Sig.} \\
+\textbf{Alg.} & \textbf{Factibles} & \textbf{Brecha $\leq$0,1\%} & \textbf{Brecha $\leq$0,5\%} & \textbf{Brecha $\leq$1\%} \\
 \hline
-GWO & RANDOM & 3,57e-05 & 0,849 & [0,750; 0,939] & sí \\
-PSO & RANDOM & 7,21e-07 & 0,908 & [0,818; 0,976] & sí \\
-GA & RANDOM & 0,234 & 0,650 & [0,502; 0,783] & no \\
-SHO & RANDOM & 0,000253 & 0,813 & [0,703; 0,914] & sí \\
-WOA & RANDOM & 2,83e-06 & 0,888 & [0,797; 0,960] & sí \\
-GA+LS & RANDOM & 0,234 & 0,643 & [0,497; 0,787] & no \\
-PSO+GA & RANDOM & 6,5e-05 & 0,838 & [0,727; 0,931] & sí \\
-SHO+LS & RANDOM & 0,00484 & 0,756 & [0,620; 0,863] & sí \\
-GA+LS & GA & 0,923 & 0,492 & [0,344; 0,637] & no \\
-PSO+GA & PSO & 0,603 & 0,403 & [0,259; 0,549] & no \\
-PSO+GA & GA & 0,0383 & 0,706 & [0,569; 0,832] & sí \\
-SHO+LS & SHO & 0,603 & 0,418 & [0,270; 0,566] & no \\
+GWO & 30/30 & 3,3\% & 70,0\% & 90,0\% \\
+SHO & 30/30 & 26,7\% & 70,0\% & 83,3\% \\
+WOA & 30/30 & 16,7\% & 53,3\% & 80,0\% \\
+PSO & 30/30 & 36,7\% & 40,0\% & 86,7\% \\
+GA & 30/30 & 20,0\% & 23,3\% & 66,7\% \\
+PSO+GA & 30/30 & 10,0\% & 20,0\% & 53,3\% \\
+RANDOM & 30/30 & 0,0\% & 3,3\% & 13,3\% \\
 \hline
 \end{tabular}
 \end{table}
 }
 
-\newcommand{\TablaParesCompletaAutoD}{%
+\newcommand{\TablaRankingAutoF}{%
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Todos los pares en I4 (300 MW): Mann--Whitney bilateral, Holm sobre los 36 pares y $A_{12}$ (A frente a B)}
-\label{tab:pares_all_i4}
+\caption{Calidad final por algoritmo en I6 (100 MW, AGSR 0,10), 30 ejecuciones; brecha respecto del óptimo exacto}
+\label{tab:ranking_auto_i6}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r l}
+\begin{tabular}{l l r r r r r}
 \hline
-\textbf{A} & \textbf{B} & \textbf{$p_{Holm}$} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{Sig.} \\
+\textbf{\#} & \textbf{Alg.} & \textbf{Mediana} & \textbf{IQR} & \textbf{Mejor} & \textbf{Peor} & \textbf{Brecha med. [\%]} \\
 \hline
-GA & GA+LS & 1 & 0,508 & [0,357; 0,654] & no \\
-GA & GWO & 0,133 & 0,290 & [0,172; 0,431] & no \\
-GA & PSO & 0,00717 & 0,223 & [0,113; 0,343] & sí \\
-GA & PSO+GA & 0,147 & 0,294 & [0,167; 0,423] & no \\
-GA & RANDOM & 0,888 & 0,650 & [0,499; 0,792] & no \\
-GA & SHO & 0,115 & 0,286 & [0,162; 0,423] & no \\
-GA & SHO+LS & 1 & 0,376 & [0,242; 0,519] & no \\
-GA & WOA & 0,0425 & 0,261 & [0,143; 0,392] & sí \\
-GA+LS & GWO & 0,14 & 0,292 & [0,169; 0,432] & no \\
-GA+LS & PSO & 0,00622 & 0,220 & [0,113; 0,351] & sí \\
-GA+LS & PSO+GA & 0,16 & 0,299 & [0,174; 0,434] & no \\
-GA+LS & RANDOM & 1 & 0,643 & [0,502; 0,782] & no \\
-GA+LS & SHO & 0,16 & 0,298 & [0,177; 0,433] & no \\
-GA+LS & SHO+LS & 1 & 0,372 & [0,230; 0,519] & no \\
-GA+LS & WOA & 0,0425 & 0,261 & [0,143; 0,393] & sí \\
-GWO & PSO & 1 & 0,381 & [0,250; 0,531] & no \\
-GWO & PSO+GA & 1 & 0,504 & [0,356; 0,654] & no \\
-GWO & RANDOM & 0,000121 & 0,849 & [0,743; 0,932] & sí \\
-GWO & SHO & 1 & 0,493 & [0,337; 0,646] & no \\
-GWO & SHO+LS & 1 & 0,587 & [0,438; 0,729] & no \\
-GWO & WOA & 1 & 0,477 & [0,331; 0,628] & no \\
-PSO & PSO+GA & 1 & 0,597 & [0,442; 0,741] & no \\
-PSO & RANDOM & 2,16e-06 & 0,908 & [0,827; 0,977] & sí \\
-PSO & SHO & 1 & 0,609 & [0,459; 0,743] & no \\
-PSO & SHO+LS & 0,382 & 0,677 & [0,536; 0,806] & no \\
-PSO & WOA & 1 & 0,603 & [0,446; 0,746] & no \\
-PSO+GA & RANDOM & 0,000238 & 0,838 & [0,720; 0,930] & sí \\
-PSO+GA & SHO & 1 & 0,500 & [0,347; 0,642] & no \\
-PSO+GA & SHO+LS & 1 & 0,576 & [0,423; 0,726] & no \\
-PSO+GA & WOA & 1 & 0,476 & [0,338; 0,622] & no \\
-RANDOM & SHO & 0,00101 & 0,187 & [0,078; 0,310] & sí \\
-RANDOM & SHO+LS & 0,02 & 0,244 & [0,132; 0,369] & sí \\
-RANDOM & WOA & 9e-06 & 0,112 & [0,040; 0,208] & sí \\
-SHO & SHO+LS & 1 & 0,582 & [0,428; 0,727] & no \\
-SHO & WOA & 1 & 0,489 & [0,343; 0,638] & no \\
-SHO+LS & WOA & 1 & 0,386 & [0,247; 0,536] & no \\
+1 & GWO & 0,337037 & 0,000147 & 0,336983 & 0,341712 & 0,013 \\
+2 & WOA & 0,337088 & 0,001823 & 0,336979 & 0,339650 & 0,028 \\
+3 & PSO & 0,338813 & 0,008191 & 0,336980 & 0,352263 & 0,540 \\
+4 & SHO & 0,338818 & 0,001845 & 0,336991 & 0,345556 & 0,541 \\
+5 & PSO+GA & 0,341641 & 0,010032 & 0,336979 & 0,380162 & 1,379 \\
+6 & RANDOM & 0,343286 & 0,006243 & 0,339828 & 0,358517 & 1,867 \\
+7 & GA & 0,345951 & 0,006424 & 0,336979 & 0,382558 & 2,658 \\
 \hline
 \end{tabular}
 \end{table}
 }
 
-\newcommand{\TablaHibridosAuto}{%
+\newcommand{\TablaExitoAutoF}{%
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Híbrido frente a padre por instancia: medianas, $A_{12}$ (híbrido frente a padre) y Holm dentro de la familia planificada}
-\label{tab:hibridos_auto}
+\caption{Probabilidad empírica de proximidad al óptimo exacto en I6 (100 MW, AGSR 0,10)}
+\label{tab:exito_auto_i6}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l l r r r r r r l}
+\begin{tabular}{l r r r r}
 \hline
-\textbf{Inst.} & \textbf{Híbrido} & \textbf{Padre} & \textbf{Med. híb.} & \textbf{Med. padre} & \textbf{$\Delta$ [\%]} & \textbf{$A_{12}$} & \textbf{IC 95\%} & \textbf{$p_{Holm}$} & \textbf{Sig.} \\
+\textbf{Alg.} & \textbf{Factibles} & \textbf{Brecha $\leq$0,1\%} & \textbf{Brecha $\leq$0,5\%} & \textbf{Brecha $\leq$1\%} \\
 \hline
-I1 & GA+LS & GA & 0,287156 & 0,285718 & 0,503 & 0,412 & [0,27; 0,56] & 0,983 & no \\
-I1 & PSO+GA & PSO & 0,285778 & 0,285781 & -0,001 & 0,520 & [0,37; 0,68] & 1 & no \\
-I1 & PSO+GA & GA & 0,285778 & 0,285718 & 0,021 & 0,602 & [0,45; 0,74] & 0,881 & no \\
-I1 & SHO+LS & SHO & 0,284639 & 0,284304 & 0,118 & 0,492 & [0,34; 0,64] & 1 & no \\
-I2 & GA+LS & GA & 0,330609 & 0,330149 & 0,139 & 0,513 & [0,37; 0,66] & 1 & no \\
-I2 & PSO+GA & PSO & 0,328100 & 0,327859 & 0,073 & 0,498 & [0,34; 0,65] & 1 & no \\
-I2 & PSO+GA & GA & 0,328100 & 0,330149 & -0,620 & 0,716 & [0,58; 0,84] & 0,0254 & sí \\
-I2 & SHO+LS & SHO & 0,326062 & 0,326188 & -0,039 & 0,643 & [0,49; 0,78] & 0,287 & no \\
-I3 & GA+LS & GA & 0,286101 & 0,286228 & -0,044 & 0,441 & [0,29; 0,59] & 0,568 & no \\
-I3 & PSO+GA & PSO & 0,285629 & 0,284382 & 0,438 & 0,370 & [0,23; 0,51] & 0,351 & no \\
-I3 & PSO+GA & GA & 0,285629 & 0,286228 & -0,209 & 0,581 & [0,43; 0,73] & 0,568 & no \\
-I3 & SHO+LS & SHO & 0,285900 & 0,284376 & 0,536 & 0,363 & [0,23; 0,51] & 0,351 & no \\
-I4 & GA+LS & GA & 0,283001 & 0,282927 & 0,026 & 0,492 & [0,34; 0,64] & 0,923 & no \\
-I4 & PSO+GA & PSO & 0,282299 & 0,282232 & 0,024 & 0,403 & [0,26; 0,55] & 0,603 & no \\
-I4 & PSO+GA & GA & 0,282299 & 0,282927 & -0,222 & 0,706 & [0,57; 0,83] & 0,0383 & sí \\
-I4 & SHO+LS & SHO & 0,282639 & 0,281172 & 0,522 & 0,418 & [0,27; 0,57] & 0,603 & no \\
+GWO & 30/30 & 76,7\% & 76,7\% & 96,7\% \\
+WOA & 30/30 & 60,0\% & 60,0\% & 100,0\% \\
+PSO & 30/30 & 40,0\% & 40,0\% & 66,7\% \\
+SHO & 30/30 & 46,7\% & 46,7\% & 93,3\% \\
+PSO+GA & 30/30 & 30,0\% & 30,0\% & 46,7\% \\
+RANDOM & 30/30 & 0,0\% & 0,0\% & 13,3\% \\
+GA & 30/30 & 16,7\% & 16,7\% & 23,3\% \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaRankingAutoG}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Calidad final por algoritmo en I7 (300 MW, AGSR 0,10), 30 ejecuciones; brecha respecto del óptimo exacto}
+\label{tab:ranking_auto_i7}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l r r r r r}
+\hline
+\textbf{\#} & \textbf{Alg.} & \textbf{Mediana} & \textbf{IQR} & \textbf{Mejor} & \textbf{Peor} & \textbf{Brecha med. [\%]} \\
+\hline
+1 & SHO & 0,322442 & 0,000662 & 0,322267 & 0,324479 & 0,055 \\
+2 & GWO & 0,322555 & 0,001830 & 0,322305 & 0,324636 & 0,090 \\
+3 & PSO & 0,324205 & 0,001261 & 0,322266 & 0,331123 & 0,602 \\
+4 & WOA & 0,324301 & 0,002428 & 0,322269 & 0,329831 & 0,631 \\
+5 & PSO+GA & 0,324593 & 0,001692 & 0,322266 & 0,327253 & 0,722 \\
+6 & GA & 0,326560 & 0,003940 & 0,322377 & 0,348622 & 1,333 \\
+7 & RANDOM & 0,329865 & 0,007357 & 0,323007 & 0,342539 & 2,358 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaExitoAutoG}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Probabilidad empírica de proximidad al óptimo exacto en I7 (300 MW, AGSR 0,10)}
+\label{tab:exito_auto_i7}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r}
+\hline
+\textbf{Alg.} & \textbf{Factibles} & \textbf{Brecha $\leq$0,1\%} & \textbf{Brecha $\leq$0,5\%} & \textbf{Brecha $\leq$1\%} \\
+\hline
+SHO & 30/30 & 63,3\% & 76,7\% & 100,0\% \\
+GWO & 30/30 & 50,0\% & 56,7\% & 100,0\% \\
+PSO & 30/30 & 23,3\% & 26,7\% & 83,3\% \\
+WOA & 30/30 & 26,7\% & 33,3\% & 80,0\% \\
+PSO+GA & 30/30 & 13,3\% & 16,7\% & 70,0\% \\
+GA & 30/30 & 3,3\% & 16,7\% & 36,7\% \\
+RANDOM & 30/30 & 0,0\% & 10,0\% & 20,0\% \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaRankingAutoH}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Calidad final por algoritmo en I8 (AGSR 0,30), 30 ejecuciones; brecha respecto del óptimo exacto}
+\label{tab:ranking_auto_i8}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l r r r r r}
+\hline
+\textbf{\#} & \textbf{Alg.} & \textbf{Mediana} & \textbf{IQR} & \textbf{Mejor} & \textbf{Peor} & \textbf{Brecha med. [\%]} \\
+\hline
+1 & SHO & 0,254382 & 0,001345 & 0,253494 & 0,256883 & 0,358 \\
+2 & GWO & 0,254435 & 0,001403 & 0,253498 & 0,256843 & 0,379 \\
+3 & PSO & 0,254920 & 0,000802 & 0,253534 & 0,256936 & 0,570 \\
+4 & WOA & 0,254983 & 0,002474 & 0,253530 & 0,257823 & 0,595 \\
+5 & PSO+GA & 0,255034 & 0,001751 & 0,253472 & 0,256740 & 0,615 \\
+6 & GA & 0,255145 & 0,001643 & 0,253626 & 0,260497 & 0,659 \\
+7 & RANDOM & 0,256100 & 0,001589 & 0,254186 & 0,258957 & 1,035 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaExitoAutoH}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Probabilidad empírica de proximidad al óptimo exacto en I8 (AGSR 0,30)}
+\label{tab:exito_auto_i8}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r}
+\hline
+\textbf{Alg.} & \textbf{Factibles} & \textbf{Brecha $\leq$0,1\%} & \textbf{Brecha $\leq$0,5\%} & \textbf{Brecha $\leq$1\%} \\
+\hline
+SHO & 30/30 & 20,0\% & 60,0\% & 90,0\% \\
+GWO & 30/30 & 10,0\% & 56,7\% & 86,7\% \\
+PSO & 30/30 & 20,0\% & 33,3\% & 93,3\% \\
+WOA & 30/30 & 16,7\% & 46,7\% & 66,7\% \\
+PSO+GA & 30/30 & 30,0\% & 43,3\% & 90,0\% \\
+GA & 30/30 & 6,7\% & 46,7\% & 73,3\% \\
+RANDOM & 30/30 & 0,0\% & 13,3\% & 46,7\% \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaBrechaMedianaAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Brecha mediana respecto del óptimo exacto [\%] por algoritmo e instancia, 30 ejecuciones; algoritmos ordenados por rango medio}
+\label{tab:brecha_mediana_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r r r r r r}
+\hline
+\textbf{Alg.} & \textbf{I1} & \textbf{I2} & \textbf{I3} & \textbf{I4} & \textbf{I5} & \textbf{I6} & \textbf{I7} & \textbf{I8} & \textbf{Media} \\
+\hline
+SHO & 0,217 & 0,048 & 0,263 & 0,286 & 0,240 & 0,541 & 0,055 & 0,358 & 0,251 \\
+GWO & 0,236 & 0,026 & 0,335 & 0,364 & 0,230 & 0,013 & 0,090 & 0,379 & 0,209 \\
+WOA & 0,310 & 0,558 & 0,389 & 0,505 & 0,275 & 0,028 & 0,631 & 0,595 & 0,411 \\
+PSO & 0,737 & 0,561 & 0,265 & 0,664 & 0,718 & 0,540 & 0,602 & 0,570 & 0,582 \\
+PSO+GA & 0,737 & 0,635 & 0,704 & 0,688 & 0,863 & 1,379 & 0,722 & 0,615 & 0,793 \\
+GA & 0,715 & 1,263 & 0,916 & 0,912 & 0,768 & 2,658 & 1,333 & 0,659 & 1,153 \\
+RANDOM & 1,349 & 1,817 & 1,438 & 1,341 & 1,735 & 1,867 & 2,358 & 1,035 & 1,618 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaExitoMedioAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Porcentaje de ejecuciones que terminan a 0,5\,\% o menos del óptimo exacto, por algoritmo e instancia}
+\label{tab:exito_medio_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r r r r r r}
+\hline
+\textbf{Alg.} & \textbf{I1} & \textbf{I2} & \textbf{I3} & \textbf{I4} & \textbf{I5} & \textbf{I6} & \textbf{I7} & \textbf{I8} & \textbf{Media} \\
+\hline
+SHO & 67 & 57 & 67 & 57 & 70 & 47 & 77 & 60 & 62 \\
+GWO & 70 & 80 & 57 & 53 & 70 & 77 & 57 & 57 & 65 \\
+WOA & 60 & 47 & 53 & 50 & 53 & 60 & 33 & 47 & 50 \\
+PSO & 37 & 30 & 57 & 47 & 40 & 40 & 27 & 33 & 39 \\
+PSO+GA & 40 & 33 & 33 & 40 & 20 & 30 & 17 & 43 & 32 \\
+GA & 40 & 17 & 23 & 23 & 23 & 17 & 17 & 47 & 26 \\
+RANDOM & 17 & 10 & 10 & 10 & 3 & 0 & 10 & 13 & 9 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaDuplicadosAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Solicitudes repetidas por ejecución (media sobre 30 ejecuciones de 600 solicitudes), por algoritmo e instancia}
+\label{tab:duplicados_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r r r r r r}
+\hline
+\textbf{Alg.} & \textbf{I1} & \textbf{I2} & \textbf{I3} & \textbf{I4} & \textbf{I5} & \textbf{I6} & \textbf{I7} & \textbf{I8} & \textbf{Media} \\
+\hline
+SHO & 17,5 & 0,3 & 10,6 & 12,2 & 28,9 & 0,2 & 0,2 & 62,8 & 16,6 \\
+GWO & 13,5 & 0,3 & 6,4 & 8,3 & 24,2 & 0,3 & 0,2 & 109,1 & 20,3 \\
+WOA & 33,5 & 23,6 & 26,8 & 32,0 & 41,7 & 23,8 & 23,5 & 110,5 & 39,4 \\
+PSO & 0,0 & 0,0 & 0,0 & 0,0 & 0,0 & 0,0 & 0,0 & 16,1 & 2,0 \\
+PSO+GA & 30,6 & 29,0 & 29,8 & 31,5 & 43,5 & 29,9 & 30,2 & 91,7 & 39,5 \\
+GA & 207,5 & 180,0 & 181,0 & 201,2 & 191,2 & 183,6 & 185,6 & 237,7 & 196,0 \\
+RANDOM & 0,0 & 0,0 & 0,0 & 0,0 & 0,0 & 0,0 & 0,0 & 0,0 & 0,0 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaPUnoAutoGwo}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{PSO+GA frente a GWO, instancia por instancia: LCOE mediano [CNY/kWh] e IQR, $\hat{A}_{12}$ (mayor que 0,5: gana PSO+GA) con IC bootstrap, Mann--Whitney bilateral con Holm sobre las 8 instancias. $+$/$-$: PSO+GA significativamente mejor/peor; $\approx$: sin diferencia significativa. Negrita: mejor mediana}
+\label{tab:puno_gwo}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r l r c}
+\hline
+\textbf{Inst.} & \textbf{PSO+GA} & \textbf{GWO} & \textbf{$\hat{A}_{12}$} & \textbf{IC 95\,\%} & \textbf{$p_{Holm}$} & \textbf{Sig.} \\
+ & \textbf{mediana (IQR)} & \textbf{mediana (IQR)} & & & & \\
+\hline
+I1 & 0,28578 (0,00202) & \textbf{0,28436} (0,00163) & 0,39 & [0,25; 0,55] & 0,632 & $\approx$ \\
+I2 & 0,32810 (0,00275) & \textbf{0,32612} (0,00029) & 0,28 & [0,15; 0,42] & 0,017 & $-$ \\
+I3 & 0,28563 (0,00219) & \textbf{0,28458} (0,00189) & 0,41 & [0,27; 0,57] & 0,774 & $\approx$ \\
+I4 & 0,28230 (0,00213) & \textbf{0,28139} (0,00232) & 0,49 & [0,35; 0,64] & 1,000 & $\approx$ \\
+I5 & 0,29618 (0,00304) & \textbf{0,29432} (0,00153) & 0,24 & [0,11; 0,38] & 0,004 & $-$ \\
+I6 & 0,34164 (0,01003) & \textbf{0,33704} (0,00015) & 0,28 & [0,15; 0,42] & 0,017 & $-$ \\
+I7 & 0,32459 (0,00169) & \textbf{0,32255} (0,00183) & 0,25 & [0,12; 0,38] & 0,006 & $-$ \\
+I8 & 0,25503 (0,00175) & \textbf{0,25444} (0,00140) & 0,54 & [0,39; 0,69] & 1,000 & $\approx$ \\
+\hline
+\multicolumn{7}{l}{$+/\approx/-$: 0 / 4 / 4\qquad Wilcoxon sobre 8 medianas: $p = 0{,}008$ ($p_{Holm} = 0{,}047$)} \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaPUnoAutoPso}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{PSO+GA frente a PSO, instancia por instancia: LCOE mediano [CNY/kWh] e IQR, $\hat{A}_{12}$ (mayor que 0,5: gana PSO+GA) con IC bootstrap, Mann--Whitney bilateral con Holm sobre las 8 instancias. $+$/$-$: PSO+GA significativamente mejor/peor; $\approx$: sin diferencia significativa. Negrita: mejor mediana}
+\label{tab:puno_pso}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r l r c}
+\hline
+\textbf{Inst.} & \textbf{PSO+GA} & \textbf{PSO} & \textbf{$\hat{A}_{12}$} & \textbf{IC 95\,\%} & \textbf{$p_{Holm}$} & \textbf{Sig.} \\
+ & \textbf{mediana (IQR)} & \textbf{mediana (IQR)} & & & & \\
+\hline
+I1 & \textbf{0,28578} (0,00202) & 0,28578 (0,00183) & 0,52 & [0,37; 0,67] & 1,000 & $\approx$ \\
+I2 & 0,32810 (0,00275) & \textbf{0,32786} (0,00249) & 0,47 & [0,32; 0,62] & 1,000 & $\approx$ \\
+I3 & 0,28563 (0,00219) & \textbf{0,28438} (0,00227) & 0,37 & [0,23; 0,51] & 0,595 & $\approx$ \\
+I4 & 0,28230 (0,00213) & \textbf{0,28223} (0,00193) & 0,40 & [0,26; 0,55] & 1,000 & $\approx$ \\
+I5 & 0,29618 (0,00304) & \textbf{0,29575} (0,00253) & 0,30 & [0,18; 0,45] & 0,074 & $\approx$ \\
+I6 & 0,34164 (0,01003) & \textbf{0,33881} (0,00819) & 0,43 & [0,29; 0,58] & 1,000 & $\approx$ \\
+I7 & 0,32459 (0,00169) & \textbf{0,32421} (0,00126) & 0,40 & [0,26; 0,56] & 1,000 & $\approx$ \\
+I8 & 0,25503 (0,00175) & \textbf{0,25492} (0,00080) & 0,54 & [0,39; 0,69] & 1,000 & $\approx$ \\
+\hline
+\multicolumn{7}{l}{$+/\approx/-$: 0 / 8 / 0\qquad Wilcoxon sobre 8 medianas: $p = 0{,}016$ ($p_{Holm} = 0{,}047$)} \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaPUnoAutoGa}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{PSO+GA frente a GA, instancia por instancia: LCOE mediano [CNY/kWh] e IQR, $\hat{A}_{12}$ (mayor que 0,5: gana PSO+GA) con IC bootstrap, Mann--Whitney bilateral con Holm sobre las 8 instancias. $+$/$-$: PSO+GA significativamente mejor/peor; $\approx$: sin diferencia significativa. Negrita: mejor mediana}
+\label{tab:puno_ga}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r l r c}
+\hline
+\textbf{Inst.} & \textbf{PSO+GA} & \textbf{GA} & \textbf{$\hat{A}_{12}$} & \textbf{IC 95\,\%} & \textbf{$p_{Holm}$} & \textbf{Sig.} \\
+ & \textbf{mediana (IQR)} & \textbf{mediana (IQR)} & & & & \\
+\hline
+I1 & 0,28578 (0,00202) & \textbf{0,28572} (0,00288) & 0,60 & [0,45; 0,74] & 0,572 & $\approx$ \\
+I2 & \textbf{0,32810} (0,00275) & 0,33015 (0,00601) & 0,72 & [0,58; 0,84] & 0,033 & $+$ \\
+I3 & \textbf{0,28563} (0,00219) & 0,28623 (0,00192) & 0,58 & [0,44; 0,72] & 0,572 & $\approx$ \\
+I4 & \textbf{0,28230} (0,00213) & 0,28293 (0,00271) & 0,71 & [0,57; 0,83] & 0,041 & $+$ \\
+I5 & 0,29618 (0,00304) & \textbf{0,29590} (0,00242) & 0,42 & [0,27; 0,57] & 0,572 & $\approx$ \\
+I6 & \textbf{0,34164} (0,01003) & 0,34595 (0,00642) & 0,65 & [0,50; 0,78] & 0,256 & $\approx$ \\
+I7 & \textbf{0,32459} (0,00169) & 0,32656 (0,00394) & 0,71 & [0,57; 0,84] & 0,041 & $+$ \\
+I8 & \textbf{0,25503} (0,00175) & 0,25515 (0,00164) & 0,64 & [0,49; 0,78] & 0,256 & $\approx$ \\
+\hline
+\multicolumn{7}{l}{$+/\approx/-$: 3 / 5 / 0\qquad Wilcoxon sobre 8 medianas: $p = 0{,}055$ ($p_{Holm} = 0{,}055$)} \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaPUnoAutoSho}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{PSO+GA frente a SHO, instancia por instancia: LCOE mediano [CNY/kWh] e IQR, $\hat{A}_{12}$ (mayor que 0,5: gana PSO+GA) con IC bootstrap, Mann--Whitney bilateral con Holm sobre las 8 instancias. $+$/$-$: PSO+GA significativamente mejor/peor; $\approx$: sin diferencia significativa. Negrita: mejor mediana}
+\label{tab:puno_sho}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r l r c}
+\hline
+\textbf{Inst.} & \textbf{PSO+GA} & \textbf{SHO} & \textbf{$\hat{A}_{12}$} & \textbf{IC 95\,\%} & \textbf{$p_{Holm}$} & \textbf{Sig.} \\
+ & \textbf{mediana (IQR)} & \textbf{mediana (IQR)} & & & & \\
+\hline
+I1 & 0,28578 (0,00202) & \textbf{0,28430} (0,00229) & 0,42 & [0,28; 0,57] & 0,846 & $\approx$ \\
+I2 & 0,32810 (0,00275) & \textbf{0,32619} (0,00183) & 0,35 & [0,21; 0,51] & 0,263 & $\approx$ \\
+I3 & 0,28563 (0,00219) & \textbf{0,28438} (0,00221) & 0,41 & [0,26; 0,55] & 0,846 & $\approx$ \\
+I4 & 0,28230 (0,00213) & \textbf{0,28117} (0,00249) & 0,50 & [0,34; 0,65] & 1,000 & $\approx$ \\
+I5 & 0,29618 (0,00304) & \textbf{0,29435} (0,00195) & 0,28 & [0,15; 0,43] & 0,028 & $-$ \\
+I6 & 0,34164 (0,01003) & \textbf{0,33882} (0,00184) & 0,35 & [0,21; 0,50] & 0,263 & $\approx$ \\
+I7 & 0,32459 (0,00169) & \textbf{0,32244} (0,00066) & 0,18 & [0,08; 0,31] & <0,001 & $-$ \\
+I8 & 0,25503 (0,00175) & \textbf{0,25438} (0,00135) & 0,50 & [0,35; 0,65] & 1,000 & $\approx$ \\
+\hline
+\multicolumn{7}{l}{$+/\approx/-$: 0 / 6 / 2\qquad Wilcoxon sobre 8 medianas: $p = 0{,}008$ ($p_{Holm} = 0{,}047$)} \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaPUnoAutoWoa}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{PSO+GA frente a WOA, instancia por instancia: LCOE mediano [CNY/kWh] e IQR, $\hat{A}_{12}$ (mayor que 0,5: gana PSO+GA) con IC bootstrap, Mann--Whitney bilateral con Holm sobre las 8 instancias. $+$/$-$: PSO+GA significativamente mejor/peor; $\approx$: sin diferencia significativa. Negrita: mejor mediana}
+\label{tab:puno_woa}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r l r c}
+\hline
+\textbf{Inst.} & \textbf{PSO+GA} & \textbf{WOA} & \textbf{$\hat{A}_{12}$} & \textbf{IC 95\,\%} & \textbf{$p_{Holm}$} & \textbf{Sig.} \\
+ & \textbf{mediana (IQR)} & \textbf{mediana (IQR)} & & & & \\
+\hline
+I1 & 0,28578 (0,00202) & \textbf{0,28457} (0,00219) & 0,49 & [0,33; 0,64] & 1,000 & $\approx$ \\
+I2 & 0,32810 (0,00275) & \textbf{0,32785} (0,00185) & 0,41 & [0,27; 0,56] & 0,979 & $\approx$ \\
+I3 & 0,28563 (0,00219) & \textbf{0,28474} (0,00201) & 0,40 & [0,26; 0,56] & 0,979 & $\approx$ \\
+I4 & 0,28230 (0,00213) & \textbf{0,28179} (0,00185) & 0,47 & [0,33; 0,62] & 1,000 & $\approx$ \\
+I5 & 0,29618 (0,00304) & \textbf{0,29445} (0,00199) & 0,35 & [0,21; 0,50] & 0,356 & $\approx$ \\
+I6 & 0,34164 (0,01003) & \textbf{0,33709} (0,00182) & 0,29 & [0,16; 0,43] & 0,032 & $-$ \\
+I7 & 0,32459 (0,00169) & \textbf{0,32430} (0,00243) & 0,42 & [0,28; 0,57] & 0,979 & $\approx$ \\
+I8 & 0,25503 (0,00175) & \textbf{0,25498} (0,00247) & 0,62 & [0,48; 0,76] & 0,595 & $\approx$ \\
+\hline
+\multicolumn{7}{l}{$+/\approx/-$: 0 / 7 / 1\qquad Wilcoxon sobre 8 medianas: $p = 0{,}008$ ($p_{Holm} = 0{,}047$)} \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaPUnoAutoRandom}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{PSO+GA frente a RANDOM, instancia por instancia: LCOE mediano [CNY/kWh] e IQR, $\hat{A}_{12}$ (mayor que 0,5: gana PSO+GA) con IC bootstrap, Mann--Whitney bilateral con Holm sobre las 8 instancias. $+$/$-$: PSO+GA significativamente mejor/peor; $\approx$: sin diferencia significativa. Negrita: mejor mediana}
+\label{tab:puno_random}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r l r c}
+\hline
+\textbf{Inst.} & \textbf{PSO+GA} & \textbf{RANDOM} & \textbf{$\hat{A}_{12}$} & \textbf{IC 95\,\%} & \textbf{$p_{Holm}$} & \textbf{Sig.} \\
+ & \textbf{mediana (IQR)} & \textbf{mediana (IQR)} & & & & \\
+\hline
+I1 & \textbf{0,28578} (0,00202) & 0,28752 (0,00274) & 0,82 & [0,71; 0,92] & <0,001 & $+$ \\
+I2 & \textbf{0,32810} (0,00275) & 0,33195 (0,00442) & 0,80 & [0,68; 0,91] & <0,001 & $+$ \\
+I3 & \textbf{0,28563} (0,00219) & 0,28771 (0,00214) & 0,79 & [0,67; 0,90] & <0,001 & $+$ \\
+I4 & \textbf{0,28230} (0,00213) & 0,28413 (0,00162) & 0,84 & [0,73; 0,93] & <0,001 & $+$ \\
+I5 & \textbf{0,29618} (0,00304) & 0,29874 (0,00421) & 0,76 & [0,63; 0,87] & 0,001 & $+$ \\
+I6 & \textbf{0,34164} (0,01003) & 0,34329 (0,00624) & 0,65 & [0,50; 0,79] & 0,046 & $+$ \\
+I7 & \textbf{0,32459} (0,00169) & 0,32987 (0,00736) & 0,84 & [0,72; 0,94] & <0,001 & $+$ \\
+I8 & \textbf{0,25503} (0,00175) & 0,25610 (0,00159) & 0,84 & [0,73; 0,93] & <0,001 & $+$ \\
+\hline
+\multicolumn{7}{l}{$+/\approx/-$: 8 / 0 / 0\qquad Wilcoxon sobre 8 medianas: $p = 0{,}008$ ($p_{Holm} = 0{,}047$)} \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaLineaBaseAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Cada metaheurística frente a la búsqueda aleatoria: $\hat{A}_{12}$ por instancia (mayor que 0,5: gana la metaheurística). Negrita: significativo tras Holm sobre las 8 instancias del par}
+\label{tab:linea_base_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r r r r r c r}
+\hline
+\textbf{Alg.} & \textbf{I1} & \textbf{I2} & \textbf{I3} & \textbf{I4} & \textbf{I5} & \textbf{I6} & \textbf{I7} & \textbf{I8} & \textbf{$+/\approx/-$} & \textbf{$p$ Wilcoxon} \\
+\hline
+GWO & \textbf{0,91} & \textbf{0,97} & \textbf{0,87} & \textbf{0,85} & \textbf{0,93} & \textbf{0,99} & \textbf{0,94} & \textbf{0,84} & 8 / 0 / 0 & 0,008 \\
+PSO & \textbf{0,86} & \textbf{0,82} & \textbf{0,87} & \textbf{0,91} & \textbf{0,92} & \textbf{0,78} & \textbf{0,85} & \textbf{0,84} & 8 / 0 / 0 & 0,008 \\
+GA & 0,67 & 0,60 & \textbf{0,70} & 0,65 & \textbf{0,76} & 0,49 & \textbf{0,71} & \textbf{0,72} & 4 / 4 / 0 & 0,109 \\
+SHO & \textbf{0,83} & \textbf{0,95} & \textbf{0,85} & \textbf{0,81} & \textbf{0,87} & \textbf{0,97} & \textbf{0,97} & \textbf{0,85} & 8 / 0 / 0 & 0,008 \\
+WOA & \textbf{0,82} & \textbf{0,87} & \textbf{0,87} & \textbf{0,89} & \textbf{0,83} & \textbf{1,00} & \textbf{0,87} & \textbf{0,69} & 8 / 0 / 0 & 0,008 \\
+PSO+GA & \textbf{0,82} & \textbf{0,80} & \textbf{0,79} & \textbf{0,84} & \textbf{0,76} & \textbf{0,65} & \textbf{0,84} & \textbf{0,84} & 8 / 0 / 0 & 0,008 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaGlobalAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Comparación en general: Wilcoxon de rangos con signo sobre una mediana por instancia (8 pares). G/E/P: instancias donde A tiene mejor, igual o peor mediana que B. Robustez: la misma prueba sobre brechas relativas y la prueba de signos}
+\label{tab:global_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l c r r r r r c}
+\hline
+\textbf{A} & \textbf{B} & \textbf{G/E/P} & \textbf{$W$} & \textbf{$p$} & \textbf{$p_{Holm}$} & \textbf{$p$ relativa} & \textbf{$p$ signos} & \textbf{$+/\approx/-$} \\
+\hline
+PSO+GA & GWO & 0/0/8 & 0,0 & 0,008 & 0,047 & 0,008 & 0,008 & 0 / 4 / 4 \\
+PSO+GA & PSO & 1/0/7 & 1,0 & 0,016 & 0,047 & 0,016 & 0,070 & 0 / 8 / 0 \\
+PSO+GA & GA & 6/0/2 & 4,0 & 0,055 & 0,055 & 0,055 & 0,289 & 3 / 5 / 0 \\
+PSO+GA & SHO & 0/0/8 & 0,0 & 0,008 & 0,047 & 0,008 & 0,008 & 0 / 6 / 2 \\
+PSO+GA & WOA & 0/0/8 & 0,0 & 0,008 & 0,047 & 0,008 & 0,008 & 0 / 7 / 1 \\
+PSO+GA & RANDOM & 8/0/0 & 0,0 & 0,008 & 0,047 & 0,008 & 0,008 & 8 / 0 / 0 \\
+\hline
+GWO & RANDOM & 8/0/0 & 0,0 & 0,008 & 0,039 & 0,008 & 0,008 & 8 / 0 / 0 \\
+PSO & RANDOM & 8/0/0 & 0,0 & 0,008 & 0,039 & 0,008 & 0,008 & 8 / 0 / 0 \\
+GA & RANDOM & 7/0/1 & 6,0 & 0,109 & 0,109 & 0,109 & 0,070 & 4 / 4 / 0 \\
+SHO & RANDOM & 8/0/0 & 0,0 & 0,008 & 0,039 & 0,008 & 0,008 & 8 / 0 / 0 \\
+WOA & RANDOM & 8/0/0 & 0,0 & 0,008 & 0,039 & 0,008 & 0,008 & 8 / 0 / 0 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaUnicosAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Sensibilidad a la contabilidad del presupuesto: cada contraste con la regla principal (600 solicitudes, repeticiones incluidas) y a igual número de diseños únicos (corte en la mediana del GA en cada instancia, entre 414 y 440 diseños). P1: recuento $+/\approx/-$ sobre las 8 instancias; P2: $p$ de Wilcoxon tras Holm, en negrita si es significativo}
+\label{tab:unicos_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l c c r r}
+\hline
+\textbf{A} & \textbf{B} & \textbf{P1 principal} & \textbf{P1 únicos} & \textbf{$p_{Holm}$ principal} & \textbf{$p_{Holm}$ únicos} \\
+\hline
+PSO+GA & GWO & 0 / 4 / 4 & 0 / 8 / 0 & \textbf{0,047} & 0,070 \\
+PSO+GA & PSO & 0 / 8 / 0 & 0 / 8 / 0 & \textbf{0,047} & 0,062 \\
+PSO+GA & GA & 3 / 5 / 0 & 3 / 5 / 0 & 0,055 & 0,109 \\
+PSO+GA & SHO & 0 / 6 / 2 & 0 / 7 / 1 & \textbf{0,047} & \textbf{0,047} \\
+PSO+GA & WOA & 0 / 7 / 1 & 0 / 8 / 0 & \textbf{0,047} & 0,109 \\
+PSO+GA & RANDOM & 8 / 0 / 0 & 8 / 0 / 0 & \textbf{0,047} & \textbf{0,047} \\
+\hline
+GWO & RANDOM & 8 / 0 / 0 & 8 / 0 / 0 & \textbf{0,039} & \textbf{0,039} \\
+PSO & RANDOM & 8 / 0 / 0 & 8 / 0 / 0 & \textbf{0,039} & \textbf{0,039} \\
+GA & RANDOM & 4 / 4 / 0 & 5 / 3 / 0 & 0,109 & \textbf{0,039} \\
+SHO & RANDOM & 8 / 0 / 0 & 8 / 0 / 0 & \textbf{0,039} & \textbf{0,039} \\
+WOA & RANDOM & 8 / 0 / 0 & 8 / 0 / 0 & \textbf{0,039} & \textbf{0,039} \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaConvergenciaAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Convergencia: rango medio de cada algoritmo tras cada 100 solicitudes (1 = menor brecha mediana de la instancia, promedio sobre las 8 instancias), brecha mediana media a 300 y 600 solicitudes y su reducción relativa en la segunda mitad del presupuesto. Descriptivo: no se contrasta en los puntos intermedios}
+\label{tab:convergencia_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r r r r r r}
+\hline
+\textbf{Alg.} & \multicolumn{6}{c}{\textbf{Rango medio tras $n$ solicitudes}} & \multicolumn{2}{c}{\textbf{Brecha [\%]}} & \textbf{Reducción} \\
+\cline{2-7}\cline{8-9}
+ & 100 & 200 & 300 & 400 & 500 & 600 & 300 & 600 & \textbf{[\%]} \\
+\hline
+SHO & 3,69 & 3,75 & 2,38 & 1,75 & 1,75 & 1,62 & 0,71 & 0,25 & 65 \\
+GWO & 3,94 & 3,75 & 3,94 & 2,69 & 2,00 & 1,75 & 0,84 & 0,21 & 75 \\
+WOA & 4,38 & 4,75 & 4,12 & 3,50 & 3,31 & 3,25 & 0,90 & 0,41 & 55 \\
+PSO & 2,75 & 2,62 & 2,12 & 3,00 & 3,38 & 3,62 & 0,71 & 0,58 & 18 \\
+PSO+GA & 1,12 & 1,62 & 2,88 & 4,25 & 5,00 & 5,12 & 0,82 & 0,79 & 3 \\
+GA & 5,12 & 4,62 & 5,56 & 5,94 & 5,69 & 5,75 & 1,34 & 1,15 & 14 \\
+RANDOM & 7,00 & 6,88 & 7,00 & 6,88 & 6,88 & 6,88 & 2,25 & 1,62 & 28 \\
 \hline
 \end{tabular}
 \end{table}
@@ -1038,22 +1648,38 @@ I4 & SHO+LS & SHO & 0,282639 & 0,281172 & 0,522 & 0,418 & [0,27; 0,57] & 0,603 &
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Ranking transversal: rango por mediana en cada instancia, rango medio, brecha mediana media y éxito medio al 0,5\%}
+\caption{Rango de cada algoritmo por instancia (1 = menor brecha mediana), rango medio del contraste de Friedman, brecha mediana media y éxito medio al 0,5\,\%}
 \label{tab:ranking_transversal_auto}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l r r r r r r r}
+\begin{tabular}{l l r r r r r r r r r r r}
 \hline
-\textbf{\#} & \textbf{Alg.} & \textbf{I1} & \textbf{I2} & \textbf{I3} & \textbf{I4} & \textbf{Rango medio} & \textbf{Brecha med. [\%]} & \textbf{Éxito 0,5\% [\%]} \\
+\textbf{\#} & \textbf{Alg.} & \textbf{I1} & \textbf{I2} & \textbf{I3} & \textbf{I4} & \textbf{I5} & \textbf{I6} & \textbf{I7} & \textbf{I8} & \textbf{Rango medio} & \textbf{Brecha med. [\%]} & \textbf{Éxito 0,5\% [\%]} \\
 \hline
-1 & SHO & 1 & 3 & 1 & 1 & 1,50 & 0,203 & 61,7 \\
-2 & GWO & 2 & 2 & 3 & 2 & 2,25 & 0,240 & 65,0 \\
-3 & WOA & 3 & 4 & 4 & 3 & 3,50 & 0,441 & 52,5 \\
-4 & SHO+LS & 4 & 1 & 6 & 6 & 4,25 & 0,488 & 48,3 \\
-5 & PSO & 7 & 5 & 2 & 4 & 4,50 & 0,557 & 42,5 \\
-6 & PSO+GA & 6 & 6 & 5 & 5 & 5,50 & 0,691 & 36,7 \\
-7 & GA & 5 & 7 & 8 & 7 & 6,75 & 0,951 & 25,8 \\
-8 & GA+LS & 8 & 8 & 7 & 8 & 7,75 & 1,109 & 26,7 \\
-9 & RANDOM & 9 & 9 & 9 & 9 & 9,00 & 1,486 & 11,7 \\
+1 & SHO & 1 & 2 & 1 & 1 & 2 & 4 & 1 & 1 & 1,62 & 0,251 & 62,5 \\
+2 & GWO & 2 & 1 & 3 & 2 & 1 & 1 & 2 & 2 & 1,75 & 0,209 & 65,0 \\
+3 & WOA & 3 & 3 & 4 & 3 & 3 & 2 & 4 & 4 & 3,25 & 0,411 & 50,4 \\
+4 & PSO & 6 & 4 & 2 & 4 & 4 & 3 & 3 & 3 & 3,62 & 0,582 & 38,7 \\
+5 & PSO+GA & 5 & 5 & 5 & 5 & 6 & 5 & 5 & 5 & 5,12 & 0,793 & 32,1 \\
+6 & GA & 4 & 6 & 6 & 6 & 5 & 7 & 6 & 6 & 5,75 & 1,153 & 25,8 \\
+7 & RANDOM & 7 & 7 & 7 & 7 & 7 & 6 & 7 & 7 & 6,88 & 1,618 & 9,2 \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+\newcommand{\TablaPotenciaAuto}{%
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Potencia aproximada de la prueba t bilateral equivalente ($\alpha = 0{,}05$) según la unidad de análisis; con pruebas de rangos la potencia es algo menor}
+\label{tab:potencia_auto}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l r r r r}
+\hline
+\textbf{Unidad de análisis} & \textbf{Diseño} & \textbf{$n$} & \textbf{Potencia $d = 0{,}5$} & \textbf{Potencia $d = 0{,}8$} & \textbf{$d$ detectable (potencia 0,8)} \\
+\hline
+réplicas por instancia & dos muestras independientes & 30 & 0,48 & 0,86 & 0,74 \\
+instancias & pareado & 8 & 0,23 & 0,50 & 1,16 \\
 \hline
 \end{tabular}
 \end{table}

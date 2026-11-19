@@ -1,0 +1,3 @@
+unidad,diseno,n,potencia_dz_0.5,potencia_dz_0.8,dz_detectable_potencia_0.8,p_minimo_wilcoxon_exacto
+replicas por instancia,dos muestras independientes,30,0.47789652076016476,0.8614225160229565,0.7356210695976683,
+instancias,pareado,8,0.23207700463899156,0.49638204624383425,1.1560346779948378,0.0078125

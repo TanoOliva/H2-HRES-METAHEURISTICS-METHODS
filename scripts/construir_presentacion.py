@@ -1,24 +1,40 @@
 """Construye la presentación de la defensa a partir del deck de avance.
 
 Conserva la plantilla (paleta, logo, banda inferior, tipografía) del deck
-``presentacion/Presentacion_avance_tesis_LOliva.pptx`` y reescribe el guion con una
-organización centrada en el método: la pregunta y el pipeline del híbrido PSO+GA
-primero, el problema y las cuatro instancias como banco de pruebas, la validación en
-tres bloques (correctitud, calidad, aporte) y las conclusiones. Los otros dos híbridos
-del documento quedan en respaldo. Todos los números salen de ``notebooks/results``.
+``presentacion/Presentacion_avance_tesis_LOliva.pptx`` y reescribe el guion con la
+estructura clásica de examen: el problema antes que el método y los resultados
+ordenados por las tres preguntas del protocolo estadístico.
 
-Uso:
+    1. El problema            contexto y pregunta · qué se optimiza · por qué es difícil · objetivos
+    2. El método: PSO+GA      los padres · el híbrido en cada iteración · una iteración en detalle · competidores
+    3. Diseño experimental    protocolo de siete pasos · ocho instancias · condiciones justas · mapa de decisión
+    4. Resultados             explorar (2) · P1 (2) · P2 · P3 · lectura
+    5. Conclusiones           qué se puede afirmar · aporte y trabajo futuro · cierre
+
+Regla del guion: ningún resultado va escrito a mano. Las constantes del diseño (siete
+algoritmos, ocho instancias, R = 30, 600 solicitudes, hiperparámetros) son texto fijo;
+todo título, viñeta, tabla o nota que diga cuánto o quién gana se redacta desde los CSV
+de ``notebooks/results`` con las funciones ``frase_*``, ``voz_*`` y ``titulo_*``. Al
+llegar una corrida nueva basta volver a ejecutar los dos scripts:
+
     python scripts/figuras_presentacion.py          # figuras pres_*.png
     python scripts/construir_presentacion.py        # escribe el .pptx de la defensa
+
+Si los CSV no corresponden al diseño (por ejemplo, una corrida rápida de prueba), las
+láminas de resultados llevan una marca «DATOS PROVISIONALES» que desaparece sola.
 """
 
 from __future__ import annotations
 
+import argparse
 import copy
+import math
+import re
 from pathlib import Path
 
+import matplotlib
 import pandas as pd
-from PIL import Image
+from PIL import Image, ImageFont
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE, PP_PLACEHOLDER
@@ -26,29 +42,49 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.oxml.ns import qn
 from pptx.util import Emu, Inches, Pt
 
+from figuras_presentacion import TAMANOS
+
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "notebooks" / "results"
-FIGS_TESIS = ROOT / "latex" / "figures"
 FIGS_PRES = ROOT / "presentacion" / "figuras"
 ORIGEN = ROOT / "presentacion" / "Presentacion_avance_tesis_LOliva.pptx"
-DESTINO = ROOT / "presentacion" / "Presentacion_defensa_tesis_LOliva.pptx"
+DESTINO = ROOT / "presentacion" / "Presentacion_defensa_tesis_LOliva_v3.pptx"
+
+# ---- Constantes del diseño experimental (fijas; no dependen de la corrida) ----------
+N_ALG, N_INST = 7, 8
+R_DISENO, PRESUPUESTO, POB, ITER, HIJOS = 30, 600, 20, 30, 5
+SEMILLAS = "42–71"
+H = "pso_ga"                               # el híbrido es el algoritmo de control
+CONFIRMATORIOS = ("pso", "ga", "random")   # sus padres y la línea base
+RESTO_CONTROL = ("gwo", "sho", "woa")
+CLASICAS = ("gwo", "pso", "ga", "sho", "woa")
 
 LABELS = {"gwo": "GWO", "pso": "PSO", "ga": "GA", "sho": "SHO", "woa": "WOA",
-          "ga_ls": "GA+LS", "pso_ga": "PSO+GA", "sho_ls": "SHO+LS", "random": "RANDOM"}
-HYBRID_PAIRS = (("ga_ls", "ga"), ("pso_ga", "pso"), ("pso_ga", "ga"), ("sho_ls", "sho"))
+          "pso_ga": "PSO+GA", "random": "RANDOM"}
+COLOR_ALG = {"gwo": "2A78D6", "pso": "EB6834", "ga": "1BAF7A", "sho": "EDA100", "woa": "E87BA4",
+             "pso_ga": "A8431A", "random": "898781"}
+SIMB = {"+": "+", "=": "≈", "-": "−"}
+NBSP = chr(0x00A0)                         # espacio de no separación
 
 # Paleta de la plantilla
 NAVY, BLUE, LIGHT, TEXT = "3C4975", "497DB5", "F1F4F9", "33333D"
-RED, CYAN, GREEN, BROWN = "E53A34", "57B6D0", "1BAF7A", "A8431A"
+RED, GREEN, BROWN = "E53A34", "1BAF7A", "A8431A"
+VERDE_SUAVE, ROJO_SUAVE, GRIS_SUAVE = "D5EFE3", "F9D9D7", "F1F4F9"
 
 
-# --------------------------------------------------------------------------- utilidades
+# --------------------------------------------------------------------------- formato
 def lab(a: str) -> str:
     return LABELS.get(str(a), str(a).upper())
 
 
 def num(x, d=2) -> str:
-    return f"{float(x):.{d}f}".replace(".", ",")
+    try:
+        x = float(x)
+    except (TypeError, ValueError):
+        return "--"
+    if pd.isna(x):
+        return "--"
+    return f"{x:.{d}f}".replace(".", ",").replace("-", "−")
 
 
 def entero(x) -> str:
@@ -64,6 +100,7 @@ def truthy(v) -> bool:
 
 
 def pvalor(p) -> str:
+    """Valor p para tablas."""
     try:
         p = float(p)
     except (TypeError, ValueError):
@@ -71,10 +108,89 @@ def pvalor(p) -> str:
     if pd.isna(p):
         return "--"
     if p < 0.001:
-        return "{:.1e}".format(p).replace(".", ",").replace("e-0", "·10⁻").replace("e-", "·10⁻")
+        return "< 0,001"
     return num(p, 3)
 
 
+def ptxt(p) -> str:
+    """Valor p para prosa: «p = 0,032» o «p < 0,001»."""
+    v = pvalor(p)
+    texto = "p " + v if v.startswith("<") else "p = " + v
+    return texto.replace(" ", NBSP)        # sin salto de línea entre «p», el signo y el valor
+
+
+_ACENTOS = (("jerarquico", "jerárquico"), ("lideres", "líderes"), ("mutacion", "mutación"), ("hibrido", "híbrido"),
+            ("heterogeneo", "heterogéneo"), ("linea base", "línea base"), ("identico", "idéntico"),
+            ("iteracion", "iteración"), ("geneticos", "genéticos"), ("catalogo", "catálogo"), ("->", "→"),
+            ("<=", "≤"), ("chi=", "χ = "), ("sigma=", "σ = "))
+
+
+def acentuar(texto) -> str:
+    """Los CSV guardan descripciones en ASCII; aquí se devuelven las tildes y símbolos para mostrarlas."""
+    texto = str(texto)
+    for sin, con in _ACENTOS:
+        texto = texto.replace(sin, con)
+    return texto
+
+
+def enumerar(items, final="y") -> str:
+    items = [str(i) for i in items]
+    if not items:
+        return "ninguno"
+    if len(items) == 1:
+        return items[0]
+    return ", ".join(items[:-1]) + f" {final} " + items[-1]
+
+
+def entre_parentesis(codigos, maximo=4) -> str:
+    """Lista de instancias entre paréntesis solo si es corta: el texto no crece con los datos."""
+    return " ({})".format(", ".join(codigos)) if 1 <= len(codigos) <= maximo else ""
+
+
+def rango(valores, d=2) -> str:
+    valores = [float(v) for v in valores if not pd.isna(v)]
+    if not valores:
+        return "--"
+    a, b = min(valores), max(valores)
+    return num(a, d) if num(a, d) == num(b, d) else "{} a {}".format(num(a, d), num(b, d))
+
+
+# --------------------------------------------------------------------------- medida de texto
+_FUENTES: dict = {}
+
+
+def ancho_texto_in(texto: str, pt: float, bold: bool = False) -> float:
+    """Ancho prudente del texto en pulgadas.
+
+    Roboto puede no estar instalada donde se proyecte; se mide con DejaVu Sans, la más ancha de
+    las sustitutas habituales (es la que usa LibreOffice), para que el texto quepa con cualquiera.
+    """
+    if bold not in _FUENTES:
+        _FUENTES[bold] = None
+        candidatas = [Path(matplotlib.get_data_path()) / "fonts" / "ttf" / ("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"),
+                      "arialbd.ttf" if bold else "arial.ttf"]
+        for candidata in candidatas:
+            try:
+                _FUENTES[bold] = ImageFont.truetype(str(candidata), 100)
+                break
+            except OSError:
+                continue
+    fuente = _FUENTES[bold]
+    if fuente is None:
+        return len(texto) * (0.68 if bold else 0.6) * pt / 72.0
+    return fuente.getlength(texto) / 100.0 * pt / 72.0
+
+
+def alto_estimado(paras, pt: float, ancho_in: float, espacio_pt: float = 4.0) -> float:
+    total = 0.0
+    for item in paras:
+        texto = item if isinstance(item, str) else "".join(item)
+        lineas = max(1, math.ceil(ancho_texto_in(texto, pt) * 1.03 / ancho_in))
+        total += lineas * pt * 1.2 / 72.0 + espacio_pt / 72.0
+    return total
+
+
+# --------------------------------------------------------------------------- utilidades pptx
 def shape_by_name(slide, name: str):
     for sh in slide.shapes:
         if sh.name == name:
@@ -120,16 +236,64 @@ def set_text(slide, name: str, paras) -> None:
     set_paragraphs(shape_by_name(slide, name), paras if isinstance(paras, list) else [paras])
 
 
-def replace_picture(slide, name: str, path: Path) -> None:
-    """Sustituye la imagen de un `Picture` y la ajusta dentro de su caja original."""
-    pic = shape_by_name(slide, name)
-    _, rid = slide.part.get_or_add_image_part(str(path))
-    pic._element.blipFill.blip.rEmbed = rid
-    iw, ih = Image.open(path).size
-    bw, bh = pic.width, pic.height
-    escala = min(bw / iw, bh / ih)
-    pic.width = Emu(int(iw * escala))
-    pic.height = Emu(int(ih * escala))
+def set_size(shape, pt: float) -> None:
+    for p in shape.text_frame.paragraphs:
+        for r in p.runs:
+            r.font.size = Pt(pt)
+
+
+def encoger(shape, alto_max_in: float, minimo_pt: float = 8.5) -> None:
+    """Reduce la letra de una caja de la plantilla hasta que su texto quepa en ``alto_max_in``."""
+    paras = [p.text for p in shape.text_frame.paragraphs]
+    runs = [r for p in shape.text_frame.paragraphs for r in p.runs if r.font.size]
+    if not runs:
+        return
+    pt = max(r.font.size.pt for r in runs)
+    ancho = shape.width / 914400.0
+    while pt > minimo_pt and alto_estimado(paras, pt, ancho) > alto_max_in:
+        pt -= 0.5
+    for r in runs:
+        r.font.size = Pt(min(r.font.size.pt, pt))
+
+
+def titulo(slide, kicker: str, texto: str, dos_lineas: bool = False) -> None:
+    """Antetítulo y título. ``dos_lineas`` solo en láminas cuyo contenido empieza en y >= 1,08 pulgadas."""
+    set_text(slide, "TextBox 3", kicker)
+    set_text(slide, "TextBox 4", texto)
+    ajustar_titulo(slide, dos_lineas)
+
+
+def ajustar_titulo(slide, dos_lineas: bool = False) -> None:
+    """Ajusta solo el tamaño de letra del título (TextBox 4) al ancho disponible; no cambia el texto.
+
+    Una línea: de 22 pt hacia abajo hasta que quepa. Si se admiten dos líneas (títulos redactados
+    desde los datos, de largo variable), se prefiere 18 pt en dos líneas antes que una letra menor.
+    """
+    caja = shape_by_name(slide, "TextBox 4")
+    texto = caja.text_frame.text
+    ancho = caja.width / 914400.0 * 0.98
+    cabe = lambda pt, lineas=1.0: ancho_texto_in(texto, pt, bold=True) <= lineas * ancho
+    pt = next((t for t in (22, 20, 18) if cabe(t)), None)
+    if pt is None and dos_lineas:
+        pt = next((t for t in (18, 17, 16) if cabe(t, 1.85)), None)
+    if pt is None:
+        pt = next((t for t in (17, 16, 15, 14) if cabe(t)), 14)
+        if not cabe(pt):
+            print("AVISO: el título no cabe en el espacio previsto:", texto)
+    set_size(caja, pt)
+
+
+def clonar(slide, name: str, dx: float = 0.0, dy: float = 0.0, nuevo: str | None = None):
+    """Duplica una forma dentro de la misma lámina, desplazada (dx, dy) pulgadas."""
+    src = shape_by_name(slide, name)
+    siguiente = max(int(e.get("id")) for e in slide.shapes._spTree.iter(qn("p:cNvPr"))) + 1
+    el = copy.deepcopy(src._element)
+    next(el.iter(qn("p:cNvPr"))).set("id", str(siguiente))
+    src._element.addnext(el)
+    sh = next(s for s in slide.shapes if s._element is el)
+    sh.left, sh.top = src.left + Inches(dx), src.top + Inches(dy)
+    sh.name = nuevo or f"{name} copia {siguiente}"
+    return sh
 
 
 def ensure_rows(table, n: int) -> None:
@@ -177,8 +341,9 @@ def set_cell(cell, text: str) -> None:
 
 
 def fill_table(slide, name: str, filas: list[list[str]], col_widths_in: list[float] | None = None,
-               font_pt: float | None = None, row_height_in: float | None = None) -> None:
-    table = shape_by_name(slide, name).table
+               font_pt: float | None = None, row_height_in: float | None = None, top_in: float | None = None):
+    marco = shape_by_name(slide, name)
+    table = marco.table
     ensure_rows(table, len(filas))
     ensure_cols(table, len(filas[0]))
     for i, fila in enumerate(filas):
@@ -197,6 +362,25 @@ def fill_table(slide, name: str, filas: list[list[str]], col_widths_in: list[flo
     if row_height_in is not None:
         for fila in table.rows:
             fila.height = Emu(int(row_height_in * 914400))
+        marco.height = Emu(int(row_height_in * 914400 * len(filas)))
+    if top_in is not None:
+        marco.top = Inches(top_in)
+    return table
+
+
+def pintar_celda(cell, fill: str | None = None, bold: bool | None = None, color: str | None = None,
+                 align=None) -> None:
+    if fill:
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = RGBColor.from_string(fill)
+    for p in cell.text_frame.paragraphs:
+        if align is not None:
+            p.alignment = align
+        for r in p.runs:
+            if bold is not None:
+                r.font.bold = bold
+            if color:
+                r.font.color.rgb = RGBColor.from_string(color)
 
 
 NOTAS_MODELO = None   # notes slide de una diapositiva original, para clonar su marcador de cuerpo
@@ -249,18 +433,32 @@ def reorder_and_prune(prs, keep: list) -> None:
         sldIdLst.append(sldId)
 
 
-def set_bullets(slide, items: list[str], pares: list[tuple[str, str]]) -> None:
-    """Rellena las viñetas de un divisor (óvalo + texto) y borra las sobrantes."""
-    for k, (oval, caja) in enumerate(pares):
-        if k < len(items):
-            set_text(slide, caja, items[k])
-        else:
+def set_vinetas(slide, items: list[str], paso: float = 0.405) -> None:
+    """Viñetas «En esta sección» de un divisor: tantas como ``items``, con el recuadro a su medida."""
+    for oval, caja in (("Oval 12", "TextBox 13"), ("Oval 14", "TextBox 15"), ("Oval 16", "TextBox 17"),
+                       ("Oval 18", "TextBox 19"), ("Oval 20", "TextBox 21")):
+        if any(sh.name == oval for sh in slide.shapes):
             delete_shapes(slide, (oval, caja))
+    set_text(slide, "TextBox 11", items[0])
+    for k, item in enumerate(items[1:], 1):
+        clonar(slide, "Oval 10", dy=paso * k, nuevo=f"Oval viñeta {k + 1}")
+        caja = clonar(slide, "TextBox 11", dy=paso * k, nuevo=f"TextBox viñeta {k + 1}")
+        set_paragraphs(caja, [item])
+    shape_by_name(slide, "Rounded Rectangle 8").height = Inches(0.86 + paso * len(items))
 
 
-# --------------------------------------------------------------------------- dibujo de pipelines
+def divisor(slide, n: int, nombre: str, descripcion: str, vinetas: list[str], nota: str) -> None:
+    set_text(slide, "TextBox 3", f"SECCIÓN {n} DE 5")
+    set_text(slide, "TextBox 4", f"{n:02d}")
+    set_text(slide, "TextBox 5", nombre)
+    set_text(slide, "TextBox 7", descripcion)
+    set_vinetas(slide, vinetas)
+    set_notes(slide, nota)
+
+
+# --------------------------------------------------------------------------- dibujo con formas
 def add_box(slide, x, y, w, h, lines, fill=NAVY, color="FFFFFF", size=9.5, shape=MSO_SHAPE.ROUNDED_RECTANGLE,
-            bold_first=True, name=None):
+            bold_first=True, name=None, first_size=None):
     sh = slide.shapes.add_shape(shape, Inches(x), Inches(y), Inches(w), Inches(h))
     sh.fill.solid()
     sh.fill.fore_color.rgb = RGBColor.from_string(fill)
@@ -278,7 +476,7 @@ def add_box(slide, x, y, w, h, lines, fill=NAVY, color="FFFFFF", size=9.5, shape
         p.alignment = PP_ALIGN.CENTER
         r = p.add_run()
         r.text = line
-        r.font.size = Pt(size + 1 if i == 0 else size)
+        r.font.size = Pt((first_size or size + 1) if i == 0 else size)
         r.font.bold = bool(i == 0 and bold_first)
         r.font.color.rgb = RGBColor.from_string(color)
         r.font.name = "Roboto"
@@ -297,12 +495,21 @@ def add_arrow(slide, x1, y1, x2, y2, color=NAVY, dashed=False, head=True, width=
     return c
 
 
-def add_label(slide, x, y, w, h, paras, size=10.5, color=TEXT, align=PP_ALIGN.LEFT, bold_label=True):
-    """Caja de texto con párrafos; cada párrafo es str o [etiqueta_negrita, texto]."""
+def add_label(slide, x, y, w, h, paras, size=10.5, color=TEXT, align=PP_ALIGN.LEFT, bold_label=True,
+              italic=False, ajustar=False, minimo=8.5):
+    """Caja de texto con párrafos; cada párrafo es str o [etiqueta_negrita, texto].
+
+    Con ``ajustar`` la letra baja (hasta ``minimo``) si el texto, que puede venir de los datos,
+    no cabe en el alto ``h``.
+    """
+    if ajustar:
+        while size > minimo and alto_estimado(paras, size, w - 0.04) > h:
+            size -= 0.5
     tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = tb.text_frame
     tf.word_wrap = True
     tf.margin_left = tf.margin_right = Inches(0.02)
+    tf.margin_top = tf.margin_bottom = Inches(0.01)
     for i, item in enumerate(paras):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
         p.alignment = align
@@ -312,50 +519,34 @@ def add_label(slide, x, y, w, h, paras, size=10.5, color=TEXT, align=PP_ALIGN.LE
             r = p.add_run()
             r.text = texto
             r.font.size = Pt(size)
-            r.font.bold = bool(k == 0 and len(runs) > 1 and bold_label)
+            r.font.bold = bool(k % 2 == 0 and len(runs) > 1 and bold_label)   # etiqueta, texto, etiqueta, texto…
+            r.font.italic = italic
             r.font.color.rgb = RGBColor.from_string(color)
             r.font.name = "Roboto"
     return tb
 
 
-def dibujar_pipeline_experimental(slide, d):
-    """Flujo datos → simulador → instancia → optimizador → réplicas → estadística, con el óptimo exacto."""
-    meta, bf = d["meta"], d["bf"]
-    y, h, w, gap, x0 = 1.15, 1.0, 1.36, 0.165, 0.5
-    cajas = [
-        ("Datos", "NASA POWER 2008", "8.760 h, sin 29/02"),
-        ("Simulador horario", "despacho secuencial", "reproducción parcial de Li et al."),
-        ("Instancia", "(Ctot, AGSRmax, u,", "ΔB, {hk}) · I1 a I4"),
-        ("Optimizador", "{} solicitudes".format(int(meta["requests_per_run"])), "PSO+GA y 8 comparadores"),
-        ("{} réplicas".format(int(meta["replicates_per_algorithm"])), "por algoritmo e instancia", "semillas 42–71"),
-        ("Estadística", "mediana, brecha, éxito", "A12 + Holm (familia planificada)"),
-    ]
-    xs = []
-    for k, (t1, t2, t3) in enumerate(cajas):
-        x = x0 + k * (w + gap)
-        xs.append(x)
-        add_box(slide, x, y, w, h, [t1, t2, t3], fill=NAVY if k != 3 else BROWN, size=8.5, name=f"Pipeline {k + 1}")
-        if k:
-            add_arrow(slide, x - gap + 0.01, y + h / 2, x - 0.01, y + h / 2)
-    # Óptimo exacto: sale del simulador y entra como referencia de la estadística.
-    ox, oy, ow, oh = xs[1] + 0.2, 2.65, 3.1, 0.72
-    add_box(slide, ox, oy, ow, oh,
-            ["Óptimo exacto por fuerza bruta",
-             "todos los catálogos × W cada 0,01 MW · {} diseños · {:.0f} h".format(entero(meta["brute_force_designs_total"]), bf["elapsed_s"].sum() / 3600)],
-            fill=LIGHT, color=TEXT, size=8.5, name="Pipeline optimo")
-    add_arrow(slide, xs[1] + w / 2, y + h + 0.01, xs[1] + w / 2, oy - 0.01, color=BLUE)
-    add_arrow(slide, ox + ow + 0.01, oy + oh / 2, xs[5] + w / 2, y + h + 0.01, color=BLUE)
-    add_label(slide, 0.5, 3.6, 9.0, 1.1, [
-        ["Un solo simulador para todo: ", "los nueve optimizadores, las cuatro instancias y la fuerza bruta evalúan diseños con el mismo modelo; lo único que cambia entre competidores es el operador de búsqueda."],
-        ["El óptimo exacto ", "convierte la brecha en una distancia a un valor conocido; la referencia de malla de 0,5 MW ya no hace falta."],
-        ["Salida: ", "CSV por instancia → tablas, macros y figuras del documento y de esta presentación, sin transcripción manual."],
-    ], size=10)
+def add_fig(slide, nombre: str, x: float, y: float, ancho: float | None = None):
+    """Inserta una figura ``pres_*.png`` a su tamaño de diseño, centrada en ``ancho`` si se indica."""
+    ruta = FIGS_PRES / nombre
+    w, h = TAMANOS[nombre]
+    iw, ih = Image.open(ruta).size
+    h = w * ih / iw
+    if ancho is not None:
+        x += (ancho - w) / 2.0
+    return slide.shapes.add_picture(str(ruta), Inches(x), Inches(y), Inches(w), Inches(h))
 
 
-def dibujar_pipeline_psoga(slide, d):
+def marca_provisional(slide, d) -> None:
+    """Etiqueta roja en las láminas con resultados mientras los CSV no sean los de la corrida completa."""
+    if d["provisional"]:
+        add_box(slide, 5.9, 0.2, 3.6, 0.27, [d["aviso"]], fill="FDECEA", color=RED, size=8, first_size=8,
+                name="Marca provisional")
+
+
+def dibujar_pipeline_psoga(slide):
     """Bucle de PSO en la fila superior, inyección genética en la inferior, cierre con el presupuesto."""
-    meta = d["meta"]
-    pop, it, budget = int(meta["population"]), int(meta["iterations"]), int(meta["requests_per_run"])
+    pop, it, budget = POB, ITER, PRESUPUESTO
     # Fila 1: bucle de PSO (se conserva íntegro)
     y1, h1, w1, g1 = 1.08, 0.86, 2.12, 0.18
     fila1 = [
@@ -374,11 +565,11 @@ def dibujar_pipeline_psoga(slide, d):
     # Fila 2: inyección genética (lo que añade el híbrido), de derecha a izquierda
     y2, h2, w2, g2 = 2.42, 0.86, 1.68, 0.15
     fila2 = [
-        ("5 · Elegir", "las 5 partículas de", "peor mérito actual"),
+        ("5 · Elegir", f"las {HIJOS} partículas de", "peor mérito actual"),
         ("6 · Torneo", "k = 3 sobre las mejores", "posiciones personales (pbest)"),
         ("7 · Cruce BLX-α", "pc = 0,9 · α = 0,5", "si no, clona al padre"),
         ("8 · Mutación", "gaussiana por gen", "pm = 0,1 · σ = 10 % del rango"),
-        ("9 · Hijos", "reemplazan a las 5 peores", "v = 0 · sin memoria (pbest = ∞)"),
+        ("9 · Hijos", f"reemplazan a las {HIJOS} peores", "v = 0 · sin memoria (pbest = ∞)"),
     ]
     x2s = []
     for k, (t1, t2, t3) in enumerate(fila2):
@@ -388,7 +579,7 @@ def dibujar_pipeline_psoga(slide, d):
         if k:
             add_arrow(slide, x2s[k - 1] - 0.01, y2 + h2 / 2, x + w2 + 0.01, y2 + h2 / 2, color=BROWN)
     add_arrow(slide, x1s[3] + w1 / 2, y1 + h1 + 0.01, x2s[0] + w2 / 2, y2 - 0.01, color=BROWN)
-    add_label(slide, x2s[4], y2 + h2 + 0.02, 5.0, 0.3, [["Inyección genética: ", "lo único que añade el híbrido; el bucle de PSO no cambia."]], size=9, color=BROWN)
+    add_label(slide, x2s[4] + 0.75, y2 + h2 + 0.02, 7.0, 0.24, [["Inyección genética: ", "lo único que añade el híbrido; el bucle de PSO no cambia."]], size=9, color=BROWN)
     # Fila 3: cierre del bucle
     y3, h3 = 3.72, 0.6
     add_box(slide, 0.5, y3, 1.9, h3, [f"¿{budget} solicitudes?", f"{it} iteraciones × {pop}"], fill=LIGHT, color=TEXT, size=8.5, name="Decision")
@@ -403,27 +594,14 @@ def dibujar_pipeline_psoga(slide, d):
     add_label(slide, 0.02, 2.0, 0.3, 0.3, ["no"], size=9, color=NAVY)
     add_label(slide, 5.0, y3 - 0.05, 4.5, 1.0, [
         ["Presupuesto: ", f"{it} iteraciones × {pop} = {budget} solicitudes, las mismas que PSO; los diseños repetidos también cuentan."],
-        ["Contrato: ", "toda solicitud pasa por _evaluate_budgeted (tope duro y checkpoint cada 20); al cierre se verifica el total."],
+        ["Contrato: ", "toda solicitud pasa por un evaluador con tope duro; al cierre se verifica el total."],
         ["Padres intactos: ", "PSO con constricción de Clerc–Kennedy; operadores y valores del GA sin cambios."],
     ], size=9)
 
 
-def hijos_por_iteracion(d) -> int:
-    """Hijos que PSO+GA inyecta por iteración, leído de la tabla de hiperparámetros."""
-    import re
-    fila = d["hyper"][d["hyper"]["codigo"] == "pso_ga"]
-    if not fila.empty:
-        m = re.search(r"(\d+)\s+hijos", str(fila.iloc[0]["hiperparametros"]))
-        if m:
-            return int(m.group(1))
-    return 5
-
-
-def dibujar_detalle_psoga(slide, d):
+def dibujar_detalle_psoga(slide):
     """Cuándo actúa PSO y cuándo GA: línea de tiempo de una iteración, reparto y cuentas de la corrida."""
-    meta = d["meta"]
-    pop, it = int(meta["population"]), int(meta["iterations"])
-    k = hijos_por_iteracion(d)
+    pop, it, k = POB, ITER, HIJOS
     budget = pop * it
     iniciales, movidas, hijos = pop, (it - 1) * (pop - k), (it - 1) * k
 
@@ -453,7 +631,7 @@ def dibujar_detalle_psoga(slide, d):
 
     # --- Franja 2: reparto de trabajo --------------------------------------------
     y2, h2, w2 = 2.3, 1.52, 4.4
-    for x2, titulo, color, filas in (
+    for x2, titulo_tarjeta, color, filas in (
         (0.5, "PSO actúa sobre todo el enjambre", NAVY, [
             ["Sobre quién: ", f"las {pop} partículas, en todas las iteraciones"],
             ["Con qué: ", "su velocidad, su pbest y el gbest del enjambre"],
@@ -462,11 +640,11 @@ def dibujar_detalle_psoga(slide, d):
         (5.1, f"GA actúa sobre las {k} peores", BROWN, [
             ["Sobre quién: ", f"las {k} partículas de peor mérito en la iteración"],
             ["Con qué: ", "los pbest del enjambre; torneo k = 3, BLX-α, mutación"],
-            ["Qué produce: ", f"{k} hijos con velocidad 0 y sin memoria (pbest = ∞)"],
-            ["Cuánto cuesta: ", "0 solicitudes; se evalúan en la iteración siguiente"]]),
+            ["Qué produce: ", f"{k} hijos con velocidad 0 y sin memoria"],
+            ["Cuánto cuesta: ", "0 solicitudes; se evalúan en la siguiente"]]),
     ):
-        add_box(slide, x2, y2, w2, h2, [], fill=LIGHT, name="Tarjeta " + titulo[:3])
-        add_label(slide, x2 + 0.15, y2 + 0.06, w2 - 0.3, 0.3, [[titulo]], size=11.5, color=color, bold_label=False)
+        add_box(slide, x2, y2, w2, h2, [], fill=LIGHT, name="Tarjeta " + titulo_tarjeta[:3])
+        add_label(slide, x2 + 0.15, y2 + 0.06, w2 - 0.3, 0.3, [[titulo_tarjeta]], size=11.5, color=color, bold_label=False)
         tb = add_label(slide, x2 + 0.15, y2 + 0.4, w2 - 0.3, h2 - 0.45, filas, size=9)
         for p in tb.text_frame.paragraphs:
             if p.runs:
@@ -487,632 +665,1411 @@ def dibujar_detalle_psoga(slide, d):
         f"Desde la segunda iteración, {pop - k} partículas siguen al enjambre y {k} vienen del GA: tres de cada cuatro evaluaciones siguen siendo del PSO."]], size=9)
 
 
+def dibujar_protocolo(slide, d):
+    """Los siete pasos del protocolo de comparación y, bajo cada uno, lo que se hizo en la tesis."""
+    alfa, eps = d["alfa"], d["eps"]
+    pasos = [
+        ("1 · Diseñar", "¿Con qué reglas se corre?",
+         [f"{N_INST} instancias, {N_ALG} algoritmos", f"R = {R_DISENO} réplicas ({SEMILLAS})", f"{PRESUPUESTO} solicitudes por corrida"]),
+        ("2 · Preguntar", "Hipótesis antes de los datos",
+         ["P1, P2 y P3 declaradas", f"Bilateral, α = {alfa}", f"Tolerancia ε = {eps}"]),
+        ("3 · Explorar", "Mirar antes de contrastar",
+         ["Convergencia", "Distribución de la brecha", "Shapiro–Wilk por muestra"]),
+        ("4 · Elegir la prueba", "¿Cuántos? ¿Pareado?",
+         ["P1: Mann–Whitney", "P2: Wilcoxon con signo", "P3: Friedman"]),
+        ("5 · Cuantificar", "Tamaño de efecto e intervalo",
+         ["Â12 de Vargha–Delaney", "IC bootstrap al 95 %", "Hodges–Lehmann"]),
+        ("6 · Corregir", "Comparaciones múltiples",
+         ["Holm por familia", f"P1: {N_INST} instancias por par", "P2: contrastes globales"]),
+        ("7 · Reportar", "También lo no significativo",
+         ["Símbolos +, ≈ y −", "p ajustado, efecto e IC", "Tablas y figuras desde CSV"]),
+        ("Dos familias", "Contrastes planificados",
+         ["Control: PSO+GA vs rival", "Confirman: padres y RANDOM", "Base: clásica vs RANDOM"]),
+    ]
+    w, h, gx, gy, x0, y0, cab = 2.16, 1.52, 0.12, 0.16, 0.5, 1.12, 0.36
+    for k, (nombre, guia, hecho) in enumerate(pasos):
+        fila, col = divmod(k, 4)
+        x, y = x0 + col * (w + gx), y0 + fila * (h + gy)
+        es_paso = k < 7
+        add_box(slide, x, y, w, h, [], fill=LIGHT, name=f"Paso {k + 1} tarjeta")
+        add_box(slide, x, y, w, cab, [nombre], fill=NAVY if es_paso else BROWN, size=11, first_size=11.5,
+                name=f"Paso {k + 1} cabecera")
+        add_label(slide, x + 0.08, y + cab + 0.06, w - 0.16, 0.24, [guia], size=9.5, color=BLUE if es_paso else BROWN,
+                  italic=True, ajustar=True, minimo=8.0)
+        add_label(slide, x + 0.08, y + cab + 0.34, w - 0.16, 0.66, hecho, size=9.5, ajustar=True, minimo=8.0)
+        if es_paso and col:
+            add_arrow(slide, x - gx + 0.015, y + cab / 2, x - 0.015, y + cab / 2, width=1.3)
+    # Del paso 4 al 5: baja por el margen derecho y vuelve al inicio de la segunda fila.
+    xd, ym = x0 + 4 * w + 3 * gx + 0.1, y0 + h + gy / 2
+    add_arrow(slide, x0 + 4 * w + 3 * gx, y0 + cab / 2, xd, y0 + cab / 2, head=False, width=1.3)
+    add_arrow(slide, xd, y0 + cab / 2, xd, ym, head=False, width=1.3)
+    add_arrow(slide, xd, ym, x0 - 0.12, ym, head=False, width=1.3)
+    add_arrow(slide, x0 - 0.12, ym, x0 - 0.12, y0 + h + gy + cab / 2, head=False, width=1.3)
+    add_arrow(slide, x0 - 0.12, y0 + h + gy + cab / 2, x0 - 0.01, y0 + h + gy + cab / 2, width=1.3)
+    add_label(slide, 0.5, y0 + 2 * h + gy + 0.06, 9.0, 0.25,
+              ["Protocolo de la guía «Comparación estadística de algoritmos estocásticos de optimización» (E. Vega); bajo cada paso, lo que se hizo en la tesis."],
+              size=8.5, color="6B7280", italic=True)
+
+
+def dibujar_mapa_decision(slide, d):
+    """Hipótesis y decisiones a priori arriba; abajo, el mapa de decisión aplicado a P1, P2 y P3."""
+    alfa, eps = d["alfa"], d["eps"]
+    add_box(slide, 0.5, 1.1, 9.0, 0.78, [], fill=LIGHT, name="Hipotesis tarjeta")
+    add_label(slide, 0.65, 1.15, 8.7, 0.7, [
+        ["Hipótesis: ", "H0, los algoritmos comparados tienen la misma distribución de brecha; H1, difieren (contraste bilateral)."],
+        ["Fijado a priori: ", f"α = {alfa} · tolerancia ε = {eps} del óptimo (una brecha ≤ ε cuenta como 0) · variable: brecha relativa al óptimo exacto."],
+    ], size=10, ajustar=True)
+    anchos = [2.0, 1.75, 1.85, 1.5, 1.6]
+    hueco = (9.0 - sum(anchos)) / 4
+    xs = [0.5 + sum(anchos[:k]) + k * hueco for k in range(5)]
+    for x, w, cab in zip(xs, anchos, ["PREGUNTA", "¿CUÁNTOS?", "¿PAREADO?", "PRUEBA", "EFECTO Y CORRECCIÓN"]):
+        add_label(slide, x, 1.95, w, 0.22, [cab], size=8.5, color="6B7280", align=PP_ALIGN.CENTER)
+    filas = [
+        (["P1 · En una instancia", "¿PSO+GA difiere del rival?"],
+         ["2 algoritmos", f"1 instancia, {R_DISENO} corridas"],
+         ["No pareado", "flujo aleatorio propio:", "muestras independientes"],
+         ["Mann–Whitney"],
+         ["Â12 + IC al 95 %", f"Holm: {N_INST} instancias"]),
+        (["P2 · En general", f"¿y sobre las {N_INST} instancias?"],
+         ["2 algoritmos", f"{N_INST} instancias, 1 mediana"],
+         ["Pareado", "por instancia"],
+         ["Wilcoxon", "rangos con signo"],
+         ["Hodges–Lehmann", "Holm: familia"]),
+        ([f"P3 · Entre los {N_ALG}", "¿hay alguna diferencia?"],
+         [f"{N_ALG} algoritmos", f"{N_INST} instancias"],
+         ["Bloques", "cada instancia es un bloque"],
+         ["Friedman", "+ Iman–Davenport"],
+         ["Si p < α: post-hoc", "diferencia crítica"]),
+    ]
+    y0, h, gy = 2.2, 0.66, 0.09
+    for i, fila in enumerate(filas):
+        y = y0 + i * (h + gy)
+        for j, (x, w, lineas) in enumerate(zip(xs, anchos, fila)):
+            if j == 0:
+                add_box(slide, x, y, w, h, lineas, fill=NAVY, size=9, first_size=10.5, name=f"Mapa P{i + 1} pregunta")
+            elif j == 3:
+                add_box(slide, x, y, w, h, lineas, fill=BROWN, size=9, first_size=11, name=f"Mapa P{i + 1} prueba")
+            else:
+                add_box(slide, x, y, w, h, lineas, fill=LIGHT, color=TEXT, size=8.5, first_size=9.5, name=f"Mapa P{i + 1} c{j}")
+            if j:
+                add_arrow(slide, x - hueco + 0.01, y + h / 2, x - 0.01, y + h / 2, width=1.3)
+    add_label(slide, 0.5, y0 + 3 * h + 2 * gy + 0.08, 9.0, 0.25,
+              ["Siempre con tamaño de efecto: un valor p dice si hay evidencia de una diferencia, no cuánto mide."],
+              size=9.5, color=NAVY, italic=True, align=PP_ALIGN.CENTER)
+
+
 # --------------------------------------------------------------------------- datos
-def cargar_datos():
+def cargar_datos(resultados: Path = RESULTS) -> dict:
+    leer = lambda nombre: pd.read_csv(resultados / nombre)
     d = {}
-    d["inst"] = pd.read_csv(RESULTS / "instances.csv")
-    d["codes"] = list(d["inst"]["instance"])
-    d["bf"] = pd.read_csv(RESULTS / "brute_force_summary.csv").set_index("instance")
-    d["rank"] = pd.read_csv(RESULTS / "algorithm_summary.csv")
-    d["cross"] = pd.read_csv(RESULTS / "cross_instance_ranking.csv")
-    d["tests"] = pd.read_csv(RESULTS / "pairwise_tests.csv")
-    d["hyb"] = pd.read_csv(RESULTS / "hybrid_vs_parent.csv")
-    d["meta"] = pd.read_csv(RESULTS / "experiment_metadata.csv").iloc[0]
-    d["hyper"] = pd.read_csv(RESULTS / "algorithm_hyperparameters.csv")
-    d["comp"] = pd.read_csv(RESULTS / "brute_force_comparison.csv")
+    d["inst"] = leer("instances.csv").set_index("instance")
+    d["bf"] = leer("brute_force_summary.csv").set_index("instance")
+    d["codes"] = [c for c in d["inst"].index if c in d["bf"].index]
+    d["sum"] = leer("algorithm_summary.csv")
+    d["hyper"] = leer("algorithm_hyperparameters.csv")
+    d["runs"] = leer("algorithm_runs.csv")
+    d["design"] = leer("stat_design.csv").iloc[0]
+    d["norm"] = leer("stat_normality.csv")
+    d["p1"] = leer("stat_per_instance.csv")
+    d["p2"] = leer("stat_global.csv")
+    d["fried"] = leer("stat_friedman.csv").iloc[0]
+    d["ranks"] = leer("stat_ranks.csv").sort_values("mean_rank").reset_index(drop=True)
+    d["power"] = leer("stat_power.csv")
+    # Sensibilidad a igual número de diseños únicos (scripts/analisis_estadistico.py).
+    d["p2_unicos"] = leer("stat_unicos_global.csv")
+    d["ranks_unicos"] = leer("stat_unicos_ranks.csv").sort_values("mean_rank").reset_index(drop=True)
+    # Perfil de convergencia: rango medio en cada punto de control (scripts/analisis_estadistico.py).
+    d["conv"] = leer("stat_convergencia.csv")
+
+    d["alfa"] = num(d["design"]["alpha"], 2)
+    d["eps"] = num(d["design"]["eps_gap_pct"], 2) + " %"
+    # Conteos reales de la corrida, leídos de los datos (pueden no ser aún los del diseño).
+    por_celda = d["runs"].groupby(["instance", "algorithm"]).size()
+    d["replicas"] = int(por_celda.max())
+    d["solicitudes"] = int(d["runs"]["n_evaluations"].max())
+    d["n_alg"] = int(d["sum"]["algorithm"].nunique())
+    d["n_inst"] = len(d["codes"])
+    d["corridas"] = int(len(d["runs"]))
+    coherente = (por_celda.nunique() == 1
+                 and int(d["design"]["replicates"]) == d["replicas"]
+                 and set(d["sum"]["runs"].astype(int)) == {d["replicas"]})
+    completo = (d["replicas"] == R_DISENO and d["solicitudes"] == PRESUPUESTO
+                and d["n_alg"] == N_ALG and d["n_inst"] == N_INST)
+    d["provisional"] = not (coherente and completo)
+    d["aviso"] = "DATOS PROVISIONALES · R = {} · {} solicitudes".format(d["replicas"], d["solicitudes"])
+    if not coherente:
+        d["aviso"] = "DATOS PROVISIONALES · CSV en transición"
     return d
 
 
-def fila_rank(d, code, alg):
-    r = d["rank"][(d["rank"]["instance"] == code) & (d["rank"]["algorithm"] == alg)]
-    return r.iloc[0]
+def resumen(d, code, alg):
+    """Fila de algorithm_summary de una instancia y un algoritmo (o None)."""
+    r = d["sum"][(d["sum"]["instance"] == code) & (d["sum"]["algorithm"] == alg)]
+    return r.iloc[0] if len(r) else None
 
 
-def contraste(d, code, a, b):
-    t = d["tests"]
-    s = t[(t["family"] == "planned") & (t["instance"] == code) & (t["algoritmo_a"] == a) & (t["algoritmo_b"] == b)]
-    return s.iloc[0] if not s.empty else None
+def brechas_medianas(d, alg) -> list[float]:
+    return [float(r["median_gap_pct"]) for r in (resumen(d, c, alg) for c in d["codes"]) if r is not None]
+
+
+def duplicados(d) -> pd.DataFrame:
+    """Porcentaje de solicitudes duplicadas por instancia (filas) y algoritmo (columnas)."""
+    s = d["sum"].copy()
+    s["share"] = 100.0 * s["mean_duplicates"] / (s["mean_duplicates"] + s["mean_unique"])
+    return s.pivot_table(index="instance", columns="algorithm", values="share")
+
+
+def respuesta_recorte(d) -> str:
+    """Respuesta oral a si el recorte a los límites favorece a GWO, WOA y SHO (amenaza declarada)."""
+    en_limite = [c for c in d["codes"]
+                 if int(d["bf"].loc[c, "optimum_n_units"]) == int(d["inst"].loc[c, "max_units"])]
+    gana_gwo = conteo_p1(d, H, "gwo")["-"]
+    con = [c for c in gana_gwo if c in en_limite]
+    sin = [c for c in gana_gwo if c not in en_limite]
+    texto = ("[Si preguntan si el recorte a los límites favorece a GWO, WOA y SHO:] Es posible, y lo declaro como "
+             "amenaza a la validez. Los óptimos están en la frontera del dominio: la duración más corta de batería "
+             f"en todas las instancias y el máximo de electrolizadores en {enumerar(en_limite, final='e')}. Como el "
+             "vector se recorta antes de decodificar, toda propuesta que se sale cae justo en ese extremo, y GWO, WOA "
+             f"y SHO previsiblemente proponen más puntos fuera de rango en su fase exploratoria. GWO supera al híbrido en {len(gana_gwo)} "
+             f"instancias, {len(con)} de ellas con el electrolizador en el límite")
+    if sin:
+        texto += f", pero también en {enumerar(sin)}, que no lo tiene"
+    return texto + "; y no registré cuántas propuestas se recortan, así que no lo uso como explicación."
+
+
+# ---- P1: una instancia --------------------------------------------------------------
+def filas_p1(d, a, b) -> pd.DataFrame:
+    t = d["p1"]
+    s = t[(t["algoritmo_a"] == a) & (t["algoritmo_b"] == b)].drop_duplicates("instance").set_index("instance")
+    return s.reindex([c for c in d["codes"] if c in s.index])
+
+
+def conteo_p1(d, a, b) -> dict:
+    s = filas_p1(d, a, b)
+    c = {k: [i for i, v in s["simbolo"].items() if str(v).strip() == k] for k in ("+", "=", "-")}
+    c["n"] = len(s)
+    return c
+
+
+def frase_p1(d, b, a=H, sujeto=True) -> str:
+    """«PSO+GA frente a GA: + en 5 de 8 (I1, …), ≈ en 3, − en 0»."""
+    c = conteo_p1(d, a, b)
+    cuerpo = "+ en {} de {}{}, ≈ en {}, − en {}{}".format(
+        len(c["+"]), c["n"], entre_parentesis(c["+"]), len(c["="]), len(c["-"]), entre_parentesis(c["-"]))
+    return "{} frente a {}: {}".format(lab(a), lab(b), cuerpo) if sujeto else cuerpo
+
+
+def voz_p1(d, b, a=H) -> str:
+    """La misma lectura, para decirla en voz alta."""
+    c = conteo_p1(d, a, b)
+    n = c["n"]
+    if not c["+"] and not c["-"]:
+        return (f"Frente a {lab(b)}, ninguna de las {n} instancias muestra una diferencia significativa tras Holm: "
+                "no hay evidencia de diferencia, que no es lo mismo que decir que son iguales.")
+    sig = []
+    if c["+"]:
+        sig.append(f"significativamente mejor en las {n} instancias" if len(c["+"]) == n else
+                   f"significativamente mejor en {len(c['+'])} de las {n} instancias{entre_parentesis(c['+'])}")
+    if c["-"]:
+        sig.append(f"significativamente peor en las {n} instancias" if len(c["-"]) == n else
+                   "significativamente peor en {}{}{}".format(
+                       len(c["-"]), "" if c["+"] else f" de las {n} instancias", entre_parentesis(c["-"])))
+    texto = f"Frente a {lab(b)}, {lab(a)} es " + " y ".join(sig)
+    if c["="]:
+        texto += "; en {} no hay evidencia de diferencia".format(
+            "la restante" if len(c["="]) == 1 else f"las {len(c['='])} restantes")
+    return texto + "."
+
+
+def voz_p1_grupo(d, rivales, a=H) -> str:
+    """Como ``voz_p1`` para varios rivales, juntando en una sola frase los que no muestran diferencias."""
+    conteos = {b: conteo_p1(d, a, b) for b in rivales}
+    sin = [b for b in rivales if not conteos[b]["+"] and not conteos[b]["-"]]
+    frases = [voz_p1(d, b, a) for b in rivales if b not in sin]
+    if len(sin) == 1:
+        frases.append(voz_p1(d, sin[0], a))
+    elif sin:
+        n = max(conteos[b]["n"] for b in sin)
+        frases.append(f"Frente a {enumerar([lab(b) for b in sin])}, ninguna de las {n} instancias muestra una diferencia "
+                      "significativa tras Holm: no hay evidencia de diferencia, que no es lo mismo que decir que son iguales.")
+    return " ".join(frases)
+
+
+def voz_base_grupo(d, algs=CLASICAS, base="random") -> str:
+    """Cada clásica frente a la línea base, por instancia."""
+    conteos = {a: conteo_p1(d, a, base) for a in algs}
+    sin = [a for a in algs if not conteos[a]["+"] and not conteos[a]["-"]]
+    frases = [voz_p1(d, base, a=a) for a in algs if a not in sin]
+    if sin:
+        frases.append("{} no {} diferencias significativas frente a {} en ninguna instancia tras Holm.".format(
+            enumerar([lab(a) for a in sin]), "muestra" if len(sin) == 1 else "muestran", lab(base)))
+    return " ".join(frases)
+
+
+def totales_p1(d, rivales, a=H) -> dict:
+    tot = {"+": 0, "=": 0, "-": 0, "n": 0}
+    for b in rivales:
+        c = conteo_p1(d, a, b)
+        for k in ("+", "=", "-"):
+            tot[k] += len(c[k])
+        tot["n"] += c["n"]
+    return tot
+
+
+def titulo_p1(d) -> str:
+    c = {b: conteo_p1(d, H, b) for b in CONFIRMATORIOS}
+    tot = totales_p1(d, CONFIRMATORIOS)
+    n = max(v["n"] for v in c.values())
+    if tot["+"] == 0 and tot["-"] == 0:
+        return "Por instancia, ninguna diferencia de PSO+GA resiste la corrección de Holm"
+    if tot["-"] == 0:
+        return "PSO+GA supera a RANDOM en {} de {} instancias, a GA en {} y a PSO en {}".format(
+            len(c["random"]["+"]), n, len(c["ga"]["+"]), len(c["pso"]["+"]))
+    return "Por instancia, PSO+GA gana {} y pierde {} de sus {} contrastes confirmatorios".format(
+        tot["+"], tot["-"], tot["n"])
+
+
+def mayor_efecto_p1(d, rivales, a=H):
+    """Fila significativa de mayor desplazamiento de Hodges–Lehmann (o None)."""
+    t = d["p1"]
+    s = t[(t["algoritmo_a"] == a) & (t["algoritmo_b"].isin(rivales)) & (t["simbolo"].astype(str).str.strip() != "=")]
+    s = s[s["hl_gap_pp"].notna()]
+    return None if s.empty else s.loc[s["hl_gap_pp"].abs().idxmax()]
+
+
+def frase_magnitud(d, rivales) -> str:
+    f = mayor_efecto_p1(d, rivales)
+    if f is None:
+        return "ninguna diferencia resiste la corrección, así que no hay desplazamiento que reportar como efecto."
+    return "el mayor desplazamiento significativo es de {} puntos porcentuales de brecha ({} CNY/kWh), frente a {} en {}.".format(
+        num(abs(f["hl_gap_pp"]), 2), num(abs(f["hl_cny_per_kwh"]), 4), lab(f["algoritmo_b"]), f["instance"])
+
+
+# ---- P2: en general -----------------------------------------------------------------
+def fila_p2(d, a, b):
+    t = d["p2"]
+    s = t[(t["algoritmo_a"] == a) & (t["algoritmo_b"] == b)]
+    return s.iloc[0] if len(s) else None
+
+
+def veredicto_p2(f) -> str | None:
+    """'mejor', 'peor' o 'sin' (sin evidencia de diferencia) para el algoritmo a del contraste."""
+    if f is None:
+        return None
+    if not truthy(f["significativo"]):
+        return "sin"
+    hl = float(f["hl_pareado_gap_pp"])
+    if pd.isna(hl) or hl == 0:
+        hl = float(f["pierde_mediana"]) - float(f["gana_mediana"])
+    return "mejor" if hl < 0 else "peor"
+
+
+LECTURA_P2 = {"mejor": "{a} mejor", "peor": "{a} peor", "sin": "sin evidencia de diferencia", None: "--"}
+
+
+def voz_p2(d, b, a=H) -> str:
+    f = fila_p2(d, a, b)
+    if f is None:
+        return ""
+    cierre = {"sin": "no hay evidencia de una diferencia general",
+              "mejor": f"la diferencia a favor de {lab(a)} es significativa",
+              "peor": f"la diferencia en contra de {lab(a)} es significativa"}[veredicto_p2(f)]
+    return "Frente a {}, {} tiene mejor mediana en {} de {} instancias; con p ajustado {}, {}.".format(
+        lab(b), lab(a), int(f["gana_mediana"]), int(f["n_instances"]), pvalor(f["p_value_holm"]), cierre)
+
+
+def voz_p2_grupo(d, rivales, a=H) -> str:
+    """Como ``voz_p2`` para varios rivales, juntando en una frase los contrastes sin evidencia de diferencia."""
+    filas = {b: fila_p2(d, a, b) for b in rivales}
+    sin = [b for b in rivales if veredicto_p2(filas[b]) == "sin"]
+    frases = [voz_p2(d, b, a) for b in rivales if veredicto_p2(filas[b]) in ("mejor", "peor")]
+    if len(sin) == 1:
+        frases.append(voz_p2(d, sin[0], a))
+    elif sin:
+        ps = sorted(float(filas[b]["p_value_holm"]) for b in sin)
+        detalle = ("el p ajustado es {} en todos".format(pvalor(ps[0])) if pvalor(ps[0]) == pvalor(ps[-1])
+                   else "los p ajustados van de {} a {}".format(pvalor(ps[0]), pvalor(ps[-1])))
+        frases.append("Frente a {} no hay evidencia de una diferencia general: {}.".format(
+            enumerar([lab(b) for b in sin]), detalle))
+    return " ".join(frases)
+
+
+def frase_potencia_breve(d) -> str:
+    pi = potencia(d, "instancias")
+    if pi is None:
+        return "la potencia es limitada."
+    return "con {} instancias la potencia para un efecto mediano es {}, así que solo se detectan efectos grandes.".format(
+        int(pi["n"]), num(pi["potencia_dz_0.5"], 2))
+
+
+def grupos_p2(d, rivales, a=H) -> dict:
+    v = {b: veredicto_p2(fila_p2(d, a, b)) for b in rivales}
+    return {k: [lab(b) for b in rivales if v[b] == k] for k in ("mejor", "peor", "sin")}
+
+
+def veredicto_general(d, rivales=CONFIRMATORIOS) -> str:
+    """«supera a …; es superado por …; sin evidencia de diferencia frente a …» (sin sujeto)."""
+    g = grupos_p2(d, rivales)
+    if not g["mejor"] and not g["peor"]:
+        return "sin evidencia de diferencia frente a " + enumerar(g["sin"], "ni")
+    partes = []
+    if g["mejor"]:
+        partes.append("supera a " + enumerar(g["mejor"]))
+    if g["peor"]:
+        partes.append("es superado por " + enumerar(g["peor"]))
+    if g["sin"]:
+        partes.append("sin evidencia de diferencia frente a " + enumerar(g["sin"]))
+    return "; ".join(partes)
+
+
+def titulo_p2(d) -> str:
+    v = veredicto_general(d)
+    return "En general, " + (v if v.startswith("sin") else "PSO+GA " + v)
+
+
+def frase_robustez(d, family="control") -> str:
+    t = d["p2"][d["p2"]["family"] == family]
+    alfa = float(d["design"]["alpha"])
+    decide = lambda col: (t[col].astype(float) < alfa)
+    iguales = int(((decide("p_value") == decide("p_value_relativa")) & (decide("p_value") == decide("p_value_signos"))).sum())
+    return "Wilcoxon sobre el LCOE, sobre la brecha relativa y la prueba de signos toman la misma decisión (α = {} sin corregir) en {} de {} contrastes.".format(
+        d["alfa"], iguales, len(t))
+
+
+def voz_robustez(d, family="control") -> str:
+    t = d["p2"][d["p2"]["family"] == family]
+    alfa = float(d["design"]["alpha"])
+    decide = lambda col: (t[col].astype(float) < alfa)
+    coincide = (decide("p_value") == decide("p_value_relativa")) & (decide("p_value") == decide("p_value_signos"))
+    iguales = int(coincide.sum())
+    texto = ("Como control de robustez, el mismo contraste sobre la brecha relativa y la prueba de signos llevan a la misma "
+             "decisión que Wilcoxon en {} de {} contrastes.").format(iguales, len(t))
+    distintos = [lab(b) for b in t.loc[~coincide, "algoritmo_b"]]
+    if distintos:
+        texto += (" La excepción es el contraste frente a {}, donde las tres pruebas no coinciden: ese resultado es "
+                  "significativo, pero no robusto, y lo presento con esa cautela.").format(enumerar(distintos))
+    return texto
+
+
+def respuesta_hibridacion(d) -> tuple[str, str]:
+    """Respuesta a la pregunta de investigación (viñeta, frase hablada), según P2 y los rangos medios."""
+    rangos = p3(d)["rangos"]
+    rh, padres = rangos[H], {a: rangos[a] for a in ("pso", "ga")}
+    mejor_padre = min(padres, key=padres.get)
+    g = grupos_p2(d, ("pso", "ga"))
+    cifras = "rango medio {} frente a {} de PSO y {} de GA".format(num(rh, 2), num(padres["pso"], 2), num(padres["ga"], 2))
+    if len(g["mejor"]) == 2:
+        return ("Respuesta: en este banco, PSO+GA supera en general a sus dos padres (" + cifras + ")",
+                "La respuesta a la pregunta de investigación es que, en este banco, el híbrido supera a sus dos padres.")
+    if rh > padres[mejor_padre]:
+        lugar = "queda entre ambos" if rh < max(padres.values()) else "queda detrás de ambos"
+        return ("Respuesta: con esta configuración, PSO+GA no mejora al mejor de sus padres ({}); {} ({})".format(
+                    lab(mejor_padre), lugar, cifras),
+                "Y la respuesta a la pregunta de investigación: con esta configuración y este presupuesto, el híbrido no "
+                "mejora al mejor de sus padres, que es {}; {} por rango medio. Hibridar no fue una mejora gratuita: "
+                "redistribuye un presupuesto fijo entre el enjambre y la recombinación.".format(lab(mejor_padre), lugar))
+    return ("Respuesta: PSO+GA obtiene mejor rango medio que sus padres, pero la ventaja no queda establecida en general (" + cifras + ")",
+            "La respuesta a la pregunta de investigación es que el híbrido obtiene mejor rango medio que sus padres, pero "
+            "la ventaja no queda establecida en general.")
+
+
+def potencia(d, unidad: str):
+    p = d["power"][d["power"]["unidad"].astype(str).str.startswith(unidad)]
+    return p.iloc[0] if len(p) else None
+
+
+def frase_potencia(d) -> str:
+    pi, pr = potencia(d, "instancias"), potencia(d, "replicas")
+    if pi is None or pr is None:
+        return "sin tabla de potencia."
+    return ("con {} instancias la potencia para un efecto mediano es {} y para uno grande, {}: solo se detectan efectos de tamaño "
+            "dz ≥ {}. Por instancia, con R = {}, la potencia para un efecto mediano es {}.").format(
+        int(pi["n"]), num(pi["potencia_dz_0.5"], 2), num(pi["potencia_dz_0.8"], 2),
+        num(pi["dz_detectable_potencia_0.8"], 2), int(pr["n"]), num(pr["potencia_dz_0.5"], 2))
+
+
+# ---- P3: todos los algoritmos -------------------------------------------------------
+def p3(d) -> dict:
+    f, r = d["fried"], d["ranks"]
+    cd = float(f["critical_difference"])
+    rangos = dict(zip(r["algorithm"], r["mean_rank"].astype(float)))
+    rh = rangos.get(H, float("nan"))
+    algs = list(rangos)
+    pares = [(a, b) for i, a in enumerate(algs) for b in algs[i + 1:]]
+    return {
+        "procede": truthy(f["posthoc_procede"]), "k": int(f["k_algorithms"]), "n": int(f["n_instances"]),
+        "cd": cd, "rangos": rangos, "rh": rh,
+        "puesto": 1 + sum(1 for v in rangos.values() if v < rh),
+        "mejor": r.iloc[0]["algorithm"], "mejor_rango": float(r.iloc[0]["mean_rank"]),
+        "distintos_de_h": [a for a in algs if a != H and abs(rangos[a] - rh) > cd],
+        "pares_sobre_cd": sum(1 for a, b in pares if abs(rangos[a] - rangos[b]) > cd), "pares": len(pares),
+    }
+
+
+def titulo_p3(d) -> str:
+    q = p3(d)
+    if q["procede"]:
+        return "Hay diferencias globales entre los {} algoritmos ({})".format(q["k"], ptxt(d["fried"]["iman_davenport_p"]))
+    return "Sin evidencia de diferencias globales entre los {} algoritmos ({})".format(q["k"], ptxt(d["fried"]["iman_davenport_p"]))
+
+
+def frase_friedman(d) -> str:
+    f = d["fried"]
+    return "χ² = {}, {}".format(num(f["friedman_chi2"], 2), ptxt(f["friedman_p"]))
+
+
+def frase_iman(d) -> str:
+    f = d["fried"]
+    return "F({}; {}) = {}, {}".format(int(f["iman_davenport_df1"]), int(f["iman_davenport_df2"]),
+                                       num(f["iman_davenport_f"], 2), ptxt(f["iman_davenport_p"]))
+
+
+def frase_decision_p3(d) -> str:
+    q = p3(d)
+    if q["procede"]:
+        return f"se rechaza H0: hay diferencias entre los {q['k']} algoritmos y procede el post-hoc."
+    return f"no se rechaza H0: sin evidencia de diferencias entre los {q['k']}; el post-hoc no procede."
+
+
+def frase_posthoc(d) -> str:
+    q = p3(d)
+    if not q["procede"]:
+        return "no procede; el diagrama queda como descripción de los rangos medios, no como contraste."
+    base = "{} de {} pares superan la diferencia crítica ({}); ".format(q["pares_sobre_cd"], q["pares"], num(q["cd"], 2))
+    if q["distintos_de_h"]:
+        return base + "PSO+GA se separa de " + enumerar([lab(a) for a in q["distintos_de_h"]]) + "."
+    return base + "ningún par con PSO+GA la supera."
+
+
+def frase_puesto(d) -> str:
+    q = p3(d)
+    texto = "rango medio {}, puesto {} de {}".format(num(q["rh"], 2), q["puesto"], q["k"])
+    if q["mejor"] != H:
+        texto += "; el mejor rango medio es de {} ({})".format(lab(q["mejor"]), num(q["mejor_rango"], 2))
+    return texto + "."
+
+
+# ---- Explorar y lectura -------------------------------------------------------------
+def normalidad(d) -> tuple[int, int]:
+    n = d["norm"]
+    evaluables = n[n["p_value"].notna()]
+    return int(evaluables["rechaza_normalidad"].map(truthy).sum()), int(len(evaluables))
+
+
+def titulo_normalidad(d) -> str:
+    rech, total = normalidad(d)
+    if rech:
+        return f"Shapiro–Wilk rechaza la normalidad en {rech} de {total} muestras"
+    return "Shapiro–Wilk no rechaza la normalidad en ninguna muestra"
+
+
+def frase_normalidad(d) -> str:
+    rech, total = normalidad(d)
+    if rech:
+        return (f"rechaza la normalidad en {rech} de las {total} muestras (instancia × algoritmo, α = {d['alfa']}): "
+                "se usan pruebas no paramétricas, basadas en rangos.")
+    return (f"no rechaza la normalidad en ninguna de las {total} muestras; con {d['replicas']} réplicas eso no la demuestra, "
+            "y se mantienen las pruebas de rangos fijadas a priori.")
+
+
+def mejores_medianas(d, algs) -> dict:
+    """Para cada algoritmo, instancias en las que tiene la menor brecha mediana del grupo."""
+    gana = {a: [] for a in algs}
+    for c in d["codes"]:
+        filas = {a: resumen(d, c, a) for a in algs}
+        validas = {a: float(r["median_gap_pct"]) for a, r in filas.items() if r is not None}
+        if validas:
+            gana[min(validas, key=validas.get)].append(c)
+    return gana
+
+
+def frase_mejores_medianas(d, algs) -> str:
+    gana = mejores_medianas(d, algs)
+    partes = ["{} en {}{}".format(lab(a), len(v), entre_parentesis(v, 3)) for a, v in gana.items() if v]
+    return "menor brecha mediana del grupo: " + "; ".join(partes) + "."
+
+
+def voz_mejores_medianas(d, algs) -> str:
+    gana = mejores_medianas(d, algs)
+    partes = ["{} en {}".format(lab(a), len(v)) for a, v in gana.items() if v]
+    return "la menor brecha mediana la tiene " + enumerar(partes) + ", contando instancias."
+
+
+def frase_brechas_finales(d, algs) -> str:
+    return "; ".join("{} {} %".format(lab(a), rango(brechas_medianas(d, a))) for a in algs)
+
+
+def lectura_convergencia(d) -> dict:
+    """Tramo en que el híbrido encabeza el rango medio, orden a mitad de presupuesto y punto de
+    estabilización (desde el cual ningún algoritmo se aparta más de un lugar de su puesto final)."""
+    rank = d["conv"].pivot(index="n_evaluations", columns="algorithm", values="mean_rank")
+    pos = d["conv"].pivot(index="n_evaluations", columns="algorithm", values="position")
+    gap = d["conv"].pivot(index="n_evaluations", columns="algorithm", values="mean_median_gap_pct")
+    puntos = list(rank.index)
+    final, mitad = puntos[-1], max(k for k in puntos if k <= d["solicitudes"] / 2)
+    lidera = [k for k in puntos if pos.loc[k, H] == 1]
+    desplazamiento = (pos - pos.loc[final]).abs().max(axis=1)
+    estable = next(k for k in puntos if (desplazamiento.loc[k:] <= 1).all())
+    reduccion = 100 * (gap.loc[mitad] - gap.loc[final]) / gap.loc[mitad]
+    return {"desde": lidera[0] if lidera else None, "hasta": lidera[-1] if lidera else None,
+            "mitad": mitad, "lider_mitad": [a for a in rank.columns if pos.loc[mitad, a] == 1],
+            "puesto_h_mitad": int(pos.loc[mitad, H]), "estable": estable, "reduccion": reduccion}
+
+
+def titulo_convergencia(d) -> str:
+    c = lectura_convergencia(d)
+    if c["hasta"] is not None:
+        return "PSO+GA converge primero y se estanca después de {} solicitudes".format(entero(c["hasta"]))
+    g = brechas_medianas(d, H)
+    if not g:
+        return "Convergencia a igual número de solicitudes"
+    return "PSO+GA termina entre {} y {} % sobre el óptimo".format(num(min(g), 2), num(max(g), 2))
+
+
+def lectura_duplicados(d) -> dict:
+    t = duplicados(d)
+    medias = t.mean().sort_values(ascending=False)
+    mas = medias.index[0]
+    comunes = t[[H, "pso"]].dropna() if {H, "pso"} <= set(t.columns) else pd.DataFrame()
+    return {"medias": medias, "mas": mas,
+            "h_mas_que_pso": int((comunes[H] > comunes["pso"]).sum()) if len(comunes) else 0,
+            "n": len(comunes)}
+
+
+def titulo_duplicados(d) -> str:
+    q = lectura_duplicados(d)
+    m = q["medias"]
+    if q["mas"] == H:
+        return "PSO+GA es el que más repite: {} % de sus solicitudes son duplicadas".format(num(m[H], 1))
+    return "{} repite {} % de sus solicitudes; PSO+GA, {} %".format(lab(q["mas"]), num(m[q["mas"]], 1), num(m.get(H, float("nan")), 1))
 
 
 # --------------------------------------------------------------------------- construcción
-def main() -> None:
-    global NOTAS_MODELO
-    d = cargar_datos()
-    codes = d["codes"]
-    meta, bf, cross, hyb = d["meta"], d["bf"], d["cross"], d["hyb"]
-    inst = d["inst"].set_index("instance")
-    etiqueta = {c: inst.loc[c, "label"] for c in codes}
-    replicas = int(meta["replicates_per_algorithm"])
-    presupuesto = int(meta["requests_per_run"])
-    n_alg = int(meta["algorithms"])
-    total_req = int(meta["total_requests"])
-    bf_total = int(meta["brute_force_designs_total"])
-    bf_horas = bf["elapsed_s"].sum() / 3600.0
-    H = "pso_ga"
-    hr = {c: fila_rank(d, c, H) for c in codes}
-    vs = {(c, b): contraste(d, c, H, b) for c in codes for b in ("random", "pso", "ga")}
-    gana = {b: [c for c in codes if vs[(c, b)] is not None and truthy(vs[(c, b)]["significativo_alpha_0.05"]) and vs[(c, b)]["a12"] > 0.5]
-            for b in ("random", "pso", "ga")}
-    mejor_med = {b: [c for c in codes if hr[c]["median"] < fila_rank(d, c, b)["median"]] for b in ("pso", "ga")}
-    mejores_corridas = {}
-    for c in codes:
-        sub = d["comp"][(d["comp"]["instance"] == c) & (d["comp"]["algorithm"] != "fuerza_bruta")].iloc[0]
-        mejores_corridas[c] = sub
-    corridas_psoga = [c for c in codes if mejores_corridas[c]["algorithm"] == H]
-    primero = cross.iloc[0]
-    rank_h = cross[cross["algorithm"] == H].iloc[0]
+def main(argv=None) -> None:
+    global NOTAS_MODELO, FIGS_PRES
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--resultados", type=Path, default=RESULTS, help="carpeta con los CSV del experimento")
+    parser.add_argument("--figuras", type=Path, default=FIGS_PRES, help="carpeta con las figuras pres_*.png")
+    parser.add_argument("--salida", type=Path, default=DESTINO, help="archivo .pptx de salida")
+    args = parser.parse_args(argv)
+    FIGS_PRES = args.figuras
+
+    d = cargar_datos(args.resultados)
+    codes, bf, inst = d["codes"], d["bf"], d["inst"]
+    etiqueta = {c: acentuar(inst.loc[c, "label"]) for c in codes}
+    alfa, eps = d["alfa"], d["eps"]
+    replicas, solicitudes = d["replicas"], d["solicitudes"]
+    bf_total = int(bf.loc[codes, "evaluated"].sum())
+    paso_w = num(bf.loc[codes, "wind_step_mw"].min(), 2)
+    cuota = bf.loc[codes, "feasible_share"].astype(float)
+    borde = int((bf.loc[codes, "optimum_agsr"].astype(float) >= 0.99 * inst.loc[codes, "agsr_max"].astype(float)).sum())
+    # Costo de la enumeración frente al de una corrida: respuesta a «¿para qué metaheurísticas?»
+    bf_seg = bf.loc[codes, "elapsed_s"].astype(float)
+    bf_min_lo, bf_min_hi = entero(bf_seg.min() / 60), entero(bf_seg.max() / 60)
+    seg_corrida = num(d["runs"]["elapsed_s"].median(), 1)
+    ref_bf = bf.loc[codes[0]]
+    dias_2d = entero(float(ref_bf["elapsed_s"]) * float(ref_bf["wind_values"]) / 86400)
+    veces_lo = entero(bf.loc[codes, "evaluated"].min() / solicitudes)
+    veces_hi = entero(bf.loc[codes, "evaluated"].max() / solicitudes)
 
     prs = Presentation(str(ORIGEN))
     orig = list(prs.slides)
     S = lambda n: orig[n - 1]
     NOTAS_MODELO = S(1).notes_slide
 
-    # ----------------------------------------------------------- duplicados (plantillas)
-    s_pregunta = duplicate_slide(prs, S(5))
-    s_pipe_exp = duplicate_slide(prs, S(23))
-    s_pipe_alg = duplicate_slide(prs, S(23))
-    s_pipe_detalle = duplicate_slide(prs, S(23))
-    s_padres = duplicate_slide(prs, S(23))
-    s_instancias = duplicate_slide(prs, S(26))
-    s_optimo = duplicate_slide(prs, S(15))
-    s_correcto = duplicate_slide(prs, S(5))
-    s_exito = duplicate_slide(prs, S(15))
-    s_aporte = duplicate_slide(prs, S(16))
-    s_presupuesto = duplicate_slide(prs, S(15))
-    s_futuro = duplicate_slide(prs, S(23))
-    s_calidad = {c: duplicate_slide(prs, S(26)) for c in codes}
-    s_matrices = duplicate_slide(prs, S(21))
-    s_otros = duplicate_slide(prs, S(16))
+    def blanca():
+        """Lámina con antetítulo, título y banda inferior, sin contenido (molde: la 23 del avance)."""
+        s = duplicate_slide(prs, S(23))
+        delete_shapes(s, ("Rounded Rectangle 5", "TextBox 6", "TextBox 7", "Rounded Rectangle 8", "TextBox 9", "TextBox 10"))
+        return s
 
-    # =========================================================== 1. PORTADA
+    def tabla():
+        """Lámina con una tabla a todo el ancho y una caja de texto al pie (molde: la 26 del avance)."""
+        return duplicate_slide(prs, S(26))
+
+    # ----------------------------------------------------------- duplicados (antes de editar los moldes)
+    s_padres = duplicate_slide(prs, S(23))
+    s_futuro = duplicate_slide(prs, S(23))
+    s_pipe_alg, s_pipe_detalle = blanca(), blanca()
+    s_protocolo, s_mapa = blanca(), blanca()
+    s_instancias = tabla()
+    s_justas = duplicate_slide(prs, S(5))
+    s_conv, s_brecha, s_a12, s_p3, s_lectura = blanca(), blanca(), blanca(), blanca(), blanca()
+    s_p1_tabla, s_p2 = tabla(), tabla()
+    s_calidad = {c: tabla() for c in codes}
+    s_resto, s_base = blanca(), blanca()
+    s_rangos = tabla()
+
+    # ======================================================================================
+    # PORTADA E ÍNDICE
+    # ======================================================================================
+    # ==== 1. PORTADA
     s = S(1)
     set_text(s, "TextBox 7", [["Defensa de Proyecto de ", "Título"]])
-    set_notes(s, "[0:30] Buenos días. Mi nombre es Luciano Oliva y presento la defensa de mi proyecto de título. La idea que "
-                 "defiendo cabe en una frase: una metaheurística híbrida, PSO con inyección genética, se puede validar de forma "
-                 "honesta sobre un problema de dimensionamiento con óptimo conocido, en cuatro instancias y con el mismo "
-                 "presupuesto que los métodos de los que parte. Voy a mostrar el método, el banco de pruebas y esa validación.")
+    set_notes(s, "[0:30] Buenos días. Mi nombre es Luciano Oliva y presento la defensa de mi proyecto de título. El trabajo "
+                 "es sobre metaheurísticas: tomo un problema de dimensionamiento de un sistema renovable con hidrógeno, lo uso "
+                 f"como banco de pruebas con óptimo conocido y comparo {N_ALG} algoritmos, entre ellos un híbrido, PSO con "
+                 "operadores genéticos, bajo un protocolo estadístico que se fijó antes de correr las cuatro instancias nuevas.")
 
-    # =========================================================== 2. ÍNDICE (4 secciones)
+    # ==== 2. ÍNDICE (5 secciones)
     s = S(2)
-    filas = [("TextBox 8", "TextBox 9", "El método: PSO+GA", "La pregunta, el pipeline experimental y el pipeline del híbrido; qué se conserva de PSO y de GA."),
-             ("TextBox 13", "TextBox 14", "Banco de pruebas", "El problema de dimensionamiento, por qué es difícil, cuatro instancias y su óptimo exacto."),
-             ("TextBox 18", "TextBox 19", "Validación", "Correctitud, calidad (convergencia, brecha, éxito) y aporte frente a RANDOM, GA y PSO."),
-             ("TextBox 23", "TextBox 24", "Conclusiones", "Qué se puede afirmar, límites y trabajo futuro.")]
+    filas = [("TextBox 8", "TextBox 9", "El problema", "Qué se optimiza, por qué es difícil y qué se propuso el trabajo."),
+             ("TextBox 13", "TextBox 14", "El método: PSO+GA", "Los padres, el híbrido paso a paso y sus competidores."),
+             ("TextBox 18", "TextBox 19", "Diseño experimental", "Protocolo de siete pasos, ocho instancias y pruebas elegidas a priori."),
+             ("TextBox 23", "TextBox 24", "Resultados", "Explorar y luego tres preguntas: por instancia, en general y entre los siete."),
+             ("TextBox 28", "TextBox 29", "Conclusiones", "Qué se puede afirmar, qué no, aporte y trabajo futuro.")]
     for a, b, t, sub in filas:
         set_text(s, a, t)
         set_text(s, b, sub)
-    delete_shapes(s, ("Rounded Rectangle 26", "Oval 27", "TextBox 28", "TextBox 29"))
-    set_notes(s, "[0:30] Cuatro partes. Primero el método: la pregunta y los dos pipelines, el experimental y el del algoritmo. "
-                 "Segundo, el banco de pruebas: el problema, sus instancias y el óptimo exacto. Tercero, la validación en tres "
-                 "bloques: que el híbrido es correcto, qué tan cerca del óptimo llega y si aporta algo frente a sus padres. "
-                 "Y cuarto, las conclusiones. Tengo respaldo con tablas completas y con los otros dos híbridos del documento.")
+    set_notes(s, "[0:30] Cinco partes. Primero el problema: qué se optimiza y por qué es difícil. Segundo, el método: el "
+                 "híbrido PSO+GA y contra quién compite. Tercero, el diseño experimental: cómo se compara de forma justa. "
+                 "Cuarto, los resultados, ordenados por tres preguntas: qué pasa en una instancia, qué pasa en general y si "
+                 "hay diferencias entre los siete algoritmos. Y quinto, las conclusiones. Al final tengo láminas de respaldo "
+                 "con las tablas completas.")
 
-    # =========================================================== 3. DIVISOR 01
-    s = S(3)
-    set_text(s, "TextBox 3", "SECCIÓN 1 DE 4")
-    set_text(s, "TextBox 5", "El método: PSO+GA")
-    set_text(s, "TextBox 7", "Qué pregunta se responde, cómo fluye el experimento y qué hace exactamente el híbrido en cada iteración.")
-    set_bullets(s, ["Pipeline experimental y pipeline del algoritmo", "Qué se conserva de PSO y de GA"],
-                [("Oval 10", "TextBox 11"), ("Oval 12", "TextBox 13")])
-    set_notes(s, "[0:10] Empiezo por el método.")
+    # ======================================================================================
+    # SECCIÓN 1 · EL PROBLEMA
+    # ======================================================================================
+    # ==== 3. DIVISOR 01 (ex 3)
+    divisor(S(3), 1, "El problema",
+            "Qué decisión se optimiza, con qué restricciones y por qué es un buen banco de pruebas para metaheurísticas.",
+            ["Contexto y pregunta de investigación", "Qué se optimiza: minimizar el LCOE", "Por qué es difícil", "Objetivos"],
+            "[0:10] Parto por el problema.")
 
-    # =========================================================== 4. LA PREGUNTA (plantilla 5)
-    s = s_pregunta
-    set_text(s, "TextBox 3", "EL MÉTODO · LA PREGUNTA")
-    set_text(s, "TextBox 4", "Una pregunta medible")
-    set_text(s, "TextBox 6", "1")
-    set_text(s, "TextBox 7", "híbrido: PSO+GA")
-    set_text(s, "TextBox 8", "El bucle de PSO intacto; al cierre de cada iteración, las 5 peores partículas se reemplazan por hijos de los operadores del GA.")
-    set_text(s, "TextBox 10", str(len(codes)))
-    set_text(s, "TextBox 11", "instancias resueltas")
-    set_text(s, "TextBox 12", "Variantes de un mismo problema de dimensionamiento, cada una con su óptimo exacto por fuerza bruta: la brecha se mide contra un valor conocido.")
-    set_text(s, "TextBox 14", "3")
-    set_text(s, "TextBox 15", "contrastes planificados")
-    set_text(s, "TextBox 16", "¿Aprende? (vs RANDOM). ¿Supera al donante de operadores? (vs GA). ¿Aporta la inyección? (vs PSO). Mismo presupuesto en todos.")
-    set_text(s, "TextBox 17", [["Pregunta: ", f"con {presupuesto} solicitudes por corrida, ¿PSO+GA llega al óptimo exacto con más fiabilidad que RANDOM y que los métodos de los que parte?"]])
-    set_notes(s, "[1:00] La pregunta en una frase. El objeto de validación es un híbrido: PSO con inyección genética. Se valida "
-                 "sobre cuatro instancias de un problema de dimensionamiento, cada una con su óptimo exacto obtenido por fuerza "
-                 "bruta, de modo que la brecha se mide contra un valor conocido. Y la validación son tres contrastes planificados "
-                 "por instancia: contra la búsqueda aleatoria, para saber si aprende; contra el GA, que dona los operadores; y "
-                 "contra el PSO, que es el bucle base, para saber si la inyección aporta algo. Todo con el mismo presupuesto.")
+    # ==== 4. CONTEXTO Y PREGUNTA DE INVESTIGACIÓN (ex 4)
+    s = S(4)
+    titulo(s, "EL PROBLEMA · CONTEXTO", "Del hidrógeno verde a una pregunta de búsqueda")
+    set_text(s, "TextBox 6", "Hidrógeno verde con recurso variable")
+    set_text(s, "TextBox 7", "Viento y sol alimentan un electrolizador; como no coinciden en el tiempo, una batería suaviza la entrega.")
+    set_text(s, "TextBox 9", "Dimensionar es optimizar")
+    set_text(s, "TextBox 10", "Cuánta capacidad eólica, fotovoltaica, de electrólisis y de batería instalar define el costo de la energía.")
+    set_text(s, "TextBox 12", "El desafío es de búsqueda")
+    set_text(s, "TextBox 13", "Cada diseño se evalúa simulando un año completo: sin fórmula ni gradiente, es terreno de metaheurísticas.")
+    set_text(s, "TextBox 15", "Pregunta de investigación")
+    set_text(s, "TextBox 16", "¿Aporta algo hibridar PSO y GA?")
+    set_text(s, "TextBox 17", [f"Con el mismo presupuesto, pequeño, de {PRESUPUESTO} evaluaciones por corrida, ¿un híbrido PSO+GA llega al óptimo exacto con más fiabilidad que PSO, que GA y que la búsqueda aleatoria?",
+                               f"Banco de pruebas: el sistema WPEB de Li et al. (2024), en {N_INST} instancias.",
+                               "Foco: las metaheurísticas y cómo se comparan, no la ingeniería eléctrica."])
+    set_notes(s, "[1:10] El contexto, breve. El hidrógeno verde se produce con electricidad renovable; como el viento y el sol "
+                 "no coinciden en el tiempo, se combinan con una batería. Dimensionar ese sistema es decidir cuánta capacidad "
+                 "instalar de cada componente, y esa decisión define el costo de la energía. Lo que me interesa como "
+                 "informático es que eso es un problema de optimización difícil: cada diseño se evalúa simulando un año "
+                 "completo, no hay fórmula ni gradiente, y por eso se resuelve con metaheurísticas. Uso como banco de pruebas "
+                 "el sistema publicado por Li y colaboradores en 2024. Y la pregunta de investigación es de método: con un "
+                 f"presupuesto idéntico y pequeño de {PRESUPUESTO} evaluaciones por corrida, ¿un híbrido de PSO y GA alcanza el "
+                 "óptimo exacto con más fiabilidad que los dos métodos de los que parte y que una búsqueda aleatoria? El foco "
+                 "de la defensa está en las metaheurísticas y en cómo se comparan, no en el detalle eléctrico.")
 
-    # =========================================================== 5. PIPELINE EXPERIMENTAL (plantilla 23 vacía)
-    s = s_pipe_exp
-    set_text(s, "TextBox 3", "EL MÉTODO · PIPELINE EXPERIMENTAL")
-    set_text(s, "TextBox 4", "De los datos a la evidencia: el pipeline experimental")
-    delete_shapes(s, ("Rounded Rectangle 5", "TextBox 6", "TextBox 7", "Rounded Rectangle 8", "TextBox 9", "TextBox 10"))
-    dibujar_pipeline_experimental(s, d)
-    set_notes(s, "[1:30] Este es el flujo completo. Los datos meteorológicos horarios de un año alimentan un simulador que reconstruye "
-                 "el sistema de Li y colaboradores y que validé contra sus indicadores. Sobre ese simulador se define una instancia "
-                 "con sus parámetros; el optimizador recibe seiscientas solicitudes por corrida; se hacen treinta corridas por "
-                 "algoritmo e instancia; y la estadística compara medianas, brechas y tasas de éxito con contrastes planificados. "
-                 "La pieza nueva es la de abajo: el mismo simulador, vectorizado, enumera todos los diseños de cada instancia y "
-                 f"entrega el óptimo exacto, {entero(bf_total)} diseños en unas {num(bf_horas, 0)} horas. Ese óptimo entra en la "
-                 "estadística como referencia de todas las brechas.")
+    # ==== 5. QUÉ SE OPTIMIZA (ex 9)
+    s = S(9)
+    titulo(s, "EL PROBLEMA · FORMULACIÓN", "Cuatro decisiones para minimizar el LCOE")
+    set_text(s, "TextBox 7", "W (continua)")
+    set_text(s, "TextBox 10", "P = Ctot − W")
+    set_text(s, "TextBox 15", "nE módulos → H₂")
+    set_text(s, "TextBox 18", "BP y duración k")
+    set_text(s, "TextBox 21", "venta ≤ AGSRmáx")
+    set_text(s, "TextBox 27", [["Caja negra: ", "el LCOE y la venta a red salen de simular 8.760 h; no hay fórmula ni gradiente."],
+                               ["Comparación de diseños: ", "primero factibilidad, luego menor LCOE (reglas de Deb)."]])
+    set_text(s, "TextBox 31", [["x = (W, nE, BP, k)", "  → una continua y tres discretas"]])
+    set_text(s, "TextBox 32", "Restricciones")
+    set_text(s, "TextBox 33", [["C", "1 ", "Capacidad renovable total fija: W + P = Ctot"],
+                               ["C", "2 ", "Catálogos: nE entero, BP en pasos fijos, k de una lista"],
+                               ["C", "3 ", "Operación válida en cada hora del año"],
+                               ["C", "4 ", "Venta anual a la red ≤ AGSRmáx (se conoce al terminar la simulación)"]])
+    set_notes(s, "[1:20] Esto es lo que se optimiza. Una planta con una capacidad renovable total fija, que se reparte entre "
+                 "eólica y fotovoltaica. La electricidad alimenta un electrolizador que produce hidrógeno, una batería guarda "
+                 "excedentes y lo que sobra se vende a la red, con un tope anual. Para la optimización importan cuatro "
+                 "decisiones: cuánta capacidad eólica, que es una variable continua; cuántos módulos de electrolizador, que es "
+                 "un entero; y la potencia y la duración de la batería, que se eligen de un catálogo. Una variable continua y "
+                 "tres discretas. El objetivo es minimizar el costo nivelado de la energía, el LCOE. Las restricciones: la "
+                 "capacidad total fija, los catálogos, que la operación sea válida en cada hora, y que la venta anual a la red "
+                 "no supere un límite. Lo importante para lo que sigue: ni el LCOE ni la venta a red tienen fórmula; salen de "
+                 "simular el año completo. Para el optimizador es una caja negra, y dos diseños se comparan con las reglas de "
+                 "Deb: primero factibilidad, después costo.")
 
-    # =========================================================== 6. PIPELINE DEL ALGORITMO
-    s = s_pipe_alg
-    set_text(s, "TextBox 3", "EL MÉTODO · PIPELINE DEL ALGORITMO")
-    set_text(s, "TextBox 4", "Qué hace PSO+GA en cada iteración")
-    delete_shapes(s, ("Rounded Rectangle 5", "TextBox 6", "TextBox 7", "Rounded Rectangle 8", "TextBox 9", "TextBox 10"))
-    dibujar_pipeline_psoga(s, d)
-    set_notes(s, "[2:00] Y este es el algoritmo. La fila de arriba es el PSO sin cambios: se inicializan veinte partículas, se evalúa "
-                 "cada una decodificando el vector y simulando el año completo, lo que cuenta una solicitud; se actualizan la memoria "
-                 "personal y la global; y se mueven con la constricción de Clerc y Kennedy. La fila de abajo es lo que añade el "
-                 "híbrido, la inyección genética: se toman las cinco partículas de peor mérito en esa iteración, se eligen padres por "
-                 "torneo sobre las mejores posiciones personales del enjambre, se cruzan con BLX-alfa, se mutan con la gaussiana del GA "
-                 "y los hijos reemplazan a esas cinco partículas con velocidad cero y sin memoria. Se repite hasta completar exactamente "
-                 "seiscientas solicitudes, las mismas que el PSO puro, y la salida es el mejor diseño. Dos cosas importantes: el "
-                 "contrato de presupuesto impide pedir la solicitud seiscientos uno, y ni el PSO ni los operadores del GA se tocan: así "
-                 "cualquier diferencia se atribuye a la inyección.")
+    # ==== 6. POR QUÉ ES DIFÍCIL (ex 5)
+    s = S(5)
+    c_min, c_max = cuota.idxmin(), cuota.idxmax()
+    titulo(s, "EL PROBLEMA · DIFICULTAD", "Por qué es difícil: tres obstáculos")
+    set_text(s, "TextBox 6", "8.760 h")
+    set_text(s, "TextBox 7", "Evaluación costosa")
+    set_text(s, "TextBox 8", "Cada diseño exige simular el año hora a hora, porque la batería acopla una hora con la siguiente. Sin gradiente: el presupuesto se cuenta en simulaciones.")
+    set_text(s, "TextBox 10", pct(cuota.min(), 1))
+    set_text(s, "TextBox 11", "Factibilidad estrecha")
+    set_text(s, "TextBox 12", f"de los diseños enumerados cumple el límite de venta a red en {c_min}; en la más holgada ({c_max}) llega a {pct(cuota.max(), 1)}. "
+                              f"En {borde} de {len(codes)} instancias el óptimo usa más del 99 % de ese límite.")
+    set_text(s, "TextBox 14", "1 + 3")
+    set_text(s, "TextBox 15", "Dominio mixto")
+    set_text(s, "TextBox 16", "Una variable continua y tres de catálogo: propuestas distintas se decodifican al mismo diseño y gastan evaluaciones repetidas.")
+    set_text(s, "TextBox 17", [["Consecuencia: ", "pocas evaluaciones, sin gradiente y un óptimo pegado a una restricción; explorar y explotar compiten por el presupuesto."]])
+    set_notes(s, "[1:00] ¿Por qué es difícil? Tres obstáculos. Uno: evaluar es caro. Cada diseño exige simular las 8.760 horas "
+                 "del año, así que el presupuesto se cuenta en simulaciones. Dos: la región factible es estrecha. La fuerza "
+                 f"bruta muestra que en la instancia más restrictiva, {c_min}, solo {pct(cuota.min(), 1)} de los diseños cumple "
+                 f"el límite de venta a la red, y en la más holgada, {c_max}, {pct(cuota.max(), 1)}; además, en {borde} de las "
+                 f"{len(codes)} instancias el óptimo queda pegado a ese límite. Tres: el dominio es mixto, una variable continua "
+                 "y tres de catálogo, y propuestas distintas se decodifican al mismo diseño, lo que gasta evaluaciones "
+                 "repetidas. La consecuencia es que un optimizador tiene pocas evaluaciones para explorar una región estrecha "
+                 "y afinar sobre un borde: explorar y explotar compiten por el presupuesto, que es justo lo que un híbrido "
+                 "pretende equilibrar.")
 
-    # =========================================================== 6b. CUÁNDO ACTÚA PSO Y CUÁNDO GA (plantilla 23 vacía)
-    s = s_pipe_detalle
-    set_text(s, "TextBox 3", "EL MÉTODO · UNA ITERACIÓN EN DETALLE")
-    set_text(s, "TextBox 4", "Cuándo actúa PSO y cuándo actúa GA")
-    delete_shapes(s, ("Rounded Rectangle 5", "TextBox 6", "TextBox 7", "Rounded Rectangle 8", "TextBox 9", "TextBox 10"))
-    dibujar_detalle_psoga(s, d)
-    _pop, _it, _k = int(meta["population"]), int(meta["iterations"]), hijos_por_iteracion(d)
-    set_notes(s, "[1:00] Esta lámina responde cuándo actúa cada uno. Dentro de una iteración, primero PSO: se evalúan las "
-                 f"{_pop} partículas, que son las {_pop} solicitudes de la iteración; se actualizan las memorias; y las {_pop} se "
-                 f"mueven con la velocidad. Sólo entonces actúa GA, y sobre {_k} partículas: las de peor mérito en esa iteración. "
-                 "Los hijos no gastan solicitudes al crearse; se evalúan al inicio de la iteración siguiente, dentro de las veinte. "
-                 f"En toda la corrida, de las {_pop * _it} solicitudes, {_pop} son la población inicial, {(_it - 1) * (_pop - _k)} son "
-                 f"posiciones movidas por el PSO y {(_it - 1) * _k} son hijos del GA: tres de cada cuatro evaluaciones siguen siendo "
-                 "del enjambre. Por eso el híbrido se parece tanto al PSO en el resultado típico, y por eso su diferencia frente al "
-                 "PSO puro es una pregunta de efecto pequeño.")
+    # ==== 7. OBJETIVOS (ex 7)
+    s = S(7)
+    titulo(s, "EL PROBLEMA · OBJETIVOS", "Objetivo general y objetivos específicos")
+    set_text(s, "TextBox 6", "Desarrollar y validar un marco metodológico para implementar y comparar metaheurísticas, clásicas e híbridas, en el dimensionamiento óptimo de sistemas renovables con hidrógeno verde, sustentando las conclusiones en evidencia experimental replicada y auditable.")
+    set_text(s, "TextBox 7", "El problema")
+    set_text(s, "TextBox 8", ["1. Analizar el modelo: variables, objetivo y restricciones",
+                              "2. Implementar y verificar el simulador",
+                              "3. Evaluar críticamente sus supuestos",
+                              "4. Formular instancias con su óptimo exacto"])
+    set_text(s, "TextBox 9", "El método y la comparación")
+    set_text(s, "TextBox 10", ["5. Implementar y comparar metaheurísticas clásicas y un híbrido PSO+GA, con presupuesto idéntico y frente a una línea base no informada"])
+    set_text(s, "TextBox 11", "La evidencia")
+    set_text(s, "TextBox 12", ["6. Caracterizar el desempeño con estadística descriptiva, contrastes planificados y tamaños de efecto",
+                               "7. Determinar la sensibilidad a restricciones y supuestos de datos"])
+    set_notes(s, "[0:50] El objetivo general es desarrollar y validar un marco metodológico para implementar y comparar "
+                 "metaheurísticas, clásicas e híbridas, en este problema, con conclusiones sustentadas en evidencia replicada "
+                 "y auditable. Los siete objetivos específicos se ordenan en tres grupos. Los cuatro primeros construyen el "
+                 "problema: analizar el modelo, implementar y verificar el simulador, evaluar sus supuestos y formular las "
+                 "instancias con su óptimo exacto. El quinto es el método y la comparación: las metaheurísticas clásicas y el "
+                 "híbrido PSO+GA, con presupuesto idéntico y frente a una línea base. Y los dos últimos son la evidencia: "
+                 "caracterizar el desempeño con estadística y medir la sensibilidad de las conclusiones. La presentación "
+                 "sigue ese mismo orden.")
 
-    # =========================================================== 7. LOS PADRES (plantilla 23)
+    # ======================================================================================
+    # SECCIÓN 2 · EL MÉTODO
+    # ======================================================================================
+    # ==== 8. DIVISOR 02 (ex 6)
+    divisor(S(6), 2, "El método: PSO+GA",
+            "Un PSO que, al cierre de cada iteración, reemplaza a sus peores partículas por hijos de los operadores del GA.",
+            ["Los padres: PSO y GA", "El híbrido en cada iteración", "Cuándo actúa cada uno", "Competidores y contrato común"],
+            "[0:10] Con el problema planteado, paso al método.")
+
+    # ==== 9. LOS PADRES PSO Y GA (molde 23)
     s = s_padres
-    set_text(s, "TextBox 3", "EL MÉTODO · LOS PADRES")
-    set_text(s, "TextBox 4", "Qué se conserva de PSO y qué se toma de GA")
+    titulo(s, "EL MÉTODO · LOS PADRES", "Qué se conserva de PSO y qué se toma de GA")
     set_text(s, "TextBox 6", "PSO: el bucle que se conserva")
-    set_text(s, "TextBox 7", ["Enjambre de 20 partículas con memoria personal (pbest) y social (gbest)",
+    set_text(s, "TextBox 7", [f"Enjambre de {POB} partículas con memoria personal (pbest) y social (gbest)",
                               "Constricción de Clerc y Kennedy: χ = 0,729, c1 = c2 = 1,49445",
                               "Velocidad acotada al 20 % del rango de cada variable",
-                              "30 iteraciones × 20 = 600 solicitudes; sin ningún cambio en el híbrido"])
+                              f"{ITER} iteraciones × {POB} = {PRESUPUESTO} solicitudes; sin ningún cambio en el híbrido"])
     set_text(s, "TextBox 9", "GA: los operadores que se inyectan")
     set_text(s, "TextBox 10", ["Selección por torneo de tamaño 3",
                                "Cruce BLX-α con α = 0,5 y probabilidad 0,9",
                                "Mutación gaussiana por gen: p = 0,1, σ = 10 % del rango",
-                               "Los mismos valores que usa el GA puro del banco: nada se reajusta para el híbrido"])
-    set_notes(s, "[1:00] Para que la comparación híbrido contra padre sea honesta, los padres no se tocan. Del PSO se conserva todo: "
-                 "el enjambre, las memorias, la constricción y la velocidad acotada. Del GA se toman sus tres operadores, torneo, "
-                 "cruce BLX-alfa y mutación gaussiana, con exactamente los mismos hiperparámetros que usa el GA puro en el banco. "
-                 "Nada se reajusta para el híbrido; los valores son los canónicos de la literatura y se fijaron antes de ver resultados.")
+                               "Los mismos valores que usa el GA puro: nada se reajusta para el híbrido"])
+    set_notes(s, "[1:00] El híbrido tiene dos padres, y ninguno se modifica. Del PSO se conserva el bucle completo: un enjambre "
+                 f"de {POB} partículas, cada una con su mejor posición personal y la mejor del enjambre, la constricción de Clerc "
+                 "y Kennedy y la velocidad acotada. Del GA se toman sus tres operadores, selección por torneo, cruce BLX-alfa "
+                 "y mutación gaussiana, con exactamente los mismos valores que usa el GA puro que compite en el experimento. "
+                 "Nada se reajusta para el híbrido; los valores son los canónicos de la literatura y se fijaron antes de ver "
+                 "resultados. Esto importa para leer las dos comparaciones, que no preguntan lo mismo. Frente a PSO, la única "
+                 "diferencia es el componente inyectado, así que ese contraste funciona como una ablación en bloque. Frente a "
+                 "GA, el híbrido usa los mismos operadores con los mismos valores, pero dentro de otra dinámica de búsqueda: ese "
+                 "contraste dice si los operadores rinden más dentro del enjambre, no el efecto de una pieza aislada. Y en "
+                 "ninguno de los dos casos la diferencia puede venir de un reajuste de parámetros.")
 
-    # =========================================================== 8. REGLAS DEL CONTRATO (ex 12)
+    # ==== 10. PIPELINE DE PSO+GA (lámina en blanco + formas)
+    s = s_pipe_alg
+    titulo(s, "EL MÉTODO · EL HÍBRIDO", "Qué hace PSO+GA en cada iteración")
+    dibujar_pipeline_psoga(s)
+    set_notes(s, f"[1:30] Este es el algoritmo. La fila de arriba es el PSO sin cambios: se inicializan {POB} partículas; se "
+                 "evalúa cada una decodificando el vector y simulando el año completo, lo que cuenta una solicitud; se "
+                 "actualizan la memoria personal y la global; y las partículas se mueven. La fila de abajo es lo que añade el "
+                 f"híbrido, la inyección genética: se toman las {HIJOS} partículas de peor mérito en esa iteración, se eligen "
+                 "padres por torneo sobre las mejores posiciones personales del enjambre, se cruzan con BLX-alfa, se mutan con "
+                 f"la gaussiana del GA, y los hijos reemplazan a esas {HIJOS} partículas con velocidad cero y sin memoria. El "
+                 f"ciclo se repite hasta completar exactamente {PRESUPUESTO} solicitudes, las mismas que el PSO puro, y la "
+                 f"salida es el mejor diseño encontrado. Dos garantías: un contrato de presupuesto impide pedir la solicitud "
+                 f"{PRESUPUESTO + 1}, y ni el PSO ni los operadores del GA se tocan.")
+
+    # ==== 11. UNA ITERACIÓN EN DETALLE (lámina en blanco + formas)
+    s = s_pipe_detalle
+    titulo(s, "EL MÉTODO · UNA ITERACIÓN EN DETALLE", "Cuándo actúa PSO y cuándo actúa GA")
+    dibujar_detalle_psoga(s)
+    set_notes(s, "[1:10] Esta lámina responde cuándo actúa cada uno. Dentro de una iteración, primero PSO: se evalúan las "
+                 f"{POB} partículas, que son las {POB} solicitudes de la iteración; se actualizan las memorias; y las {POB} se "
+                 f"mueven con la velocidad. Solo entonces actúa GA, y sobre {HIJOS} partículas: las de peor mérito en esa "
+                 "iteración. Los hijos no gastan solicitudes al crearse; se evalúan al inicio de la iteración siguiente, "
+                 f"dentro de las {POB}. En toda la corrida, de las {PRESUPUESTO} solicitudes, {POB} son la población inicial, "
+                 f"{(ITER - 1) * (POB - HIJOS)} son posiciones movidas por el PSO y {(ITER - 1) * HIJOS} son hijos del GA. "
+                 "Es decir, tres de cada cuatro evaluaciones siguen siendo del enjambre: conviene tener esa proporción "
+                 "presente al leer los resultados.")
+
+    # ==== 12. COMPETIDORES Y CONTRATO COMÚN (ex 12)
     s = S(12)
-    set_text(s, "TextBox 3", "EL MÉTODO · REGLAS")
-    set_text(s, "TextBox 4", "Un contrato idéntico para todos los competidores")
-    set_text(s, "TextBox 5", "1"); set_text(s, "TextBox 6", "híbrido validado: PSO+GA")
-    set_text(s, "TextBox 7", str(len(codes))); set_text(s, "TextBox 8", "instancias con óptimo exacto")
-    set_text(s, "TextBox 9", str(replicas)); set_text(s, "TextBox 10", "réplicas por algoritmo e instancia")
-    set_text(s, "TextBox 11", str(presupuesto)); set_text(s, "TextBox 12", "solicitudes por corrida")
-    set_text(s, "TextBox 13", str(n_alg)); set_text(s, "TextBox 14", "algoritmos en el banco (6 clásicos, 3 híbridos)")
-    set_text(s, "TextBox 15", "Reglas del protocolo")
-    reglas = [(str(presupuesto), "solicitudes; los duplicados cuentan"),
-              ("42–71", "semillas propias por algoritmo y réplica"),
-              ("Deb", "reglas de factibilidad, sin penalización"),
-              ("A priori", "parámetros canónicos, sin reajuste"),
-              ("0,01 MW", "referencia: óptimo exacto por instancia"),
-              ("Holm", "familia planificada; A12 con bootstrap")]
-    nombres = ["TextBox 17", "TextBox 20", "TextBox 23", "TextBox 26", "TextBox 29", "TextBox 32"]
-    descs = ["TextBox 18", "TextBox 21", "TextBox 24", "TextBox 27", "TextBox 30", "TextBox 33"]
-    for (n, t), nn, dd in zip(reglas, nombres, descs):
-        set_text(s, nn, n)
-        set_text(s, dd, t)
-    set_text(s, "TextBox 35", "Contra quién se compara PSO+GA")
-    set_text(s, "TextBox 36", [["RANDOM: ", "muestreo uniforme, sin aprendizaje. ¿Aprende el híbrido?"],
-                               ["GA: ", "el donante de los operadores. ¿Supera al método del que toma el cruce y la mutación?"],
-                               ["PSO: ", "el bucle base. ¿Aporta la inyección genética, o da lo mismo?"],
-                               ["Contexto: ", "GWO, SHO y WOA, los mejores clásicos del banco, y GA+LS y SHO+LS en el documento."]])
-    set_notes(s, "[1:00] Las reglas del contrato. Seiscientas solicitudes por corrida, contando los diseños repetidos; un flujo "
-                 "aleatorio propio por algoritmo y réplica; factibilidad por reglas de Deb; parámetros canónicos fijados a priori; "
-                 "el óptimo exacto como referencia; y una familia planificada de contrastes con corrección de Holm. PSO+GA se compara "
-                 "contra tres referencias: RANDOM, para saber si aprende; GA, el donante de operadores; y PSO, el bucle base. Los "
-                 "demás clásicos aparecen como contexto, y los otros dos híbridos del documento quedan en respaldo.")
+    titulo(s, "EL MÉTODO · COMPETIDORES", "Siete competidores bajo un mismo contrato")
+    for caja, valor, leyenda in (("TextBox 5", str(N_ALG), "algoritmos en competencia"),
+                                 ("TextBox 7", str(len(CLASICAS)), "metaheurísticas clásicas"),
+                                 ("TextBox 9", "1", "híbrido: PSO+GA"),
+                                 ("TextBox 11", "1", "línea base aleatoria"),
+                                 ("TextBox 13", str(PRESUPUESTO), "solicitudes por corrida")):
+        set_text(s, caja, valor)
+        set_text(s, "TextBox " + str(int(caja.split()[1]) + 1), leyenda)
+    set_text(s, "TextBox 15", "Los siete competidores")
+    competidores = [("gwo", "Tres líderes guían la manada"), ("pso", "Memoria personal y social"),
+                    ("ga", "Torneo, cruce BLX-α y mutación"), ("sho", "Agrupación dinámica de hienas"),
+                    ("woa", "Cerco, exploración y espiral"), ("pso_ga", "PSO con inyección genética (híbrido)"),
+                    ("random", "Línea base sin aprendizaje")]
+    filas12 = [("Oval 16", "TextBox 17", "TextBox 18"), ("Oval 19", "TextBox 20", "TextBox 21"),
+               ("Oval 22", "TextBox 23", "TextBox 24"), ("Oval 25", "TextBox 26", "TextBox 27"),
+               ("Oval 28", "TextBox 29", "TextBox 30"), ("Oval 31", "TextBox 32", "TextBox 33")]
+    filas12.append(tuple(clonar(s, nombre, nuevo=nombre + " bis").name for nombre in filas12[-1]))
+    for k, ((oval, caja_nombre, caja_desc), (alg, desc)) in enumerate(zip(filas12, competidores)):
+        y = 2.6 + 0.29 * k
+        punto = shape_by_name(s, oval)
+        punto.top = Inches(y + 0.04)
+        punto.fill.solid()
+        punto.fill.fore_color.rgb = RGBColor.from_string(COLOR_ALG[alg])
+        for nombre, texto in ((caja_nombre, lab(alg)), (caja_desc, desc)):
+            caja = shape_by_name(s, nombre)
+            caja.top = Inches(y)
+            set_paragraphs(caja, [texto])
+    set_text(s, "TextBox 35", "El mismo contrato para todos")
+    set_text(s, "TextBox 36", ["El mismo simulador y la misma función objetivo",
+                               "La misma codificación del dominio mixto",
+                               f"{PRESUPUESTO} solicitudes por corrida; los duplicados cuentan",
+                               "Factibilidad por reglas de Deb, sin penalizaciones",
+                               "Hiperparámetros canónicos, fijados a priori"])
+    set_notes(s, f"[1:10] El híbrido compite contra seis algoritmos. Cinco metaheurísticas clásicas: GWO, PSO, GA, SHO y WOA; "
+                 "dos de ellas, PSO y GA, son sus padres. Y una búsqueda aleatoria, RANDOM, que es la línea base: sin ella no "
+                 "se puede saber si un algoritmo aprende o solo muestrea. Los colores de esta lista son los mismos de todos "
+                 "los gráficos que siguen. Los siete trabajan bajo el mismo contrato: el mismo simulador y la misma función "
+                 f"objetivo, la misma codificación del dominio mixto, {PRESUPUESTO} solicitudes por corrida contando los "
+                 "diseños repetidos, la factibilidad tratada con las reglas de Deb y los hiperparámetros canónicos de cada "
+                 "método, fijados antes de ver resultados. Lo único que cambia entre competidores es el operador de búsqueda. "
+                 "[Si preguntan por qué GWO, WOA y SHO, si se los ha criticado como metáforas sin novedad:] Es una crítica "
+                 "conocida: Sörensen en 2015 y, en 2023, Camacho-Villalón, Dorigo y Stützle, que muestran que GWO y WOA "
+                 "reutilizan ideas de PSO. Por eso no los incluyo por su metáfora ni por su novedad, sino por sus mecanismos, "
+                 "y los describo por sus ecuaciones. De hecho, los tres comparten la misma regla de cerco y difieren en la "
+                 "guía y en el calendario de contracción. Y los evalúo con el mismo presupuesto, la misma línea base y el "
+                 "óptimo exacto, que es lo que piden las guías metodológicas del área.")
 
-    # =========================================================== 9. DIVISOR 02 (ex 6)
-    s = S(6)
-    set_text(s, "TextBox 3", "SECCIÓN 2 DE 4")
-    set_text(s, "TextBox 5", "Banco de pruebas")
-    set_text(s, "TextBox 7", "El problema de dimensionamiento sobre el que se valida el híbrido: qué se minimiza, por qué es difícil y qué instancias se resuelven.")
-    set_bullets(s, ["Problema, cuatro instancias y óptimo exacto"], [("Oval 10", "TextBox 11")])
-    set_notes(s, "[0:10] El banco de pruebas: el problema sobre el que se valida el método.")
+    # ======================================================================================
+    # SECCIÓN 3 · DISEÑO EXPERIMENTAL
+    # ======================================================================================
+    # ==== 13. DIVISOR 03 (ex 8)
+    divisor(S(8), 3, "Diseño experimental",
+            "Cómo se compara de forma justa: un protocolo de siete pasos con las decisiones estadísticas fijadas antes de correr las instancias nuevas.",
+            ["Protocolo en siete pasos", "Ocho instancias con óptimo exacto", "Condiciones justas", "Hipótesis y mapa de decisión"],
+            "[0:10] Ahora, cómo se compara.")
 
-    # =========================================================== 10. EL PROBLEMA EN UNA LÁMINA (ex 9)
-    s = S(9)
-    set_text(s, "TextBox 3", "BANCO DE PRUEBAS · EL PROBLEMA")
-    set_text(s, "TextBox 4", "Minimizar el LCOE de un sistema WPEB: una lámina")
-    set_text(s, "TextBox 10", "P = Ctot − W")
-    set_text(s, "TextBox 15", "E = u·nE MW → H₂")
-    set_text(s, "TextBox 18", "BP, hB de catálogo")
-    set_text(s, "TextBox 21", "AGSR ≤ AGSRmax")
-    set_text(s, "TextBox 27", [["Caja negra: ", "LCOE y AGSR son salidas de un simulador de 8.760 h; C5 sólo se verifica al terminar el año."],
-                               ["Decodificación: ", "nE entero, BP múltiplo de ΔB, k índice de duración; B = 0 anula la duración."]])
-    set_text(s, "TextBox 31", [["x = (W, nE, BP, k)", "  → una continua y tres discretas"]])
-    set_text(s, "TextBox 33", [["C", "1 ", "Balance de potencia en cada hora"],
-                               ["C", "2 ", "W + P = Ctot"],
-                               ["C", "3 ", "0 < E ≤ 0,5·Ctot"],
-                               ["C", "4 ", "SOC, potencia de batería y carga mínima del electrolizador"],
-                               ["C", "5 ", "Venta anual a red ≤ AGSRmax (verificable a posteriori)"]])
-    set_notes(s, "[1:30] El problema en una lámina. Una planta con capacidad renovable total fija, repartida entre eólica, W, continua, "
-                 "y fotovoltaica, el complemento. La electricidad alimenta un electrolizador comprado en módulos y una batería elegida "
-                 "de un catálogo de potencias y duraciones. El vector de decisión tiene cuatro coordenadas, una continua y tres "
-                 "discretas. Se minimiza el costo nivelado de la energía con cinco grupos de restricciones; la que manda es la fracción "
-                 "anual vendida a la red. Y lo esencial para la metaheurística: el LCOE y esa fracción no tienen fórmula, salen de "
-                 "simular el año hora a hora. Es una caja negra, y la restricción cinco sólo se conoce al final.")
+    # ==== 14. PROTOCOLO EN 7 PASOS (lámina en blanco + formas)
+    s = s_protocolo
+    titulo(s, "DISEÑO EXPERIMENTAL · PROTOCOLO", "Siete pasos para separar el algoritmo del azar")
+    dibujar_protocolo(s, d)
+    set_notes(s, "[1:10] La comparación sigue un protocolo de siete pasos, el de la guía de comparación estadística de "
+                 "algoritmos estocásticos de mi profesor guía. Uno, diseñar: instancias, réplicas, semillas y el mismo "
+                 f"presupuesto; aquí son {N_INST} instancias, {R_DISENO} réplicas y {PRESUPUESTO} solicitudes. Dos, preguntar: las "
+                 f"hipótesis y el nivel de significación se fijaron antes de correr las instancias nuevas, I5 a I8; contrastes bilaterales, alfa {alfa} "
+                 f"y una tolerancia de {eps} del óptimo. Tres, explorar con descriptivos y gráficos. Cuatro, elegir la prueba "
+                 "según cuántos algoritmos y cuántas instancias se comparan y si las muestras son pareadas. Cinco, cuantificar "
+                 "con un tamaño de efecto y su intervalo. Seis, corregir por comparaciones múltiples con Holm. Y siete, "
+                 "reportar todo, también lo no significativo. Las familias de contrastes también se planificaron: el híbrido "
+                 "frente a cada rival, con sus padres y RANDOM como contrastes confirmatorios.")
 
-    # =========================================================== 11. POR QUÉ ES DIFÍCIL (ex 5)
-    s = S(5)
-    fa, fb = bf.loc[codes[0], "feasible_share"], bf.loc[codes[1], "feasible_share"]
-    set_text(s, "TextBox 3", "BANCO DE PRUEBAS · DIFICULTAD")
-    set_text(s, "TextBox 4", "Por qué es un buen banco de pruebas")
-    set_text(s, "TextBox 8", "Cada diseño exige simular el año hora a hora: el estado de carga de la batería acopla las horas. Sin derivadas; el presupuesto se cuenta en solicitudes de simulación.")
-    set_text(s, "TextBox 10", pct(fa, 1))
-    set_text(s, "TextBox 11", "Región factible estrecha")
-    set_text(s, "TextBox 12", f"de los diseños enumerados en I1 respetan el límite de venta a red; en I2 (límite a la mitad) baja a {pct(fb, 1)}. El óptimo vive en el borde de esa restricción.")
-    set_text(s, "TextBox 16", "W continua junto a catálogos discretos de módulos, potencia y duración: propuestas distintas colapsan en el mismo diseño y gastan evaluaciones repetidas.")
-    set_text(s, "TextBox 17", [["Consecuencia: ", "un optimizador debe explorar una región estrecha y afinar W sobre un borde; es el escenario donde explorar y explotar compiten por el presupuesto."]])
-    set_notes(s, "[0:50] Tres razones lo hacen un buen banco de pruebas. Evaluar es caro: un año completo por diseño. La región "
-                 f"factible es estrecha: en la instancia de referencia sólo {pct(fa, 0)} de los diseños cumple el límite de venta a "
-                 f"red y, con el límite a la mitad, {pct(fb, 0)}. Y el dominio es mixto. Es exactamente el escenario donde explorar y "
-                 "explotar compiten por el presupuesto, que es lo que un híbrido pretende equilibrar.")
-
-    # =========================================================== 12. INSTANCIAS (plantilla 26)
+    # ==== 15. OCHO INSTANCIAS Y ÓPTIMO EXACTO (molde 26)
     s = s_instancias
-    set_text(s, "TextBox 3", "BANCO DE PRUEBAS · INSTANCIAS")
-    set_text(s, "TextBox 4", "Cuatro instancias del mismo problema")
-    que_cambia = {codes[0]: "referencia (AGSR ≤ 0,20)", codes[1]: "límite de venta a red a la mitad",
-                  codes[2]: "módulos de 2,5 MW, batería 2,5 MW, duraciones 1/2/4/8 h", codes[3]: "planta de 300 MW, electrolizador hasta 150 MW"}
-    filas = [["Inst.", "Qué cambia", "Ctot [MW]", "AGSRmax", "Catálogos", "Diseños (paso 0,01 MW)", "Factibles"]]
+    titulo(s, "DISEÑO EXPERIMENTAL · INSTANCIAS", "Ocho instancias, cada una con su óptimo exacto")
+    que_cambia = {"I1": "referencia: 200 MW, AGSR ≤ 0,20", "I2": "límite de venta a red a la mitad",
+                  "I3": "catálogos más finos", "I4": "planta de 300 MW", "I5": "planta de 100 MW",
+                  "I6": "100 MW y límite a la mitad", "I7": "300 MW y límite a la mitad", "I8": "límite de venta a red relajado"}
+    filas = [["Inst.", "Qué cambia", "Ctot [MW]", "AGSRmáx", "Catálogos", "Diseños enumerados", "Factibles", "Óptimo [CNY/kWh]"]]
     for c in codes:
-        filas.append([c, que_cambia.get(c, etiqueta[c]), num(inst.loc[c, "total_capacity_mw"], 0), num(inst.loc[c, "agsr_max"], 2),
-                      entero(inst.loc[c, "n_catalogs"]), entero(bf.loc[c, "evaluated"]), pct(bf.loc[c, "feasible_share"], 1)])
-    fill_table(s, "Table 5", filas, [0.6, 3.1, 0.9, 0.9, 1.0, 1.5, 1.0])
-    set_text(s, "TextBox 6", [["Una instancia es una tupla ", "(Ctot, AGSRmax, u, nmin, nmax, ΔB, Bmax, {hk}). ",
-                               "Las cuatro derivan de I1 cambiando un aspecto cada vez: región factible (I2), finura del espacio discreto (I3) y escala (I4). Comparten simulador, codificación y tratamiento de restricciones."]])
-    set_notes(s, "[1:00] Las cuatro instancias. I1 es la de referencia. I2 reduce a la mitad el límite de venta a red: cambia sólo la "
-                 "restricción que manda. I3 refina los catálogos: cinco veces más combinaciones discretas sobre la misma región física. "
-                 "I4 escala la planta a trescientos megavatios. Cada una cambia un aspecto, así que si el híbrido se comporta "
-                 "distinto en una de ellas, la causa está declarada.")
+        filas.append([c, que_cambia.get(c, str(etiqueta[c])), num(inst.loc[c, "total_capacity_mw"], 0), num(inst.loc[c, "agsr_max"], 2),
+                      entero(bf.loc[c, "catalogs"]), entero(bf.loc[c, "evaluated"]), pct(bf.loc[c, "feasible_share"], 1),
+                      num(bf.loc[c, "optimum_lcoe_cny_per_kwh"], 5)])
+    fill_table(s, "Table 5", filas, [0.5, 2.55, 0.8, 1.0, 1.0, 1.3, 0.9, 0.95], font_pt=10, row_height_in=0.29, top_in=1.08)
+    caja = shape_by_name(s, "TextBox 6")
+    caja.top = Inches(1.08 + 0.29 * len(filas) + 0.2)
+    set_paragraphs(caja, [f"Óptimo exacto por fuerza bruta: todos los catálogos sobre W cada {paso_w} MW, {entero(bf_total)} diseños simulados en total. "
+                          "La brecha de cada corrida se mide contra un valor conocido, no contra el mejor resultado observado.",
+                          "Una variación por vez respecto de I1: límite de venta a red (I2, I8), finura de los catálogos (I3), escala (I4, I5) y sus combinaciones (I6, I7)."])
+    set_notes(s, f"[1:00] El banco de pruebas son {len(codes)} instancias del mismo problema. I1 es la de referencia. Las demás "
+                 "cambian una cosa a la vez: I2 reduce a la mitad el límite de venta a la red y I8 lo relaja; I3 refina los "
+                 "catálogos; I4 e I5 cambian la escala de la planta; e I6 e I7 combinan escala y límite. Así, si un algoritmo "
+                 "se comporta distinto en una instancia, la causa está declarada. Y lo que hace posible todo el análisis: "
+                 f"cada instancia tiene su óptimo exacto, obtenido por fuerza bruta, enumerando todos los catálogos sobre la "
+                 f"capacidad eólica con paso de {paso_w} megavatios; en total, {entero(bf_total)} diseños simulados. Por eso "
+                 "la variable de respuesta es la brecha respecto de un óptimo conocido y no respecto del mejor resultado que "
+                 "se haya visto. [Si preguntan para qué metaheurísticas si la fuerza bruta resuelve cada instancia] La "
+                 "enumeración es el instrumento de medida, no la alternativa. Es posible aquí porque hay una sola variable "
+                 "continua, catálogos pequeños y un despacho por reglas que se puede vectorizar; aun así toma entre "
+                 f"{bf_min_lo} y {bf_min_hi} minutos por instancia. Con una segunda variable continua, por ejemplo liberando "
+                 f"la capacidad total, solo {codes[0]} tardaría unos {dias_2d} días. Una corrida usa {solicitudes} solicitudes, "
+                 f"entre {veces_lo} y {veces_hi} veces menos que los diseños de la instancia, y tarda unos {seg_corrida} segundos.")
 
-    # =========================================================== 13. ÓPTIMO EXACTO (plantilla 15)
-    s = s_optimo
-    set_text(s, "TextBox 3", "BANCO DE PRUEBAS · ÓPTIMO EXACTO")
-    set_text(s, "TextBox 4", "El óptimo exacto de cada instancia por fuerza bruta")
-    replace_picture(s, "Picture 5", FIGS_TESIS / "fig10_envolvente_fuerza_bruta.png")
-    optimos = "; ".join("{}: {}".format(c, num(bf.loc[c, "optimum_lcoe_cny_per_kwh"], 5)) for c in codes)
-    set_text(s, "TextBox 6", [[f"{entero(bf_total)} diseños anuales ", f"enumerados en {num(bf_horas, 1)} h: todos los catálogos sobre W cada 0,01 MW, con despacho vectorizado y reducción por bloque."],
-                              ["Verificado ", f"contra el simulador oficial en 200 celdas por instancia (dif. máx. {bf['control_max_rel_diff_lcoe'].max():.0e}) y recertificando los 10 mejores catálogos."],
-                              ["Óptimos (CNY/kWh) ", optimos + ". Todos sobre el borde de AGSR: un paso más en W viola C5."]])
-    set_notes(s, "[1:00] Esto es lo que convierte la validación en una medición contra un valor conocido. Para cada instancia "
-                 f"enumeré todos los catálogos sobre todos los valores de W con paso de una centésima: {entero(bf_total)} diseños en "
-                 f"unas {num(bf_horas, 0)} horas, con el despacho vectorizado. La curva es la envolvente: el mejor LCOE factible para "
-                 "cada W. Los cuatro óptimos están sobre el borde de la restricción de venta a red: un paso más en W la viola.")
+    # ==== 16. CONDICIONES JUSTAS (molde 5)
+    s = s_justas
+    titulo(s, "DISEÑO EXPERIMENTAL · CONDICIONES", "Mismo presupuesto y mismas reglas para todos")
+    set_text(s, "TextBox 6", str(PRESUPUESTO))
+    set_text(s, "TextBox 7", "solicitudes por corrida")
+    set_text(s, "TextBox 8", f"Las mismas para los {N_ALG}: {POB} individuos × {ITER} iteraciones. Los diseños duplicados también cuentan, y un contrato rechaza la solicitud {PRESUPUESTO + 1}.")
+    set_text(s, "TextBox 10", f"R = {R_DISENO}")
+    set_text(s, "TextBox 11", "réplicas por celda")
+    set_text(s, "TextBox 12", f"Semillas {SEMILLAS}. Cada algoritmo usa su propio flujo aleatorio: dentro de una instancia las muestras son independientes; entre instancias, pareadas.")
+    set_text(s, "TextBox 14", "A priori")
+    set_text(s, "TextBox 15", "parámetros y reglas")
+    set_text(s, "TextBox 16", "Hiperparámetros canónicos, sin reajuste para el híbrido. Factibilidad por reglas de Deb, igual para todos.")
+    total_corridas = N_ALG * N_INST * R_DISENO
+    set_text(s, "TextBox 17", [["En total: ", f"{N_ALG} algoritmos × {N_INST} instancias × {R_DISENO} réplicas = {entero(total_corridas)} corridas y {entero(total_corridas * PRESUPUESTO)} simulaciones anuales."]])
+    set_notes(s, f"[0:50] Las condiciones de la comparación. El presupuesto: {PRESUPUESTO} solicitudes de evaluación por corrida "
+                 f"para todos, {POB} individuos por {ITER} iteraciones; un diseño repetido también gasta una solicitud. Las "
+                 f"réplicas: {R_DISENO} por algoritmo e instancia, con semillas fijas. Cada algoritmo usa su propio flujo "
+                 "aleatorio, y eso decide la estadística: dentro de una instancia las muestras de dos algoritmos son "
+                 "independientes, no forman pares; entre instancias, en cambio, sí se comparan de forma pareada. Y los "
+                 f"parámetros y las reglas se fijaron a priori. En total son {entero(total_corridas)} corridas y algo más de un "
+                 "millón de simulaciones anuales.")
 
-    # =========================================================== 14. SIMULADOR VALIDADO (ex 11)
-    s = S(11)
-    set_notes(s, "[0:40] Y el simulador en el que todo descansa está validado: reconstruí el modelo de Li y lo contrasté con los "
-                 "indicadores publicados; ocho de once quedan a menos de cinco por ciento. Es una reproducción parcial, no una "
-                 "equivalencia, pero es el mismo simulador para los nueve algoritmos, las cuatro instancias y la fuerza bruta.")
+    # ==== 17. HIPÓTESIS Y MAPA DE DECISIÓN (lámina en blanco + formas)
+    s = s_mapa
+    titulo(s, "DISEÑO EXPERIMENTAL · PRUEBAS", "Tres preguntas, tres pruebas: el mapa de decisión")
+    dibujar_mapa_decision(s, d)
+    set_notes(s, f"[1:10] Antes de mirar los datos quedaron fijadas las hipótesis y las pruebas. La hipótesis nula es que los "
+                 "algoritmos comparados tienen la misma distribución de brecha; la alternativa, que difieren, en contraste "
+                 f"bilateral, con alfa {alfa} y una tolerancia de {eps}. Y el mapa de decisión de la guía, aplicado a tres "
+                 "preguntas. P1: en una instancia, ¿el híbrido difiere del rival? Son dos algoritmos y las muestras son "
+                 "independientes, así que corresponde Mann-Whitney, con el tamaño de efecto A12 y Holm sobre las "
+                 f"{N_INST} instancias. P2: ¿y en general? Dos algoritmos sobre {N_INST} instancias, con una mediana por instancia: "
+                 "muestras pareadas, prueba de Wilcoxon de rangos con signo. P3: ¿hay diferencias entre los siete? Tres o más "
+                 "algoritmos: Friedman con la corrección de Iman-Davenport, y post-hoc solo si resulta significativo. En los "
+                 "tres casos, siempre con un tamaño de efecto.")
 
-    # =========================================================== 15. DIVISOR 03 (ex 8)
-    s = S(8)
-    set_text(s, "TextBox 3", "SECCIÓN 3 DE 4")
-    set_text(s, "TextBox 5", "Validación")
-    set_text(s, "TextBox 7", "Tres bloques: que el híbrido es correcto, qué tan cerca del óptimo llega y si aporta algo frente a RANDOM, GA y PSO.")
-    set_bullets(s, ["Correctitud: presupuesto, operadores, reproducción", "Calidad: convergencia, brecha y tasa de éxito",
-                    "Aporte: contrastes planificados", "Uso del presupuesto"],
-                [("Oval 10", "TextBox 11"), ("Oval 12", "TextBox 13"), ("Oval 14", "TextBox 15"), ("Oval 16", "TextBox 17")])
-    set_notes(s, "[0:10] La validación, en tres bloques.")
+    # ======================================================================================
+    # SECCIÓN 4 · RESULTADOS (todo el texto de esta sección sale de los CSV)
+    # ======================================================================================
+    # ==== 18. DIVISOR 04 (ex 13)
+    divisor(S(13), 4, "Resultados",
+            "Primero explorar; después, tres preguntas, cada una con su prueba, su tamaño de efecto y su corrección.",
+            ["Explorar: convergencia y distribución", "P1: en una instancia", "P2: en general", "P3: entre los siete",
+             "Lectura: uso del presupuesto"],
+            "[0:10] Con eso definido, los resultados.")
 
-    # =========================================================== 16. CORRECTITUD (plantilla 5)
-    s = s_correcto
-    set_text(s, "TextBox 3", "VALIDACIÓN 1 · CORRECTITUD")
-    set_text(s, "TextBox 4", "Antes de medir calidad: el híbrido hace lo que dice")
-    set_text(s, "TextBox 6", str(presupuesto))
-    set_text(s, "TextBox 7", "solicitudes exactas")
-    set_text(s, "TextBox 8", f"Verificado al cierre de cada una de las {entero(len(codes) * n_alg * replicas)} corridas; el contrato rechaza la solicitud {presupuesto + 1} y registra un checkpoint cada 20.")
-    set_text(s, "TextBox 10", "1 paso")
-    set_text(s, "TextBox 11", "contra las ecuaciones")
-    set_text(s, "TextBox 12", "La inyección genética reproducida con semilla fija (torneo, cruce, mutación, velocidad 0, memoria borrada); dirección y límites en Sphere y Rastrigin.")
-    set_text(s, "TextBox 14", "bit a bit")
-    set_text(s, "TextBox 15", "los padres no cambian")
-    set_text(s, "TextBox 16", "La corrida de I1 reproduce la comparativa previa de los seis clásicos con los mismos valores; el flujo aleatorio no depende de la instancia.")
-    set_text(s, "TextBox 17", [["Además: ", f"las {entero(len(codes) * n_alg * replicas)} corridas terminaron factibles, con residuo de balance menor que 1e-8 MW y AGSR bajo el límite de su instancia."]])
-    set_notes(s, "[1:00] Primer bloque: correctitud. Tres pruebas. El presupuesto: cada corrida hizo exactamente seiscientas solicitudes; "
-                 "el contrato rechaza la seiscientos uno. Los operadores: un paso de la inyección genética reproducido contra sus "
-                 "ecuaciones con semilla fija, más pruebas de dirección y límites sobre Sphere y Rastrigin. Y la reproducción: como los "
-                 "padres no se tocan, la corrida de I1 reproduce bit a bit la comparativa anterior de los seis clásicos. Todas las "
-                 "corridas terminaron en un diseño factible.")
+    # ==== 19. EXPLORAR: CONVERGENCIA
+    s = s_conv
+    titulo(s, "RESULTADOS · EXPLORAR", titulo_convergencia(d), dos_lineas=True)
+    marca_provisional(s, d)
+    add_fig(s, "pres_convergencia.png", 0.5, 1.08)
+    conv = lectura_convergencia(d)
+    red = conv["reduccion"]
+    lider_mitad = enumerar([lab(a) for a in conv["lider_mitad"]])
+    add_label(s, 0.5, 4.22, 9.0, 0.5, [
+        ["Mediana e IQR ", f"de la brecha al óptimo exacto en {replicas} corridas por algoritmo. Brecha mediana final por instancia: "
+                           + frase_brechas_finales(d, ("pso_ga", "pso", "ga", "random")) + "."],
+        ["Rango medio de los siete: ", f"PSO+GA es 1.º entre {entero(conv['desde'])} y {entero(conv['hasta'])} solicitudes; "
+                                       f"a {entero(conv['mitad'])} lidera {lider_mitad}; desde {entero(conv['estable'])}, "
+                                       "ningún algoritmo se aparta más de un lugar de su puesto final."]],
+        size=10, ajustar=True)
+    g_h = brechas_medianas(d, H)
+    set_notes(s, "[1:20] Tercer paso del protocolo: explorar antes de contrastar. Cada panel es una instancia; el eje horizontal "
+                 "son las solicitudes acumuladas, de modo que en cada punto todos los algoritmos han gastado lo mismo; el "
+                 "vertical es la brecha respecto del óptimo exacto, que es la línea punteada en cero. Las curvas son la "
+                 f"mediana de {replicas} corridas y la banda, el rango intercuartil. PSO+GA va en marrón, sus padres PSO y GA en "
+                 f"naranja y verde, y RANDOM en gris. Al agotar las {solicitudes} solicitudes, la brecha mediana de PSO+GA "
+                 f"va de {rango(g_h)} por ciento según la instancia; la de PSO, de {rango(brechas_medianas(d, 'pso'))}; "
+                 f"la de GA, de {rango(brechas_medianas(d, 'ga'))}; y la de RANDOM, de {rango(brechas_medianas(d, 'random'))}. "
+                 "Pero las curvas también muestran cuándo se forma el orden. Si en cada punto ordeno a los siete por su brecha "
+                 f"mediana y promedio el puesto sobre las ocho instancias, PSO+GA es el primero entre {entero(conv['desde'])} y "
+                 f"{entero(conv['hasta'])} solicitudes: es el que converge más rápido. A mitad del presupuesto ya lidera "
+                 f"{lider_mitad} y el híbrido es {conv['puesto_h_mitad']}.º; en la segunda mitad su brecha mediana media baja "
+                 f"solo un {num(red[H], 0)} por ciento, mientras GWO, SHO y WOA la reducen un {num(red['gwo'], 0)}, un "
+                 f"{num(red['sho'], 0)} y un {num(red['woa'], 0)} por ciento. El orden final solo queda fijado desde "
+                 f"{entero(conv['estable'])} solicitudes. Todo esto es descriptivo: todavía no dice qué diferencias son reales. "
+                 "[Si preguntan si con menos presupuesto ganaría el híbrido:] No se puede concluir. GWO, WOA y SHO bajan su "
+                 "parámetro a o h según la fracción de iteraciones transcurridas, así que con menos presupuesto habrían pasado "
+                 f"antes a explotar. Lo que sí sostengo es que el orden es relativo a {solicitudes} solicitudes, y que la "
+                 "inyección genética acelera al enjambre al principio pero no evita que se estanque.")
 
-    # =========================================================== 17. CONVERGENCIA (ex 15)
-    s = S(15)
-    set_text(s, "TextBox 3", "VALIDACIÓN 2 · CALIDAD")
-    replace_picture(s, "Picture 5", FIGS_PRES / "pres_convergencia_foco.png")
-    set_text(s, "TextBox 4", "Convergencia a igual número de solicitudes")
-    set_text(s, "TextBox 6", [["Mediana y rango intercuartil ", "del mejor LCOE factible frente a las solicitudes acumuladas; PSO+GA en marrón, la línea punteada es el óptimo exacto."],
-                              ["PSO+GA sigue al PSO ", "en las cuatro instancias: la inyección no cambia el ritmo de la convergencia."],
-                              ["RANDOM ", "se separa desde las primeras decenas de solicitudes; SHO, el mejor clásico, marca la referencia superior."]])
-    set_notes(s, "[1:10] Segundo bloque: calidad. Las curvas de convergencia, un panel por instancia, con las solicitudes en el eje "
-                 "horizontal: en cada punto todos han visto el mismo número de diseños. PSO+GA, en marrón, sigue de cerca al PSO en "
-                 "las cuatro instancias: la inyección no cambia el ritmo. Ambos se separan de RANDOM desde el inicio. SHO, el mejor "
-                 "clásico del banco, marca la referencia superior.")
+    # ==== 20. EXPLORAR: DISTRIBUCIÓN DE LA BRECHA Y NORMALIDAD
+    s = s_brecha
+    titulo(s, "RESULTADOS · EXPLORAR", titulo_normalidad(d), dos_lineas=True)
+    marca_provisional(s, d)
+    add_fig(s, "pres_brecha.png", 0.5, 1.12)
+    add_label(s, 0.5, 3.95, 9.0, 0.78, [
+        ["Distribución de la brecha final: ", frase_mejores_medianas(d, ("pso_ga", "pso", "ga", "random"))],
+        ["Shapiro–Wilk ", frase_normalidad(d)]], size=10, ajustar=True)
+    set_notes(s, f"[1:10] La distribución de la brecha final, una caja por algoritmo en cada instancia, con las {replicas} "
+                 "corridas dibujadas encima. Lo que importa no es el mejor valor aislado sino la distribución completa. "
+                 "Dentro de este grupo de cuatro, " + voz_mejores_medianas(d, ("pso_ga", "pso", "ga", "random")) + " "
+                 "Y esta exploración decide el tipo de prueba: las brechas están acotadas por abajo y son asimétricas. "
+                 "La prueba de Shapiro-Wilk " + frase_normalidad(d) + " Por eso todas las pruebas que siguen trabajan "
+                 "con rangos y ninguna supone normalidad.")
 
-    # =========================================================== 18. DISTRIBUCIÓN Y BRECHA (ex 16)
-    s = S(16)
-    set_text(s, "TextBox 3", "VALIDACIÓN 2 · CALIDAD")
-    replace_picture(s, "Picture 5", FIGS_PRES / "pres_distribucion_foco.png")
-    set_text(s, "TextBox 4", "Qué tan cerca del óptimo queda PSO+GA")
-    filas = [["Inst.", "Rango", "Brecha", "Éxito", "Mejor"]]
-    for c in codes:
-        r = hr[c]
-        filas.append([c, entero(r["ranking_descriptivo"]), num(r["median_gap_pct"], 2) + " %", pct(r["success_0.5pct"], 0),
-                      num(r["best_gap_pct"], 3) + " %"])
-    fill_table(s, "Table 6", filas, [0.55, 0.7, 0.85, 0.85, 0.8], font_pt=9.5, row_height_in=0.3)
-    set_text(s, "TextBox 7", [["Tabla: ", "rango entre los 9 algoritmos, brecha mediana al óptimo exacto, corridas a menos de 0,5 % y brecha de la mejor corrida."],
-                              ["Brecha mediana ", "de {} a {} %: una corrida típica queda a menos de 1 % del óptimo exacto.".format(
-                                   num(min(hr[c]["median_gap_pct"] for c in codes), 2), num(max(hr[c]["median_gap_pct"] for c in codes), 2))],
-                              ["Mejor corrida ", ("la mejor de los nueve algoritmos en " + ", ".join(corridas_psoga) + ", por debajo del óptimo discretizado gracias a W continuo." if corridas_psoga else "a milésimas del óptimo exacto en las cuatro instancias.")]])
-    set_notes(s, "[1:20] La distribución del LCOE final en treinta corridas, con PSO+GA en marrón junto a PSO, GA, SHO y RANDOM. "
-                 "La tabla resume al híbrido: su rango entre los nueve, la brecha mediana al óptimo exacto, la tasa de éxito al medio "
-                 "por ciento y la brecha de su mejor corrida. Una corrida típica queda a menos de un uno por ciento del óptimo en las "
-                 f"cuatro instancias. Y su mejor corrida es la mejor de todos los algoritmos en {', '.join(corridas_psoga) if corridas_psoga else 'varias instancias'}, "
-                 "incluso por debajo del óptimo discretizado, porque el optimizador maneja W continuo.")
+    # ==== 21. P1: Â12 POR INSTANCIA
+    s = s_a12
+    titulo(s, "RESULTADOS · P1 · EN UNA INSTANCIA", titulo_p1(d), dos_lineas=True)
+    marca_provisional(s, d)
+    add_fig(s, "pres_a12_foco.png", 0.5, 1.12)
+    ancho_panel = 9.0 * 0.94 / 3.14          # geometría de fig_a12 con tres paneles
+    for k, b in enumerate(CONFIRMATORIOS):
+        add_label(s, 0.5 + 9.0 * 0.05 + k * ancho_panel * 1.07, 3.76, ancho_panel, 0.26,
+                  [frase_p1(d, b, sujeto=False)], size=10.5, color=COLOR_ALG[b], align=PP_ALIGN.CENTER, ajustar=True)
+    n_p1 = max(conteo_p1(d, H, b)["n"] for b in CONFIRMATORIOS)
+    add_label(s, 0.5, 4.1, 9.0, 0.6, [
+        ["Cómo leerlo: ", f"Â12 > 0,5 significa que PSO+GA obtiene menor LCOE. Marcador lleno: significativo tras Holm sobre las {n_p1} instancias del par (+ o −); "
+                          "vacío: sin evidencia de diferencia (≈). Banda gris: efecto despreciable."],
+        ["Prueba: ", f"Mann–Whitney bilateral, α = {alfa}, {replicas} corridas por algoritmo; brechas ≤ {eps} cuentan como 0."]],
+        size=9.5, ajustar=True)
+    set_notes(s, "[1:10] Primera pregunta: en una instancia, ¿PSO+GA difiere del rival? Cada punto es el tamaño de efecto A12 "
+                 "de una instancia con su intervalo bootstrap al 95 por ciento: a la derecha de 0,5, PSO+GA obtiene menor "
+                 f"LCOE. El marcador lleno indica que la diferencia es significativa tras corregir con Holm sobre las {n_p1} "
+                 "instancias del par, y la banda gris es la zona de efecto despreciable. Son los tres contrastes "
+                 "confirmatorios: los dos padres y la línea base. " + voz_p1_grupo(d, ("random", "ga", "pso")))
 
-    # =========================================================== 19. TASA DE ÉXITO (plantilla 15)
-    s = s_exito
-    set_text(s, "TextBox 3", "VALIDACIÓN 2 · CALIDAD")
-    set_text(s, "TextBox 4", "¿Con qué frecuencia se llega cerca del óptimo?")
-    replace_picture(s, "Picture 5", FIGS_PRES / "pres_exito_foco.png")
-    ex = {c: hr[c]["success_0.5pct"] for c in codes}
-    ex_pso = {c: fila_rank(d, c, "pso")["success_0.5pct"] for c in codes}
-    ex_ga = {c: fila_rank(d, c, "ga")["success_0.5pct"] for c in codes}
-    ex_rnd = {c: fila_rank(d, c, "random")["success_0.5pct"] for c in codes}
-    set_text(s, "TextBox 6", [["Tasa de éxito: ", "fracción de las 30 corridas que termina a menos de 0,5 % del óptimo exacto de su instancia."],
-                              ["PSO+GA: ", "entre {} y {} de las corridas; GA entre {} y {}; RANDOM entre {} y {}.".format(
-                                  pct(min(ex.values()), 0), pct(max(ex.values()), 0), pct(min(ex_ga.values()), 0), pct(max(ex_ga.values()), 0),
-                                  pct(min(ex_rnd.values()), 0), pct(max(ex_rnd.values()), 0))],
-                              ["Frente a PSO: ", "PSO alcanza entre {} y {}; la diferencia va en ambos sentidos según la instancia.".format(pct(min(ex_pso.values()), 0), pct(max(ex_pso.values()), 0))]])
-    set_notes(s, "[0:50] La tasa de éxito: en qué fracción de las corridas se queda a menos de medio por ciento del óptimo. PSO+GA "
-                 f"alcanza entre {pct(min(ex.values()), 0)} y {pct(max(ex.values()), 0)} según la instancia, claramente por encima de "
-                 "RANDOM y por encima de GA, y en el entorno del PSO, con diferencias en ambos sentidos. Es lo que un usuario "
-                 "querría saber: si corro este método una vez, cuán probable es quedar cerca.")
+    # ==== 22. P1: TABLA +/≈/−
+    s = s_p1_tabla
+    rivales = list(CONFIRMATORIOS) + list(RESTO_CONTROL)
+    tot = totales_p1(d, rivales)
+    titulo(s, "RESULTADOS · P1 · EN UNA INSTANCIA",
+           "PSO+GA frente a sus seis rivales: {} +, {} ≈ y {} − en {} contrastes".format(tot["+"], tot["="], tot["-"], tot["n"]), dos_lineas=True)
+    marca_provisional(s, d)
+    papel = {"pso": "PSO (padre)", "ga": "GA (padre)", "random": "RANDOM (base)"}
+    filas = [["PSO+GA frente a"] + codes + ["+ / ≈ / −"]]
+    for b in rivales:
+        f = filas_p1(d, H, b)
+        c = conteo_p1(d, H, b)
+        celdas = ["{} {}".format(SIMB.get(str(f.loc[i, "simbolo"]).strip(), "?"), num(f.loc[i, "a12"], 2)) if i in f.index else "--"
+                  for i in codes]
+        filas.append([papel.get(b, lab(b))] + celdas + ["{} / {} / {}".format(len(c["+"]), len(c["="]), len(c["-"]))])
+    ancho_inst = 6.1 / max(len(codes), 1)
+    t = fill_table(s, "Table 5", filas, [1.75] + [ancho_inst] * len(codes) + [1.15], font_pt=10.5, row_height_in=0.33, top_in=1.12)
+    for i, b in enumerate(rivales, 1):
+        f = filas_p1(d, H, b)
+        for j, code in enumerate(codes, 1):
+            simbolo = str(f.loc[code, "simbolo"]).strip() if code in f.index else "="
+            pintar_celda(t.cell(i, j), fill={"+": VERDE_SUAVE, "-": ROJO_SUAVE}.get(simbolo, "FFFFFF"),
+                         bold=simbolo != "=", align=PP_ALIGN.CENTER)
+        pintar_celda(t.cell(i, len(codes) + 1), fill=GRIS_SUAVE, bold=True, align=PP_ALIGN.CENTER)
+    caja = shape_by_name(s, "TextBox 6")
+    caja.top = Inches(1.12 + 0.33 * len(filas) + 0.14)
+    set_paragraphs(caja, [f"Cada celda: símbolo y Â12. «+» PSO+GA significativamente mejor, «−» significativamente peor, «≈» sin evidencia de diferencia (Mann–Whitney, Holm sobre las {n_p1} instancias de cada par, α = {alfa}).",
+                          "Significativo no es lo mismo que relevante: " + frase_magnitud(d, rivales),
+                          "Las tres primeras filas son los contrastes confirmatorios; GWO, SHO y WOA completan la familia de control."])
+    encoger(caja, 4.72 - (1.12 + 0.33 * len(filas) + 0.14), 9.0)
+    set_notes(s, "[1:10] La misma pregunta para los seis rivales, en una tabla. Un más significa que PSO+GA es "
+                 "significativamente mejor en esa instancia; un menos, significativamente peor; y el aproximado, que no hay "
+                 "evidencia de diferencia. En total, PSO+GA suma "
+                 f"{tot['+']} más, {tot['=']} aproximados y {tot['-']} menos en {tot['n']} contrastes. Las tres primeras "
+                 "filas son las de la lámina anterior. En las otras tres: " + voz_p1_grupo(d, RESTO_CONTROL)
+                 + " Y una precaución de lectura: significativo no es lo mismo que relevante; por eso cada resultado va con "
+                 "su tamaño de efecto. En unidades del problema, " + frase_magnitud(d, rivales))
 
-    # =========================================================== 20. APORTE: CONTRASTES (plantilla 16)
-    s = s_aporte
-    set_text(s, "TextBox 3", "VALIDACIÓN 3 · APORTE")
-    set_text(s, "TextBox 4", "¿Aporta la inyección genética?")
-    replace_picture(s, "Picture 5", FIGS_PRES / "pres_psoga_a12.png")
-    filas = [["PSO+GA vs"] + codes]
-    for b, nombre in (("random", "RANDOM"), ("ga", "GA"), ("pso", "PSO")):
-        fila = [nombre]
-        for c in codes:
-            r = vs[(c, b)]
-            fila.append("--" if r is None else num(r["a12"], 2) + ("*" if truthy(r["significativo_alpha_0.05"]) else ""))
-        filas.append(fila)
-    fill_table(s, "Table 6", filas, [1.15, 0.65, 0.65, 0.65, 0.65], font_pt=10, row_height_in=0.32)
-    set_text(s, "TextBox 7", [["A12 > 0,5: ", "gana PSO+GA; * = significativo tras Holm en la familia planificada de la instancia."],
-                              ["Lectura: ", "supera a RANDOM en {}; supera a GA en mediana en {} y de forma significativa en {}; frente a PSO no hay diferencia detectable.".format(
-                                  "las cuatro" if len(gana["random"]) == len(codes) else ", ".join(gana["random"]) or "ninguna",
-                                  "las cuatro" if len(mejor_med["ga"]) == len(codes) else ", ".join(mejor_med["ga"]) or "ninguna",
-                                  ", ".join(gana["ga"]) or "ninguna")]])
-    set_notes(s, "[1:30] Tercer bloque, la pregunta central: ¿aporta la inyección? Tres contrastes por instancia, con el tamaño de "
-                 "efecto A12 y su intervalo; marcador lleno si es significativo tras Holm. Contra RANDOM, PSO+GA gana en las cuatro "
-                 f"instancias con A12 cercano a 0,8: aprende. Contra GA, el donante de los operadores, tiene mejor mediana en "
-                 f"{'las cuatro' if len(mejor_med['ga']) == len(codes) else ', '.join(mejor_med['ga'])} y la diferencia es significativa en "
-                 f"{', '.join(gana['ga']) or 'ninguna'}. Y contra PSO, el bucle base, no hay diferencia detectable en ninguna: el A12 "
-                 "oscila alrededor de 0,5. La respuesta honesta es: la inyección genética no empeora ni mejora al PSO bajo este presupuesto.")
+    # ==== 23. P2: EN GENERAL
+    s = s_p2
+    titulo(s, "RESULTADOS · P2 · EN GENERAL", titulo_p2(d), dos_lineas=True)
+    marca_provisional(s, d)
+    filas = [["PSO+GA frente a", "Medianas: gana–empata–pierde", "Wilcoxon p", "p Holm", "p brecha relativa", "p signos", "HL pareado [pp]", "Lectura"]]
+    veredictos = []
+    for b in rivales:
+        f = fila_p2(d, H, b)
+        v = veredicto_p2(f)
+        veredictos.append(v)
+        if f is None:
+            filas.append([papel.get(b, lab(b))] + ["--"] * 7)
+            continue
+        filas.append([papel.get(b, lab(b)), "{}–{}–{}".format(int(f["gana_mediana"]), int(f["empata_mediana"]), int(f["pierde_mediana"])),
+                      pvalor(f["p_value"]), pvalor(f["p_value_holm"]), pvalor(f["p_value_relativa"]), pvalor(f["p_value_signos"]),
+                      num(f["hl_pareado_gap_pp"], 2), {"mejor": "PSO+GA mejor", "peor": "PSO+GA peor", "sin": "sin evidencia"}.get(v, "--")])
+    t = fill_table(s, "Table 5", filas, [1.5, 1.45, 0.95, 0.85, 1.0, 0.85, 1.0, 1.4], font_pt=10, row_height_in=0.3, top_in=1.12)
+    t.rows[0].height = Inches(0.44)
+    for i, v in enumerate(veredictos, 1):
+        for j in range(1, len(filas[0])):
+            pintar_celda(t.cell(i, j), align=PP_ALIGN.CENTER)
+        pintar_celda(t.cell(i, len(filas[0]) - 1), fill={"mejor": VERDE_SUAVE, "peor": ROJO_SUAVE}.get(v, GRIS_SUAVE), bold=v in ("mejor", "peor"))
+    y_pie = 1.12 + 0.44 + 0.3 * (len(filas) - 1) + 0.14
+    caja = shape_by_name(s, "TextBox 6")
+    caja.top = Inches(y_pie)
+    pi = potencia(d, "instancias")
+    set_paragraphs(caja, [f"Unidad de análisis: la instancia (una mediana por algoritmo, pareadas). Wilcoxon de rangos con signo, Holm dentro de la familia de control, α = {alfa}. HL < 0: menor brecha de PSO+GA.",
+                          "Robustez: " + frase_robustez(d),
+                          "Potencia: " + frase_potencia(d) + " «Sin evidencia de diferencia» no significa «iguales»."])
+    encoger(caja, 4.74 - y_pie, 8.5)
+    set_notes(s, "[1:10] Segunda pregunta: ¿y en general? Aquí la unidad de análisis ya no es la corrida sino la instancia: una "
+                 "mediana por algoritmo e instancia, comparadas de forma pareada con la prueba de Wilcoxon de rangos con signo "
+                 "y con Holm dentro de la familia. " + voz_p2_grupo(d, CONFIRMATORIOS) + " "
+                 + voz_robustez(d) + " Y hay que leer esto con la potencia a la vista: " + frase_potencia_breve(d)
+                 + " Por eso, donde no hay significancia, la lectura correcta es «sin evidencia de diferencia», no «son iguales».")
 
-    # =========================================================== 21. LECTURA (ex 4)
-    s = S(4)
-    set_text(s, "TextBox 3", "VALIDACIÓN 3 · LECTURA")
-    set_text(s, "TextBox 4", "Qué dice la evidencia sobre el híbrido")
-    set_text(s, "TextBox 6", "Aprende y supera al donante")
-    en_ga = "las cuatro instancias" if len(mejor_med["ga"]) == len(codes) else ", ".join(mejor_med["ga"])
-    sig_ga = ", ".join(gana["ga"]) or "ninguna"
-    set_text(s, "TextBox 7", f"Gana a RANDOM en las cuatro instancias y a GA en mediana en {en_ga}, con significancia en {sig_ga}: el híbrido hereda la calidad del bucle del enjambre.")
-    set_text(s, "TextBox 9", "La inyección ni suma ni resta")
-    set_text(s, "TextBox 10", "Frente a PSO, A12 entre 0,37 y 0,52 sin significancia: reemplazar las 5 peores partículas por hijos genéticos no cambia el resultado típico.")
-    set_text(s, "TextBox 12", "Pero sí mejora el mejor caso")
-    set_text(s, "TextBox 13", ("Su mejor corrida es la mejor de los nueve en " + ", ".join(corridas_psoga) + ": la diversidad inyectada ayuda a afinar W sobre el borde de AGSR en algunas semillas.") if corridas_psoga else "Sus mejores corridas quedan a milésimas del óptimo exacto en las cuatro instancias.")
-    set_text(s, "TextBox 15", "Dónde queda entre los nueve")
-    set_text(s, "TextBox 16", "Rango medio {} (puesto {} de 9)".format(num(rank_h["mean_rank"], 2), entero(rank_h["ranking_transversal"])))
-    set_text(s, "TextBox 17", ["{} lidera el banco con rango medio {}".format(lab(primero["algorithm"]), num(primero["mean_rank"], 2)),
-                               "PSO+GA: rangos " + ", ".join("{} en {}".format(entero(rank_h["rank_" + c]), c) for c in codes),
-                               "Por encima de GA ({}) y de GA+LS ({}) en rango medio".format(num(cross.set_index('algorithm').loc['ga', 'mean_rank'], 2), num(cross.set_index('algorithm').loc['ga_ls', 'mean_rank'], 2)),
-                               "El orden cambia entre instancias: nadie domina en las cuatro",
-                               "Los seis clásicos y los otros dos híbridos: tablas en respaldo"])
-    set_notes(s, "[1:20] Qué dice la evidencia. Primero, PSO+GA aprende y supera al donante: gana a RANDOM en las cuatro instancias y a "
-                 f"GA por mediana en {en_ga}, con significancia en {sig_ga}. Segundo, la inyección ni suma ni resta frente al PSO: el "
-                 "resultado típico es el mismo. Tercero, sí mejora el mejor caso: su mejor corrida es la mejor de los nueve algoritmos "
-                 f"en {', '.join(corridas_psoga) if corridas_psoga else 'varias instancias'}; la diversidad inyectada ayuda a afinar W sobre el borde "
-                 f"en algunas semillas. Y en el banco completo queda en el puesto {entero(rank_h['ranking_transversal'])} de nueve por rango "
-                 f"medio; {lab(primero['algorithm'])} lidera. Nadie domina en las cuatro instancias.")
+    # ==== 24. P3: FRIEDMAN Y DIFERENCIA CRÍTICA
+    s = s_p3
+    q3 = p3(d)
+    titulo(s, "RESULTADOS · P3 · ENTRE LOS SIETE", titulo_p3(d), dos_lineas=True)
+    marca_provisional(s, d)
+    add_fig(s, "pres_diferencia_critica.png", 0.5, 1.1)
+    add_box(s, 0.5, 3.5, 4.4, 1.2, [], fill=LIGHT, name="P3 tarjeta contraste")
+    add_label(s, 0.65, 3.56, 4.1, 1.1, [
+        ["Rangos: ", f"por brecha mediana en {q3['n']} instancias (1 = mejor)."],
+        ["Friedman: ", frase_friedman(d) + ". ", "Iman–Davenport: ", frase_iman(d) + "."],
+        [f"Decisión (α = {alfa}): ", frase_decision_p3(d)]], size=10, ajustar=True)
+    add_box(s, 5.1, 3.5, 4.4, 1.2, [], fill=LIGHT, name="P3 tarjeta lectura")
+    add_label(s, 5.25, 3.56, 4.1, 1.1, [
+        ["PSO+GA: ", frase_puesto(d)],
+        ["Post-hoc de Nemenyi: ", frase_posthoc(d)]], size=10, ajustar=True)
+    set_notes(s, f"[1:10] Tercera pregunta: ¿hay diferencias entre los {q3['k']} algoritmos? En cada instancia se ordenan los "
+                 f"{q3['k']} por su brecha mediana y se promedian esos rangos sobre las {q3['n']} instancias; el diagrama los "
+                 "muestra de mejor a peor. El contraste global de Friedman da " + frase_friedman(d).replace("χ²", "ji cuadrado")
+                 + "; con la corrección de Iman-Davenport, " + frase_iman(d) + ". Entonces, " + frase_decision_p3(d)
+                 + (" En el post-hoc de Nemenyi, " + frase_posthoc(d) if q3["procede"]
+                    else " Por eso el diagrama queda como una descripción de los rangos medios, no como un contraste.")
+                 + " Las barras negras unen algoritmos cuyos rangos medios difieren menos que la diferencia crítica. "
+                 "En cuanto al híbrido: " + frase_puesto(d))
 
-    # =========================================================== 22. USO DEL PRESUPUESTO (plantilla 15)
-    s = s_presupuesto
-    set_text(s, "TextBox 3", "VALIDACIÓN · USO DEL PRESUPUESTO")
-    set_text(s, "TextBox 4", "Cómo se gastan las 600 solicitudes")
-    replace_picture(s, "Picture 5", FIGS_PRES / "pres_presupuesto.png")
-    dup = d["rank"].groupby("algorithm")["mean_duplicates"].mean()
-    set_text(s, "TextBox 6", [["Duplicados: ", f"PSO+GA repite en promedio {num(dup['pso_ga'], 0)} de 600 solicitudes; GA, {num(dup['ga'], 0)}; PSO, {num(dup['pso'], 0)}."],
-                              ["Por qué: ", "los hijos genéticos decodifican a diseños ya vistos con más frecuencia que una partícula en movimiento, pero mucho menos que el elitismo del GA."],
-                              ["Costo: ", "con presupuesto idéntico, las diferencias de tiempo vienen del operador de movimiento, no de la búsqueda."]])
-    set_notes(s, "[0:40] Cómo se gasta el presupuesto. Las solicitudes duplicadas, un diseño ya evaluado que se vuelve a pedir, cuentan "
-                 f"contra las seiscientas. PSO+GA repite en promedio {num(dup['pso_ga'], 0)}, frente a {num(dup['ga'], 0)} del GA y "
-                 f"{num(dup['pso'], 0)} del PSO: los hijos genéticos caen a veces en diseños ya vistos, pero muy lejos del elitismo del GA.")
+    # ==== 25. LECTURA: USO DEL PRESUPUESTO
+    s = s_lectura
+    qd = lectura_duplicados(d)
+    titulo(s, "RESULTADOS · LECTURA", titulo_duplicados(d), dos_lineas=True)
+    marca_provisional(s, d)
+    add_fig(s, "pres_duplicados.png", 0.5, 1.15)
+    medias = qd["medias"]
+    hijos_total = (ITER - 1) * HIJOS
+    # Sensibilidad: el mismo protocolo cortando a todos en los diseños únicos del GA.
+    fila_u = lambda df, a, b: df[(df["algoritmo_a"] == a) & (df["algoritmo_b"] == b)].iloc[0]
+    ga_rnd, ga_rnd_u = fila_u(d["p2"], "ga", "random"), fila_u(d["p2_unicos"], "ga", "random")
+    pso_u = fila_u(d["p2_unicos"], H, "pso")
+    puesto_ga_u = int(d["ranks_unicos"].index[d["ranks_unicos"]["algorithm"] == "ga"][0]) + 1
+    n_alg_u = len(d["ranks_unicos"])
+    add_label(s, 6.05, 1.2, 3.45, 3.45, [
+        ["Qué se mide: ", "solicitudes que repiten un diseño ya evaluado; cuentan contra el presupuesto y no aportan información."],
+        ["Duplicados (media entre instancias): ", "; ".join("{} {} %".format(lab(a), num(medias[a], 1)) for a in ("pso_ga", "pso", "ga", "random") if a in medias.index) + "."],
+        ["PSO+GA frente a PSO: ", f"duplica más que su padre en {qd['h_mas_que_pso']} de {qd['n']} instancias."],
+        ["Por diseño: ", f"{hijos_total} de las {PRESUPUESTO} solicitudes de PSO+GA ({pct(hijos_total / PRESUPUESTO, 0)}) son hijos del GA."],
+        ["A igual nº de diseños únicos: ", f"GA sigue {puesto_ga_u}.º de {n_alg_u}; supera a RANDOM en "
+                                          f"{entero(ga_rnd_u['mejor_significativo'])} instancias en vez de {entero(ga_rnd['mejor_significativo'])}."]],
+              size=10, ajustar=True, minimo=9.0)
+    set_notes(s, "[1:00] Para interpretar lo anterior miré cómo gasta cada algoritmo su presupuesto. Una solicitud duplicada "
+                 "es un diseño que ya se había evaluado y se vuelve a pedir: cuenta contra el presupuesto y no aporta "
+                 "información nueva. Como la capacidad eólica es continua, un diseño solo se repite cuando un vector se copia: "
+                 "la élite del GA, que se vuelve a pedir en cada generación, o un hijo que reproduce a su padre. "
+                 f"El que más repite es {lab(qd['mas'])}, con {num(medias[qd['mas']], 1)} por ciento de sus solicitudes en "
+                 f"promedio; PSO+GA repite {num(medias.get(H, float('nan')), 1)} por ciento y PSO, {num(medias.get('pso', float('nan')), 1)}. "
+                 f"El híbrido duplica más que su padre PSO en {qd['h_mas_que_pso']} de {qd['n']} instancias. Hay que recordar que, "
+                 f"por diseño, solo {hijos_total} de sus {PRESUPUESTO} solicitudes son hijos del GA. ¿Cambian las conclusiones si "
+                 "solo cuento diseños distintos? Repetí todo el protocolo cortando a cada algoritmo en el número de diseños "
+                 f"únicos que alcanza el GA, lo que favorece al GA. El GA sigue {puesto_ga_u}.º de {n_alg_u}. Lo que cambia es su "
+                 f"comparación con RANDOM: la supera en {entero(ga_rnd_u['mejor_significativo'])} instancias en vez de "
+                 f"{entero(ga_rnd['mejor_significativo'])}, y en general pasa a ser significativa, con p ajustado "
+                 f"{num(ga_rnd_u['p_value_holm'], 3)}, aunque la prueba de signos no la respalda. Y la desventaja del híbrido "
+                 f"frente a PSO queda en p ajustado {num(pso_u['p_value_holm'], 3)}, por encima de alfa: otra señal de que no es robusta.")
 
-    # =========================================================== 23. DIVISOR 04 (ex 13)
-    s = S(13)
-    set_text(s, "TextBox 3", "SECCIÓN 4 DE 4")
-    set_text(s, "TextBox 5", "Conclusiones")
-    set_text(s, "TextBox 7", "Qué afirmaciones quedan respaldadas por la evidencia, cuáles son los límites y qué sigue.")
-    set_bullets(s, ["Qué se puede afirmar", "Límites", "Trabajo futuro"],
-                [("Oval 10", "TextBox 11"), ("Oval 12", "TextBox 13"), ("Oval 14", "TextBox 15"),
-                 ("Oval 16", "TextBox 17"), ("Oval 18", "TextBox 19"), ("Oval 20", "TextBox 21")])
-    set_notes(s, "[0:10] Cierro con las conclusiones.")
+    # ======================================================================================
+    # SECCIÓN 5 · CONCLUSIONES
+    # ======================================================================================
+    # ==== 26. DIVISOR 05 (ex 22)
+    divisor(S(22), 5, "Conclusiones",
+            "Qué afirmaciones quedan respaldadas por la evidencia, cuáles no, y qué deja el trabajo.",
+            ["Qué se puede afirmar y qué no", "Aporte y trabajo futuro"],
+            "[0:10] Cierro con las conclusiones.")
 
-    # =========================================================== 24. QUÉ SE PUEDE AFIRMAR (ex 23)
+    # ==== 27. QUÉ SE PUEDE AFIRMAR Y QUÉ NO (ex 23)
     s = S(23)
-    set_text(s, "TextBox 3", "CONCLUSIONES")
-    set_text(s, "TextBox 4", "Qué se puede afirmar y qué no")
-    set_text(s, "TextBox 7", [f"El problema queda enunciado como mín LCOE sobre un dominio mixto, con cuatro instancias y su óptimo exacto ({entero(bf_total)} diseños enumerados)",
-                              f"PSO+GA es correcto: {presupuesto} solicitudes exactas, operadores verificados, padres intactos y reproducción bit a bit",
-                              "PSO+GA aprende (gana a RANDOM en las cuatro instancias) y supera a GA, el donante de sus operadores, con significancia en " + (", ".join(gana["ga"]) or "ninguna"),
-                              "La inyección genética no cambia el resultado típico del PSO, pero produce la mejor corrida en " + (", ".join(corridas_psoga) if corridas_psoga else "varias instancias"),
-                              "Un flujo auditable: cada cifra sale del cuaderno ejecutado"])
-    set_text(s, "TextBox 10", ["Un solo sitio aproximado y un solo año meteorológico; instancias paramétricas, no otros recursos ni costos",
-                               "Capacidad renovable fija por instancia; sin demanda explícita de hidrógeno; LCOE como único objetivo",
-                               "Hiperparámetros fijados a priori: 5 hijos por iteración sin ablación",
-                               f"Rango medio {num(rank_h['mean_rank'], 2)}: PSO+GA no es el mejor del banco; {lab(primero['algorithm'])} y GWO lo superan",
-                               "Treinta corridas por instancia: efectos pequeños entre PSO y PSO+GA no son detectables"])
-    set_notes(s, "[1:20] ¿Qué queda respaldado? El problema está enunciado y tiene óptimo conocido en cada instancia. El híbrido es "
-                 "correcto: presupuesto exacto, operadores verificados, padres intactos. Aprende y supera al donante de sus operadores. "
-                 "La inyección no cambia el resultado típico del PSO, pero produce las mejores corridas individuales. Y todo es "
-                 "auditable. ¿Qué no se puede afirmar? Superioridad general: un sitio, un año, instancias paramétricas, LCOE como único "
-                 f"objetivo, cinco hijos por iteración sin ablación, y un banco en el que {lab(primero['algorithm'])} y GWO superan al híbrido en rango medio.")
+    titulo(s, "CONCLUSIONES", "Qué se puede afirmar y qué no")
+    marca_provisional(s, d)
+    c1 = {b: conteo_p1(d, H, b) for b in CONFIRMATORIOS}
+    perdidas = sum(len(c1[b]["-"]) for b in CONFIRMATORIOS)
+    p1_resumen = "P1, por instancia (Holm): PSO+GA es mejor que RANDOM en {} de {}, que GA en {} y que PSO en {}".format(
+        len(c1["random"]["+"]), n_p1, len(c1["ga"]["+"]), len(c1["pso"]["+"]))
+    p1_resumen += f"; es peor en {perdidas} de esos contrastes" if perdidas else ""
+    if not perdidas and not any(c1[b]["+"] for b in CONFIRMATORIOS):
+        p1_resumen = f"P1, por instancia (Holm): sin evidencia de diferencia frente a RANDOM, GA ni PSO en ninguna de las {n_p1} instancias"
+    general = veredicto_general(d)
+    p2_resumen = "P2, en general: " + (general if general.startswith("sin") else "PSO+GA " + general)
+    p3_resumen = "P3, entre los {}: {} ({}); PSO+GA, puesto {} por rango medio".format(
+        q3["k"], "hay diferencias globales" if q3["procede"] else "sin evidencia de diferencias globales",
+        ptxt(d["fried"]["iman_davenport_p"]), q3["puesto"])
+    set_text(s, "TextBox 6", "Lo que respalda la evidencia")
+    set_text(s, "TextBox 7", [f"El problema queda formulado con {len(codes)} instancias y su óptimo exacto ({entero(bf_total)} diseños enumerados)",
+                              p1_resumen, p2_resumen, p3_resumen,
+                              respuesta_hibridacion(d)[0]])
+    encoger(shape_by_name(s, "TextBox 7"), 2.4, 9.0)
+    set_text(s, "TextBox 9", "Lo que no se puede afirmar")
+    set_text(s, "TextBox 10", ["Que «no significativo» sea «iguales»: " + (f"con {int(pi['n'])} instancias la potencia para un efecto mediano es {num(pi['potencia_dz_0.5'], 2)}" if pi is not None else "la potencia es limitada"),
+                               "Que significativo sea relevante: cada p va con su tamaño de efecto y su intervalo",
+                               "Generalidad: un sitio, un año meteorológico, instancias paramétricas, un solo presupuesto y LCOE como único objetivo",
+                               f"Que la configuración sea la mejor: hiperparámetros a priori y {HIJOS} hijos por iteración, sin ablación"])
+    encoger(shape_by_name(s, "TextBox 10"), 2.4, 9.0)
+    set_notes(s, "[1:20] ¿Qué queda respaldado? Primero, el problema está formulado y cada instancia tiene su óptimo exacto. "
+                 "Segundo, la respuesta a las tres preguntas. Por instancia: " + voz_p1_grupo(d, CONFIRMATORIOS)
+                 + " En general, " + ("no hay " + general[4:] if general.startswith("sin ") else "PSO+GA " + general)
+                 + ". Y entre los " + str(q3["k"]) + " algoritmos, "
+                 + frase_decision_p3(d) + " " + respuesta_hibridacion(d)[1] + " ¿Qué no se puede afirmar? Que no significativo sea lo mismo que iguales: "
+                 + frase_potencia_breve(d)
+                 + " Que significativo sea relevante: por eso cada valor p va con su tamaño de efecto. Tampoco hay generalidad "
+                 "más allá de este banco: un sitio, un año meteorológico, instancias paramétricas, un solo objetivo y un solo "
+                 f"presupuesto, con un orden que recién se fija desde {entero(lectura_convergencia(d)['estable'])} solicitudes. Y la "
+                 f"configuración del híbrido no se optimizó: {HIJOS} hijos por iteración, sin ablación.")
 
-    # =========================================================== 25. APORTE Y TRABAJO FUTURO (plantilla 23)
+    # ==== 28. APORTE Y TRABAJO FUTURO (molde 23)
     s = s_futuro
-    set_text(s, "TextBox 3", "CONCLUSIONES")
-    set_text(s, "TextBox 4", "Aporte a la Ingeniería Informática y trabajo futuro")
+    titulo(s, "CONCLUSIONES", "Aporte y trabajo futuro")
     set_text(s, "TextBox 6", "Aporte")
-    set_text(s, "TextBox 7", ["Infraestructura de hibridación: operadores del GA como mixin reutilizable y contrato de presupuesto que ningún híbrido puede eludir",
-                              "Óptimo exacto por enumeración vectorizada con reducción por bloque, verificado y cacheado",
-                              "Protocolo con familia planificada de contrastes (frente a RANDOM y frente a los padres)",
-                              "Tablas, figuras y macros del documento generadas desde los CSV: cero transcripción manual"])
+    set_text(s, "TextBox 7", ["Un híbrido PSO+GA con padres intactos y un contrato de presupuesto que ningún algoritmo puede eludir",
+                              f"Óptimo exacto por enumeración vectorizada en {N_INST} instancias: la brecha se mide contra un valor conocido",
+                              "El protocolo estadístico de siete pasos implementado como módulo reutilizable: pruebas, tamaño de efecto y Holm",
+                              "Tablas, figuras y láminas generadas desde los CSV: cero transcripción manual"])
     set_text(s, "TextBox 9", "Trabajo futuro")
     set_text(s, "TextBox 10", ["Ablación del número de hijos por iteración y de la memoria de los hijos",
-                               "Los otros dos híbridos del documento (GA+LS, SHO+LS) y GWO+LS con la misma infraestructura",
-                               "Más años y sitios; instancias que cambien la estructura de costos",
-                               "Híbridos de alto nivel en relevo y componentes de aprendizaje (selección de operadores)",
+                               "Más instancias, años y sitios, para ganar potencia, y varios presupuestos",
+                               "Ajuste de hiperparámetros con un presupuesto declarado e igual para todos",
+                               "Otros esquemas de hibridación sobre la misma infraestructura",
                                "Capacidad renovable libre, demanda de hidrógeno y formulación multiobjetivo"])
-    set_notes(s, "[0:50] El aporte informático es una infraestructura de hibridación reutilizable, un óptimo exacto por enumeración "
-                 "vectorizada y un flujo en el que cada cifra se genera desde los datos. Como trabajo futuro: una ablación del número "
-                 "de hijos, los otros dos híbridos que ya están evaluados en el documento, más años y sitios, híbridos de alto nivel "
-                 "y la formulación multiobjetivo.")
+    set_notes(s, "[0:50] El aporte a la Ingeniería Informática tiene cuatro piezas. Un híbrido implementado sin tocar a sus "
+                 "padres y bajo un contrato de presupuesto que ningún algoritmo puede eludir. Un óptimo exacto por enumeración "
+                 f"vectorizada en {N_INST} instancias, que convierte la comparación en una medición contra un valor conocido. El "
+                 "protocolo estadístico implementado como un módulo reutilizable. Y un flujo en el que tablas, figuras y estas "
+                 "mismas láminas se generan desde los datos. Como trabajo futuro: una ablación del número de hijos; más "
+                 "instancias, años y sitios para ganar potencia, y varios presupuestos, porque el orden depende del que se fije; "
+                 "ajuste de hiperparámetros con presupuesto declarado; otros "
+                 "esquemas de hibridación; y la formulación multiobjetivo.")
 
-    # =========================================================== 26. CIERRE (ex 25)
+    # ==== 29. CIERRE (ex 25)
     s = S(25)
-    set_text(s, "TextBox 4", "Un híbrido validado contra un óptimo conocido, con el mismo presupuesto que sus padres.")
+    set_text(s, "TextBox 4", "Un híbrido medido contra un óptimo conocido, con el mismo presupuesto que sus padres y las preguntas fijadas antes de correr las instancias nuevas.")
     set_text(s, "TextBox 5", "Gracias. ¿Preguntas?")
-    set_notes(s, "[0:30] En síntesis: un híbrido validado contra un óptimo conocido, con el mismo presupuesto que sus padres, y una "
-                 "respuesta honesta sobre lo que aporta y lo que no. Muchas gracias; quedo atento a sus preguntas.")
+    set_notes(s, "[0:30] En síntesis: un híbrido medido contra un óptimo conocido, con el mismo presupuesto que sus padres y con "
+                 "las preguntas estadísticas fijadas antes de correr las instancias nuevas; y una respuesta que distingue lo que la "
+                 "evidencia respalda de lo que no. Muchas gracias; quedo atento a sus preguntas.")
 
-    # =========================================================== RESPALDO
+    # ======================================================================================
+    # RESPALDO
+    # ======================================================================================
+    # ==== R1. VALIDACIÓN DEL MODELO CONTRA LI ET AL. (ex 11)
+    s = S(11)
+    set_text(s, "TextBox 3", "RESPALDO · VALIDACIÓN DEL MODELO")
+    ajustar_titulo(s)
+    set_notes(s, "[RESPALDO] Usar si preguntan por el simulador. Reconstrucción del modelo de Li et al. (2024) contrastada con "
+                 "sus indicadores publicados; es una reproducción parcial, no una equivalencia, y es el mismo simulador para "
+                 "los siete algoritmos, las ocho instancias y la fuerza bruta.")
+
+    # ==== R2–R9. CALIDAD FINAL POR INSTANCIA (molde 26)
     for c in codes:
         s = s_calidad[c]
-        set_text(s, "TextBox 4", f"Calidad final completa en {c} ({etiqueta[c]})")
-        rk = d["rank"][d["rank"]["instance"] == c].sort_values("ranking_descriptivo")
+        titulo(s, "RESPALDO · CALIDAD FINAL", f"Calidad final en {c} ({etiqueta[c]})")
+        marca_provisional(s, d)
+        rk = d["sum"][d["sum"]["instance"] == c].sort_values("ranking_descriptivo")
         filas = [["Algoritmo", "Mediana", "IQR", "Mejor", "Peor", "Brecha med. %", "≤ 0,1 %", "≤ 0,5 %", "≤ 1 %"]]
         for _, r in rk.iterrows():
             filas.append([lab(r["algorithm"]), num(r["median"], 6), num(r["iqr"], 6), num(r["best"], 6), num(r["worst"], 6),
                           num(r["median_gap_pct"], 3), pct(r["success_0.1pct"], 0), pct(r["success_0.5pct"], 0), pct(r["success_1.0pct"], 0)])
-        fill_table(s, "Table 5", filas, [1.1, 1.0, 1.0, 1.0, 1.0, 1.1, 0.9, 0.9, 0.9], font_pt=8.5, row_height_in=0.24)
+        fill_table(s, "Table 5", filas, [1.1, 1.0, 1.0, 1.0, 1.0, 1.1, 0.9, 0.9, 0.9], font_pt=10, row_height_in=0.3)
         o = bf.loc[c]
-        set_text(s, "TextBox 6", f"LCOE en CNY/kWh. Brecha respecto del óptimo exacto de {c} ({num(o['optimum_lcoe_cny_per_kwh'], 6)}; W={num(o['optimum_wind_mw'], 2)}, E={num(o['optimum_electrolyzer_mw'], 1)}, B={num(o['optimum_battery_mw'], 1)} MW × {num(o['optimum_battery_duration_h'], 0)} h). {replicas} ejecuciones por algoritmo. Factibles mínimas por algoritmo: {int(rk['feasible_runs'].min())}/{replicas}.")
-        set_notes(s, f"[RESPALDO] Usar si preguntan por valores exactos en {c} o por los seis clásicos. Mediana, IQR, mejor, peor, brecha mediana al óptimo exacto y tasas de éxito de los nueve algoritmos.")
+        corridas_c = int(rk["runs"].max()) if len(rk) else 0
+        set_text(s, "TextBox 6", f"LCOE en CNY/kWh. Brecha respecto del óptimo exacto de {c} ({num(o['optimum_lcoe_cny_per_kwh'], 6)}; "
+                                 f"W = {num(o['optimum_wind_mw'], 2)} MW, E = {num(o['optimum_electrolyzer_mw'], 1)} MW, B = {num(o['optimum_battery_mw'], 1)} MW × {num(o['optimum_battery_duration_h'], 0)} h). "
+                                 f"{corridas_c} corridas por algoritmo; factibles, como mínimo, {int(rk['feasible_runs'].min()) if len(rk) else 0} de {corridas_c}. "
+                                 "Las tres últimas columnas son la fracción de corridas a menos de esa brecha.")
+        set_notes(s, f"[RESPALDO] Usar si preguntan por valores exactos en {c}. Mediana, IQR, mejor, peor, brecha mediana al "
+                     f"óptimo exacto y tasas de éxito de los {len(rk)} algoritmos, ordenados por mediana.")
 
-    s = s_otros
-    set_text(s, "TextBox 3", "RESPALDO")
-    set_text(s, "TextBox 4", "Los otros dos híbridos: GA+LS y SHO+LS")
-    replace_picture(s, "Picture 5", FIGS_PRES / "pres_hibrido_vs_padre.png")
-    filas = [["Par"] + codes]
-    for h, p in HYBRID_PAIRS:
-        fila = ["{} vs {}".format(lab(h), lab(p))]
-        for c in codes:
-            sub = hyb[(hyb["instance"] == c) & (hyb["hibrido"] == h) & (hyb["padre"] == p)]
-            fila.append("--" if sub.empty else num(sub.iloc[0]["a12_hibrido_vs_padre"], 2) + ("*" if truthy(sub.iloc[0]["significativo_alpha_0.05"]) else ""))
-        filas.append(fila)
-    fill_table(s, "Table 6", filas, [1.55, 0.55, 0.55, 0.55, 0.55], font_pt=9.5, row_height_in=0.3)
-    n_win = int(hyb["hibrido_mejor_mediana"].map(truthy).sum())
-    n_sig = int(hyb["significativo_alpha_0.05"].map(truthy).sum())
-    set_text(s, "TextBox 7", [["GA+LS y SHO+LS ", "añaden una búsqueda local lamarckiana (4 solicitudes por generación) al mejor individuo o a la presa."],
-                              ["Resultado: ", f"el híbrido mejora la mediana de su padre en {n_win} de {len(hyb)} contrastes y {n_sig} son significativos. SHO+LS es primero en I2 y sexto en I3."]])
-    set_notes(s, "[RESPALDO] Usar si preguntan por los otros híbridos. GA+LS y SHO+LS están implementados y evaluados en el documento con la misma infraestructura; la búsqueda local rinde en la instancia de región estrecha (I2) y se resta a la exploración en la de catálogos finos (I3).")
-
+    # ==== R10. HIPERPARÁMETROS DE LOS SIETE (ex 27)
     s = S(27)
-    set_text(s, "TextBox 4", "Configuración de los nueve algoritmos")
+    titulo(s, "RESPALDO · CONFIGURACIÓN", "Configuración de los siete algoritmos")
     filas = [["Código", "Familia", "Configuración"]]
     for _, r in d["hyper"].iterrows():
-        filas.append([lab(r["codigo"]), str(r["familia"]), str(r["hiperparametros"])])
-    fill_table(s, "Table 5", filas, [1.0, 1.9, 6.1], font_pt=7.5, row_height_in=0.235)
-    set_text(s, "TextBox 6", [f"Población {int(meta['population'])} × {int(meta['iterations'])} iteraciones = {presupuesto} solicitudes por ejecución · semillas de réplica 42–71 · flujo propio por algoritmo y réplica, independiente de la instancia · sin ajuste posterior.",
-                              "PSO+GA: 5 hijos por iteración, sin memoria. Búsqueda local (GA+LS, SHO+LS): 4 solicitudes por generación, δW del 1 % del rango a 0,01 MW."])
-    set_notes(s, "[RESPALDO] Usar si preguntan por hiperparámetros. Valores canónicos de la literatura; nada se reajusta para los híbridos.")
+        filas.append([lab(r["codigo"]), acentuar(r["familia"]), acentuar(r["hiperparametros"])])
+    fill_table(s, "Table 5", filas, [1.0, 1.9, 6.1], font_pt=9.5, row_height_in=0.3)
+    set_text(s, "TextBox 6", [f"Población {POB} × {ITER} iteraciones = {PRESUPUESTO} solicitudes por corrida · semillas de réplica {SEMILLAS} · flujo aleatorio propio por algoritmo y réplica · sin ajuste posterior.",
+                              f"PSO+GA: {HIJOS} hijos por iteración, sin memoria; PSO y operadores del GA con los mismos valores que sus versiones puras."])
+    set_notes(s, "[RESPALDO] Usar si preguntan por hiperparámetros. Valores canónicos de la literatura; nada se reajusta para el híbrido.")
 
-    s = S(28)
-    set_text(s, "TextBox 4", f"Cada metaheurística frente a RANDOM en {codes[0]}")
-    planned = d["tests"][(d["tests"]["family"] == "planned") & (d["tests"]["algoritmo_b"] == "random") & (d["tests"]["instance"] == codes[0])]
-    filas = [["Algoritmo", "p (Mann–Whitney)", "p ajustado (Holm)", "A12 vs RANDOM", "IC 95 % bootstrap", "Lectura"]]
-    for _, r in planned.iterrows():
-        sig = truthy(r["significativo_alpha_0.05"])
-        lectura = ("ventaja detectable" if sig and r["a12"] > 0.5 else "desventaja detectable" if sig else "sin diferencia detectable")
-        filas.append([lab(r["algoritmo_a"]), pvalor(r["p_value"]), pvalor(r["p_value_holm"]), num(r["a12"], 2),
-                      f"[{num(r['a12_ci_low'], 2)}; {num(r['a12_ci_high'], 2)}]", lectura])
-    fill_table(s, "Table 5", filas, [1.1, 1.5, 1.5, 1.3, 1.6, 2.0], font_pt=8.5, row_height_in=0.24)
-    set_text(s, "TextBox 6", ["A12 = probabilidad de que el algoritmo logre menor LCOE que RANDOM en un enfrentamiento al azar. Holm dentro de la familia planificada de 12 contrastes por instancia (8 frente a RANDOM + 4 híbrido frente a padre).",
-                              "Las otras instancias y la matriz completa de 36 pares están en el documento (anexo de contrastes)."])
-    set_notes(s, "[RESPALDO] Usar si preguntan por los valores p o por la corrección. GA y GA+LS no se distinguen de RANDOM en ninguna instancia; los demás sí.")
+    # ==== R11. PSO+GA FRENTE A GWO, SHO Y WOA
+    s = s_resto
+    tot_r = totales_p1(d, RESTO_CONTROL)
+    titulo(s, "RESPALDO · P1 Y P2", "PSO+GA frente a GWO, SHO y WOA: {} +, {} ≈ y {} − por instancia".format(tot_r["+"], tot_r["="], tot_r["-"]), dos_lineas=True)
+    marca_provisional(s, d)
+    add_fig(s, "pres_a12_control_resto.png", 0.5, 1.12)
+    for k, b in enumerate(RESTO_CONTROL):
+        add_label(s, 0.5 + 9.0 * 0.05 + k * ancho_panel * 1.07, 3.76, ancho_panel, 0.26,
+                  [frase_p1(d, b, sujeto=False)], size=10.5, color=COLOR_ALG[b], align=PP_ALIGN.CENTER, ajustar=True)
+    add_label(s, 0.5, 4.1, 9.0, 0.62, [["En general (Wilcoxon, Holm): ", "; ".join(
+        "frente a {}, {} ({})".format(lab(b), LECTURA_P2[veredicto_p2(fila_p2(d, H, b))].format(a="PSO+GA"),
+                                      "p Holm = " + pvalor(fila_p2(d, H, b)["p_value_holm"]) if fila_p2(d, H, b) is not None else "sin datos")
+        for b in RESTO_CONTROL) + "."],
+        ["Lectura: ", "contrastes de la familia de control que no son confirmatorios; misma prueba y misma corrección que en el cuerpo."]],
+        size=9.5, ajustar=True)
+    set_notes(s, "[RESPALDO] Usar si preguntan por el híbrido frente a los otros clásicos. Por instancia: "
+                 + voz_p1_grupo(d, RESTO_CONTROL) + " En general: " + voz_p2_grupo(d, RESTO_CONTROL)
+                 + " " + respuesta_recorte(d))
 
-    s = s_matrices
-    set_text(s, "TextBox 3", "RESPALDO")
-    set_text(s, "TextBox 4", "Todos los pares: matrices A12 por instancia")
-    replace_picture(s, "Picture 5", FIGS_TESIS / "fig11_matrices_a12.png")
-    n_all = d["tests"][d["tests"]["family"] == "all"]
-    sig_all = {c: int(n_all[n_all["instance"] == c]["significativo_alpha_0.05"].map(truthy).sum()) for c in codes}
-    set_text(s, "TextBox 8", "Los 36 pares, con Holm sobre los 36")
-    set_text(s, "TextBox 9", "Pares significativos: " + "; ".join("{}: {}".format(c, sig_all[c]) for c in codes) + ".")
-    set_text(s, "TextBox 11", [["¿Por qué una familia planificada? ", "Con 36 pares, Holm exige p muy pequeños y sacrifica potencia en contrastes que no interesan; los 12 planificados responden las preguntas de la tesis."]])
-    set_text(s, "TextBox 13", "El ranking por mediana es descriptivo; la inferencia es por instancia.")
-    set_text(s, "TextBox 14", "Mann–Whitney bilateral · Holm · A12 con IC bootstrap al 95 %")
-    set_notes(s, "[RESPALDO] Usar si preguntan por las comparaciones entre metaheurísticas.")
+    # ==== R12. CADA CLÁSICA FRENTE A RANDOM
+    s = s_base
+    n_aprenden = [a for a in CLASICAS if veredicto_p2(fila_p2(d, a, "random")) == "mejor"]
+    titulo(s, "RESPALDO · LÍNEA BASE", "Frente a RANDOM, en general: {} de {} clásicas con ventaja significativa".format(len(n_aprenden), len(CLASICAS)), dos_lineas=True)
+    marca_provisional(s, d)
+    add_fig(s, "pres_a12_linea_base.png", 0.5, 1.12)
+    ancho5 = 9.0 * 0.94 / 5.28               # geometría de fig_a12 con cinco paneles
+    for k, a in enumerate(CLASICAS):
+        c = conteo_p1(d, a, "random")
+        add_label(s, 0.5 + 9.0 * 0.05 + k * ancho5 * 1.07, 3.76, ancho5, 0.26,
+                  ["+ {} · ≈ {} · − {}".format(len(c["+"]), len(c["="]), len(c["-"]))], size=10.5, color=COLOR_ALG[a], align=PP_ALIGN.CENTER)
+    add_label(s, 0.5, 4.1, 9.0, 0.62, [["En general (Wilcoxon, Holm en la familia «línea base»): ", "; ".join(
+        "{} {}".format(lab(a), "p = " + pvalor(fila_p2(d, a, "random")["p_value_holm"]) if fila_p2(d, a, "random") is not None else "sin datos")
+        for a in CLASICAS) + "."],
+        ["Lectura: ", "«+» la metaheurística es significativamente mejor que la búsqueda aleatoria en esa instancia; «≈» sin evidencia de diferencia."]],
+        size=9.5, ajustar=True)
+    set_notes(s, "[RESPALDO] Usar si preguntan si las clásicas aprenden. Familia «línea base»: cada clásica frente a RANDOM. "
+                 + voz_base_grupo(d))
 
-    s = S(19)
-    set_text(s, "TextBox 5", f"Las {replicas} ejecuciones de cada algoritmo dan valores distintos. Antes de afirmar que uno es mejor, tres preguntas por instancia.")
-    set_text(s, "TextBox 10", "Mira los nueve grupos juntos y responde sí o no, sin decir entre quiénes.")
-    set_text(s, "TextBox 11", "Resultado por instancia en el documento")
-    set_text(s, "TextBox 17", "12 contrastes planificados por instancia")
-    set_text(s, "TextBox 25", [["Corrección de Holm: ", "dentro de la familia planificada (8 frente a RANDOM + 4 híbrido frente a padre). La matriz completa de 36 pares, con Holm sobre los 36, va al anexo."]])
-    set_notes(s, "[RESPALDO] Usar si preguntan cómo se hace la inferencia: Kruskal-Wallis global, Mann-Whitney por pares, A12 como tamaño de efecto y Holm dentro de la familia planificada.")
+    # ==== R13. RANGOS POR INSTANCIA (molde 26)
+    s = s_rangos
+    titulo(s, "RESPALDO · P3", "Rangos por instancia del contraste de Friedman")
+    marca_provisional(s, d)
+    cols_rango = [c for c in codes if "rank_" + c in d["ranks"].columns]
+    filas = [["Algoritmo"] + cols_rango + ["Rango medio"]]
+    for _, r in d["ranks"].iterrows():
+        filas.append([lab(r["algorithm"])] + [num(r["rank_" + c], 1).replace(",0", "") for c in cols_rango] + [num(r["mean_rank"], 2)])
+    t = fill_table(s, "Table 5", filas, [1.5] + [6.2 / max(len(cols_rango), 1)] * len(cols_rango) + [1.3], font_pt=10.5, row_height_in=0.31)
+    for i, (_, r) in enumerate(d["ranks"].iterrows(), 1):
+        if r["algorithm"] == H:
+            for j in range(len(filas[0])):
+                pintar_celda(t.cell(i, j), fill=GRIS_SUAVE, bold=True)
+    set_text(s, "TextBox 6", f"Rango de cada algoritmo por brecha mediana (con tolerancia ε = {eps}) en cada instancia; 1 = mejor, los empates comparten rango. "
+                             f"Friedman: {frase_friedman(d)}. Iman–Davenport: {frase_iman(d)}. Diferencia crítica de Nemenyi: {num(q3['cd'], 2)}.")
+    set_notes(s, "[RESPALDO] Usar si preguntan de dónde sale el diagrama de diferencia crítica: son los rangos por instancia sobre la brecha mediana.")
 
+    # ==== R14. OPERACIÓN DE TRES DÍAS (ex 10)
     s = S(10)
-    set_text(s, "TextBox 3", "RESPALDO")
-    set_notes(s, "[RESPALDO] Usar si preguntan cómo opera un diseño: tres días de mayo del mejor diseño de la comparativa previa en I1, en la región del óptimo exacto.")
+    set_text(s, "TextBox 3", "RESPALDO · OPERACIÓN")
+    ajustar_titulo(s)
+    set_notes(s, "[RESPALDO] Usar si preguntan cómo opera un diseño: tres días de mayo de un diseño de la instancia de referencia, del estudio de avance.")
 
+    # ==== R15–R17. SENSIBILIDAD, SUPUESTOS Y PARÁMETROS (ex 29, 30, 31: intactas)
     for n in (29, 30, 31):
         s = S(n)
+        ajustar_titulo(s)                  # el texto no cambia; solo el cuerpo de letra si no cabe en una línea
         set_notes(s, s.notes_slide.notes_text_frame.text if s.has_notes_slide else "[RESPALDO]")
 
-    # =========================================================== ORDEN FINAL
-    cuerpo = [S(1), S(2), S(3), s_pregunta, s_pipe_exp, s_pipe_alg, s_pipe_detalle, s_padres, S(12),
-              S(6), S(9), S(5), s_instancias, s_optimo, S(11),
-              S(8), s_correcto, S(15), S(16), s_exito, s_aporte, S(4), s_presupuesto,
-              S(13), S(23), s_futuro, S(25)]
-    respaldo = [s_calidad[c] for c in codes] + [s_otros, S(27), S(28), s_matrices, S(19), S(10), S(29), S(30), S(31)]
+    # ======================================================================================
+    # ORDEN FINAL
+    # ======================================================================================
+    cuerpo = [S(1), S(2),
+              S(3), S(4), S(9), S(5), S(7),
+              S(6), s_padres, s_pipe_alg, s_pipe_detalle, S(12),
+              S(8), s_protocolo, s_instancias, s_justas, s_mapa,
+              S(13), s_conv, s_brecha, s_a12, s_p1_tabla, s_p2, s_p3, s_lectura,
+              S(22), S(23), s_futuro, S(25)]
+    respaldo = ([S(11)] + [s_calidad[c] for c in codes]
+                + [S(27), s_resto, s_base, s_rangos, S(10), S(29), S(30), S(31)])
     reorder_and_prune(prs, cuerpo + respaldo)
 
-    DESTINO.parent.mkdir(parents=True, exist_ok=True)
-    # Si el destino esta abierto en PowerPoint se escribe al lado con otro nombre
-    # (primero _nuevo, luego _v2, _v3, ...) y se avisa para renombrar al cerrar.
-    candidatos = [DESTINO, DESTINO.with_name(DESTINO.stem + "_nuevo.pptx")]
-    candidatos += [DESTINO.with_name(DESTINO.stem + f"_v{n}.pptx") for n in range(2, 20)]
-    destino = None
-    for candidato in candidatos:
-        try:
-            prs.save(str(candidato))
-        except PermissionError:
-            continue
-        destino = candidato
-        break
-    if destino is None:
-        raise PermissionError("todos los nombres de salida estan bloqueados; cierre PowerPoint")
-    if destino != DESTINO:
-        print("AVISO: el destino estaba bloqueado; cierre los archivos en PowerPoint y renombre", destino.name)
-    print(destino, "->", len(cuerpo), "diapositivas de cuerpo +", len(respaldo), "de respaldo")
+    args.salida.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        prs.save(str(args.salida))
+    except PermissionError:
+        raise SystemExit(f"No se pudo escribir {args.salida.name}: está abierto en PowerPoint. Ciérrelo y vuelva a ejecutar.")
+
+    # ---- Esquema y tiempos (las notas del cuerpo empiezan con [m:ss]) --------------------
+    total = 0
+    for n, slide in enumerate(cuerpo + respaldo, 1):
+        nota = slide.notes_slide.notes_text_frame.text if slide.has_notes_slide else ""
+        m = re.match(r"\[(\d+):(\d\d)\]", nota)
+        total += int(m.group(1)) * 60 + int(m.group(2)) if m else 0
+        etiqueta_t = m.group(0) if m else "[resp.]"
+        textos = [sh.text_frame.text for sh in slide.shapes if sh.has_text_frame and sh.name in ("TextBox 4", "TextBox 5", "TextBox 8")]
+        nombre = next((t for t in textos if len(t) > 3), textos[0] if textos else "")
+        print(f"{n:>2} {etiqueta_t:>8}  {nombre[:95]}")
+    print("{} -> {} láminas de cuerpo ({}:{:02d} min) + {} de respaldo".format(
+        args.salida, len(cuerpo), total // 60, total % 60, len(respaldo)))
+    if d["provisional"]:
+        print("AVISO:", d["aviso"], "- las láminas de resultados llevan la marca; vuelva a ejecutar con la corrida completa.")
 
 
 if __name__ == "__main__":

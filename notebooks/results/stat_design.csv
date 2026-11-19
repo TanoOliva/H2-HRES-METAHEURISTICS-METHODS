@@ -1,0 +1,2 @@
+alpha,eps_gap_pct,n_boot,control,baseline,n_instances,n_algorithms,replicates,tests_per_instance,tests_global,tests_omnibus,tests_total
+0.05,0.01,5000,pso_ga,random,8,7,30,88,11,1,100

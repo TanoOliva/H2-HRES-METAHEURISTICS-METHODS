@@ -1,8 +1,9 @@
 \chapter{Resultados}
 
-Este capítulo presenta los resultados en seis bloques: reproducción de Li et al. \cite{Li2024WPEB}, óptimo exacto de cada instancia, comparación de los nueve algoritmos dentro de cada instancia, lectura transversal, híbridos frente a sus padres y sensibilidad. Todas las cifras producidas por esta investigación se generan desde los archivos CSV exportados por el cuaderno; los dos valores transcritos directamente de la fuente se identifican como tales.
+Este capítulo presenta los resultados en cinco bloques: reproducción de Li et al. \cite{Li2024WPEB}, óptimo exacto de cada instancia, comparación estadística de los siete algoritmos, sensibilidad y verificaciones. La comparación sigue el orden del protocolo de la Sección~\ref{sec:protocolo_estadistico}: exploración de los datos, comparación instancia por instancia (P1), comparación en general (P2), contraste conjunto de los siete algoritmos (P3) y uso del presupuesto. Todas las cifras producidas por esta investigación se generan desde los archivos CSV exportados por el cuaderno; los dos valores transcritos directamente de la fuente se identifican como tales.
 
 \section{Reproducción del modelo publicado}
+\label{sec:reproduccion}
 
 \subsection{Recurso meteorológico y casos de contraste}
 
@@ -16,7 +17,7 @@ Los errores no respaldan una declaración de reproducción exacta. La mayoría d
 
 La Tabla~\ref{tab:casos_auto} separa magnitudes energéticas y económicas del juicio de factibilidad. Cuando AGSR supera 0,20, la conclusión correcta es que la configuración excede el límite \emph{bajo los datos y el despacho reconstruidos}; no demuestra que la solución publicada sea intrínsecamente infactible.
 
-El LCOH no admite una validación directa. Li et al. informa para W190 dos cifras incompatibles, 10,6248 CNY/kg en la Sección 3.2 y 14,1574 CNY/kg en las conclusiones. Además, la asignación de costos no puede reconstruirse inequívocamente a partir del artículo de 2024 y su antecedente de 2023 \cite{Li2023TechnoEconomic}. En consecuencia, el cuaderno reporta $\mathrm{LCOH}_{\mathrm{tesis}}$ como indicador secundario y no lo usa para afirmar concordancia con la fuente.
+El LCOH no admite una validación directa. Li et al. informan para W190 dos cifras incompatibles, 10,6248 CNY/kg en la Sección 3.2 y 14,1574 CNY/kg en las conclusiones. Además, la asignación de costos no puede reconstruirse inequívocamente a partir del artículo de 2024 y su antecedente de 2023 \cite{Li2023TechnoEconomic}. En consecuencia, el cuaderno reporta $\mathrm{LCOH}_{\mathrm{tesis}}$ como indicador secundario y no lo usa para afirmar concordancia con la fuente.
 
 \begin{table}[H]
 \centering
@@ -34,6 +35,7 @@ Conclusiones & 14,1574 \\
 \end{table}
 
 \subsection{Efecto del año bisiesto y de la altura del viento}
+\label{sec:sens_horizonte}
 
 \TablaHorizonteAuto
 
@@ -50,6 +52,7 @@ La extrapolación desde 50 m hasta 105 m altera simultáneamente generación, AG
 La discrepancia preliminar de hasta 95,16\,\% se conserva como antecedente. La reducción posterior del error coincide con cambios documentados en horizonte, escalamiento de la capacidad eólica y auditoría de supuestos. Esta trazabilidad evita presentar la versión final como si hubiera sido obtenida sin iteraciones y, al mismo tiempo, impide atribuir inequívocamente la discrepancia inicial a una sola causa.
 
 \section{Las instancias y su óptimo exacto}
+\label{sec:optimos}
 
 \subsection{Malla base de Li et al.}
 
@@ -68,97 +71,159 @@ La Tabla~\ref{tab:fuerza_bruta_auto} resume la enumeración completa de cada ins
 
 \TablaFuerzaBrutaAuto
 
-Los óptimos exactos son LCOE $=\BFALCOE$ CNY/kWh en I1 ($W=\BFAWind$ MW, $E=\BFAElectrolyzer$ MW, batería de \BFABattery{} MW durante \BFADuration{} h), \BFBLCOE{} en I2 ($W=\BFBWind$, $E=\BFBElectrolyzer$, \BFBBattery{} MW $\times$ \BFBDuration{} h), \BFCLCOE{} en I3 ($W=\BFCWind$, $E=\BFCElectrolyzer$, \BFCBattery{} MW $\times$ \BFCDuration{} h) y \BFDLCOE{} en I4 ($W=\BFDWind$, $E=\BFDElectrolyzer$, \BFDBattery{} MW $\times$ \BFDDuration{} h). En las cuatro instancias el óptimo se sitúa sobre el borde de la restricción C5, con AGSR de \BFAAGSR, \BFBAGSR, \BFCAGSR{} y \BFDAGSR{} respectivamente, y el diseño un paso de malla más allá en $W$ viola esa restricción: la fracción vendida a la red es lo que detiene la mejora, no el costo. Reducir el límite a 0,10 (I2) encarece el óptimo en más de un diez por ciento y desplaza el diseño hacia menos eólica y más electrólisis; refinar los catálogos (I3) permite un óptimo marginalmente mejor que el de I1 al disponer de combinaciones intermedias; y la escala de 300 MW (I4) reduce el LCOE por el reparto del almacenamiento de hidrógeno fijo sobre más energía.
+En la instancia de referencia I1 el óptimo exacto es un LCOE de \BFALCOE{} CNY/kWh, con $W=\text{\BFAWind}$ MW, $E=\text{\BFAElectrolyzer}$ MW y una batería de \BFABattery{} MW durante \BFADuration{} h. Los óptimos de las demás instancias son \BFBLCOE{} (I2), \BFCLCOE{} (I3), \BFDLCOE{} (I4), \BFELCOE{} (I5), \BFFLCOE{} (I6), \BFGLCOE{} (I7) y \BFHLCOE{} CNY/kWh (I8); la Tabla~\ref{tab:fuerza_bruta_auto} da el diseño completo de cada uno.
+
+En las ocho instancias el óptimo se sitúa sobre el borde de la restricción C5: el AGSR del diseño óptimo queda a menos de \OptimumAgsrSlackBound{} de su límite (0,20 en I1, I3, I4 e I5; 0,10 en I2, I6 e I7; 0,30 en I8), y el diseño un paso de malla más allá en $W$ la viola en todas ellas. La fracción vendida a la red es lo que detiene la mejora, no el costo.
+
+Tres regularidades ordenan esos óptimos. La primera es el límite de ventas a red: a 200 MW el LCOE óptimo pasa de \BFHLCOE{} con el límite de 0,30 (I8) a \BFALCOE{} con 0,20 (I1) y a \BFBLCOE{} con 0,10 (I2), mientras la capacidad eólica óptima se reduce de \BFHWind{} a \BFAWind{} y \BFBWind{} MW; el mismo sentido se observa a 100 MW, de \BFELCOE{} (I5) a \BFFLCOE{} (I6), y a 300 MW, de \BFDLCOE{} (I4) a \BFGLCOE{} (I7). Estrechar la restricción desplaza el diseño hacia menos eólica y más fotovoltaica y lo encarece. La segunda es la finura de los catálogos: I3 dispone de combinaciones intermedias que I1 no tiene, y su óptimo es \BFCLCOE{} frente a \BFALCOE{} en I1. La tercera es la escala: con el límite de 0,20, el LCOE óptimo es \BFELCOE{} a 100 MW (I5), \BFALCOE{} a 200 MW (I1) y \BFDLCOE{} a 300 MW (I4), lo que es coherente con el reparto del almacenamiento de hidrógeno fijo sobre más energía.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.98\textwidth]{figures/fig10_envolvente_fuerza_bruta.png}
+\includegraphics[width=\textwidth,height=0.80\textheight,keepaspectratio]{figures/fig10_envolvente_fuerza_bruta.png}
 \caption{Envolvente inferior de la fuerza bruta por instancia: mejor LCOE factible entre todos los catálogos para cada valor de $W$. La estrella es el óptimo exacto y el marcador coloreado la mejor corrida estocástica de la instancia.}
 \label{fig:envolvente}
 \end{figure}
 
-La Figura~\ref{fig:envolvente} muestra la geometría que los algoritmos deben recorrer: la envolvente sólo existe donde hay diseños factibles, desciende suavemente hasta el óptimo y termina abruptamente en el borde de C5. La Tabla~\ref{tab:comparacion_optimo_auto} compara el óptimo exacto con la mejor corrida estocástica de cada instancia; las brechas son de \BestRunAGapPct\,\% (I1, \BestRunAAlgorithm), \BestRunBGapPct\,\% (I2, \BestRunBAlgorithm), \BestRunCGapPct\,\% (I3, \BestRunCAlgorithm) y \BestRunDGapPct\,\% (I4, \BestRunDAlgorithm). Una brecha negativa significa que el optimizador, con $W$ continuo, halló un diseño entre dos nodos de la malla de 0,01 MW.
+La Figura~\ref{fig:envolvente} muestra la geometría que los algoritmos deben recorrer: la envolvente sólo existe donde hay diseños factibles, desciende suavemente hasta el óptimo y termina abruptamente en el borde de C5. La Tabla~\ref{tab:comparacion_optimo_auto} compara el óptimo exacto con la mejor de las corridas estocásticas de cada instancia, que corresponde a \BestRunAAlgorithm{} en I1 (brecha de \BestRunAGapPct\,\%), \BestRunBAlgorithm{} en I2 (\BestRunBGapPct\,\%), \BestRunCAlgorithm{} en I3 (\BestRunCGapPct\,\%), \BestRunDAlgorithm{} en I4 (\BestRunDGapPct\,\%), \BestRunEAlgorithm{} en I5 (\BestRunEGapPct\,\%), \BestRunFAlgorithm{} en I6 (\BestRunFGapPct\,\%), \BestRunGAlgorithm{} en I7 (\BestRunGGapPct\,\%) y \BestRunHAlgorithm{} en I8 (\BestRunHGapPct\,\%). Una brecha negativa significa que el optimizador, con $W$ continuo, halló un diseño entre dos nodos de la malla de 0,01 MW; el análisis estadístico trata como cero toda brecha que no supere la tolerancia $\varepsilon$. La mejor corrida es el extremo de todas las ejecuciones de una instancia y no describe el comportamiento típico de ningún algoritmo, que es el objeto de la sección siguiente: en cada instancia, entre tres y seis de los siete algoritmos tienen al menos una ejecución dentro de la tolerancia, de modo que el nombre que encabeza esta comparación no distingue a un método de otro.
 
 \TablaComparacionOptimoAuto
 
-\section{Comparación de los optimizadores por instancia}
+\section{Comparación estadística de los optimizadores}
+\label{sec:comparacion}
 
-Se ejecutaron \TotalRuns{} corridas y \TotalDesignRequests{} solicitudes de evaluación de diseños anuales. Cada una recorre 8.760 pasos horarios, por lo que el total solicitado equivale aproximadamente a \RequestedHourlySteps{} pasos; las propuestas duplicadas se contabilizan dentro del presupuesto aunque la memoria intermedia evite repetir la simulación. Las Figuras~\ref{fig:convergencia} y~\ref{fig:dispersion} muestran la convergencia y la distribución final en las cuatro instancias; las tablas siguientes detallan cada una.
+Se ejecutaron \TotalRuns{} corridas y \TotalDesignRequests{} solicitudes de evaluación de diseños anuales: \NAlgorithms{} algoritmos, \NInstances{} instancias y \Replicates{} réplicas por algoritmo e instancia, con \RequestsPerRun{} solicitudes por corrida. Cada solicitud recorre 8.760 pasos horarios, por lo que el total solicitado equivale aproximadamente a \RequestedHourlySteps{} pasos; las propuestas duplicadas se contabilizan dentro del presupuesto aunque la memoria intermedia evite repetir la simulación. El análisis comprende \StatTestsTotal{} contrastes: \StatTestsPerInstance{} en P1, \StatTestsGlobal{} en P2 y uno en P3, todos bilaterales con $\alpha=\text{\StatAlpha}$ y con la tolerancia $\varepsilon=\text{\StatEpsGapPct}$\,\% aplicada a la brecha.
+
+\subsection{Exploración de los datos}
+
+Las Figuras~\ref{fig:convergencia} y~\ref{fig:dispersion} muestran, para las ocho instancias, la convergencia y la distribución final de cada algoritmo. Las Tablas~\ref{tab:brecha_mediana_auto} y~\ref{tab:exito_medio_auto} las resumen con dos cifras por algoritmo e instancia: la brecha mediana respecto del óptimo exacto y el porcentaje de ejecuciones que terminan a 0,5\,\% o menos de él. Las tablas detalladas de cada instancia, con mediana, IQR, mejor y peor valor y las tres tasas de éxito, se recogen en el Anexo~\ref{anx:detalle}. La convergencia se analiza en la Sección~\ref{sec:convergencia}, después de los contrastes, porque su lectura depende de ellos.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.98\textwidth]{figures/fig05_convergencia.png}
+\includegraphics[width=\textwidth,height=0.80\textheight,keepaspectratio]{figures/fig05_convergencia.png}
 \caption{Mediana e intervalo intercuartílico del mejor LCOE factible a igual número de solicitudes, por instancia. La línea punteada es el óptimo exacto.}
 \label{fig:convergencia}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.98\textwidth]{figures/fig06_distribucion_scores.png}
+\includegraphics[width=\textwidth,height=0.80\textheight,keepaspectratio]{figures/fig06_distribucion_scores.png}
 \caption{Distribución del LCOE final de las \Replicates{} ejecuciones independientes por algoritmo e instancia, ordenadas por mediana dentro de cada instancia.}
 \label{fig:dispersion}
 \end{figure}
 
-\subsection{I1: instancia mixta de referencia}
+\TablaBrechaMedianaAuto
+\TablaExitoMedioAuto
 
-\TablaRankingAutoA
-\TablaExitoAutoA
-\TablaComputoAutoA
-\TablaParesPlanificadosAutoA
+Por brecha mediana, la primera posición corresponde a \TopMedianA{} en I1 (\TopMedianGapA\,\%), \TopMedianB{} en I2 (\TopMedianGapB\,\%), \TopMedianC{} en I3 (\TopMedianGapC\,\%), \TopMedianD{} en I4 (\TopMedianGapD\,\%), \TopMedianE{} en I5 (\TopMedianGapE\,\%), \TopMedianF{} en I6 (\TopMedianGapF\,\%), \TopMedianG{} en I7 (\TopMedianGapG\,\%) y \TopMedianH{} en I8 (\TopMedianGapH\,\%): SHO encabeza cinco instancias y GWO las otras tres, siempre con una brecha mediana inferior al 0,4\,\%. La última posición corresponde a la búsqueda aleatoria en siete instancias y a GA en I6, donde la búsqueda aleatoria queda sexta. El híbrido PSO+GA ocupa el quinto lugar en siete instancias y el sexto en I5. Las \Replicates{} corridas de cada algoritmo en cada instancia terminaron en un diseño factible.
 
-Por mediana, \TopMedianA{} ocupa la primera posición con una brecha mediana de \TopMedianGapA\,\% respecto del óptimo exacto, seguido de \SecondMedianA; \BottomMedianA{} ocupa la última y la búsqueda aleatoria el lugar \RandomRankA{} con brecha mediana de \RandomMedianGapA\,\%. Frente a esa línea base, muestran ventaja detectable tras Holm \BetterThanRandomA; sin diferencia detectable, \NoDifferenceFromRandomA; con desventaja detectable, \WorseThanRandomA. Esta última categoría expresa ausencia de evidencia y no igualdad algorítmica. Entre los híbridos, superan la mediana de su padre \HybridsBeatParentA; los contrastes híbrido--padre significativos son \HybridsSignificantA.
+Estas posiciones son descriptivas. El orden por mediana no es el mismo en todas las instancias y la separación entre algoritmos vecinos es casi siempre menor que el rango intercuartílico de ambos (en \NeighborPairsWithinIqr{} de los \NeighborPairs{} pares de algoritmos contiguos en el orden de una instancia), de modo que la exploración plantea las preguntas que los contrastes siguientes responden, pero no las contesta.
 
-\subsection{I2: región factible estrecha}
+La prueba de Shapiro--Wilk rechaza la normalidad, al nivel \StatAlpha, en \ShapiroRejects{} de las \ShapiroTotal{} muestras formadas por un algoritmo en una instancia; las muestras sin variación tras aplicar la tolerancia, en las que el estadístico no está definido, se cuentan entre las que no rechazan. Como la normalidad no puede sostenerse para el conjunto de las muestras, y por las razones de diseño expuestas en el protocolo, todos los contrastes se basan en rangos.
 
-\TablaRankingAutoB
-\TablaExitoAutoB
-\TablaComputoAutoB
-\TablaParesPlanificadosAutoB
+\subsection{P1: comparación instancia por instancia}
 
-Con el límite de ventas a red reducido a la mitad, \TopMedianB{} ocupa la primera posición (brecha mediana \TopMedianGapB\,\%), seguido de \SecondMedianB; \BottomMedianB{} ocupa la última y la búsqueda aleatoria el lugar \RandomRankB{} (brecha mediana \RandomMedianGapB\,\%). Ventaja detectable frente a la línea base: \BetterThanRandomB; sin diferencia detectable: \NoDifferenceFromRandomB; desventaja detectable: \WorseThanRandomB. Superan la mediana de su padre \HybridsBeatParentB; contrastes híbrido--padre significativos: \HybridsSignificantB. Como mínimo \FeasibleRunsMinB{} de las \Replicates{} corridas de cada algoritmo terminaron en un diseño factible.
+P1 pregunta, para cada par planificado y cada instancia, si las distribuciones de la brecha de ambos algoritmos difieren. Las Tablas~\ref{tab:puno_pso}, \ref{tab:puno_ga} y~\ref{tab:puno_random} presentan los tres contrastes confirmatorios del híbrido, y la Figura~\ref{fig:a12_instancia} los seis contrastes de la familia de control. Las tablas de los tres contrastes de contexto, frente a GWO, SHO y WOA, están en el Anexo~\ref{anx:detalle}.
 
-\subsection{I3: catálogos finos}
-
-\TablaRankingAutoC
-\TablaExitoAutoC
-\TablaComputoAutoC
-\TablaParesPlanificadosAutoC
-
-Con cinco veces más combinaciones discretas sobre la misma región física, \TopMedianC{} ocupa la primera posición (brecha mediana \TopMedianGapC\,\%), seguido de \SecondMedianC; \BottomMedianC{} ocupa la última y la búsqueda aleatoria el lugar \RandomRankC{} (brecha mediana \RandomMedianGapC\,\%). Ventaja detectable frente a la línea base: \BetterThanRandomC; sin diferencia detectable: \NoDifferenceFromRandomC; desventaja detectable: \WorseThanRandomC. Superan la mediana de su padre \HybridsBeatParentC; contrastes híbrido--padre significativos: \HybridsSignificantC.
-
-\subsection{I4: escala de 300 MW}
-
-\TablaRankingAutoD
-\TablaExitoAutoD
-\TablaComputoAutoD
-\TablaParesPlanificadosAutoD
-
-A escala de 300 MW, \TopMedianD{} ocupa la primera posición (brecha mediana \TopMedianGapD\,\%), seguido de \SecondMedianD; \BottomMedianD{} ocupa la última y la búsqueda aleatoria el lugar \RandomRankD{} (brecha mediana \RandomMedianGapD\,\%). Ventaja detectable frente a la línea base: \BetterThanRandomD; sin diferencia detectable: \NoDifferenceFromRandomD; desventaja detectable: \WorseThanRandomD. Superan la mediana de su padre \HybridsBeatParentD; contrastes híbrido--padre significativos: \HybridsSignificantD.
-
-\section{Lectura transversal}
-
-\TablaRankingTransversalAuto
-
-El rango medio sobre las cuatro instancias sitúa en primer lugar a \BestMeanRankAlgorithm{} (rango medio \BestMeanRank) y en segundo a \SecondMeanRankAlgorithm{} (\SecondMeanRank); \WorstMeanRankAlgorithm{} ocupa el último lugar y la búsqueda aleatoria obtiene un rango medio de \RandomMeanRank. El orden es descriptivo: resume cuatro instancias paramétricas del mismo sitio y año, no una población de problemas, y las diferencias de rango entre algoritmos vecinos no son evidencia de superioridad. Las columnas de brecha y éxito medios permiten leer el mismo cuadro en términos prácticos: cuán lejos del óptimo queda una corrida típica y con qué frecuencia queda a menos de 0,5\,\% de él.
-
-Los mecanismos de movimiento ofrecen hipótesis para interpretar las curvas: memoria personal y social en PSO, tres líderes en GWO, recombinación en GA, cambios de rama o agrupación en WOA y SHO, intensificación local en GA+LS y SHO+LS, y diversidad estructurada en PSO+GA. Sin embargo, el experimento sólo contiene ablaciones para el componente añadido por cada híbrido; en los clásicos la explicación causal por operador se mantiene como vacío metodológico, no como conclusión demostrada.
-
-\section{Híbridos frente a sus padres}
-
-\TablaHibridosAuto
+\TablaPUnoAutoPso
+\TablaPUnoAutoGa
+\TablaPUnoAutoRandom
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.98\textwidth]{figures/fig07_contrastes_planificados.png}
-\caption{Contrastes planificados: $A_{12}$ con intervalo bootstrap al 95\,\% de cada metaheurística frente a RANDOM (izquierda) y de cada híbrido frente a su padre (derecha), por instancia. Marcador lleno: significativo tras Holm en la familia de la instancia.}
-\label{fig:contrastes}
+\includegraphics[width=0.98\textwidth]{figures/fig07_a12_por_instancia.png}
+\caption{Probabilidad de superioridad $\hat{A}_{12}$ de PSO+GA frente a cada rival, por instancia, con intervalo bootstrap al 95\,\%. Valores mayores que 0,5 favorecen al híbrido. Marcador lleno: diferencia significativa tras Holm sobre las ocho instancias del par; banda gris: efecto despreciable.}
+\label{fig:a12_instancia}
 \end{figure}
 
-La pregunta central de la extensión es si la hibridación aporta algo respecto del método del que parte. De los \HybridContrastsTotal{} contrastes híbrido--padre (cuatro por instancia), el híbrido obtiene mejor mediana que su padre en \HybridWinsCount{} y la diferencia es significativa tras Holm en \HybridSignificantCount{}: \HybridSignificantWins{} a favor del híbrido y \HybridSignificantLosses{} en su contra. La Tabla~\ref{tab:hibridos_auto} y la Figura~\ref{fig:contrastes} muestran que el efecto depende del par y de la instancia, lo que es coherente con el teorema de la no existencia de almuerzo gratis: añadir una búsqueda local o un operador genético redistribuye el presupuesto entre exploración y explotación, y el saldo de esa redistribución cambia con la geometría de la región factible. Las columnas de solicitudes de búsqueda local de las tablas de cómputo cuantifican cuánto presupuesto consumió la intensificación en cada instancia.
+Frente a PSO, el padre del que hereda el bucle, el híbrido no se distingue en ninguna de las ocho instancias tras la corrección de Holm (recuento $+/\approx/-$ de \CtrlPsoPlus/\CtrlPsoEqual/\CtrlPsoMinus). $\hat{A}_{12}$ varía entre \CtrlPsoAMin{} y \CtrlPsoAMax{} y queda por debajo de 0,5 en seis instancias: la inclinación favorece a PSO, pero no alcanza la significación en ninguna instancia por separado. Frente a GA, el padre del que hereda los operadores, el híbrido es significativamente mejor en \CtrlGaPlus{} instancias (\CtrlGaPlusInstances), no se distingue en \CtrlGaEqual{} y no es significativamente peor en ninguna, con $\hat{A}_{12}$ entre \CtrlGaAMin{} y \CtrlGaAMax; sólo en I5 el estimador queda por debajo de 0,5. Las tres instancias en que supera a GA no comparten un rasgo único, pues dos tienen el límite de 0,10 y dos la escala de 300 MW, de modo que los datos no permiten atribuir esa ventaja al límite de AGSR ni a la escala. Frente a la búsqueda aleatoria el híbrido es significativamente mejor en las ocho instancias, con $\hat{A}_{12}$ entre \CtrlRandomAMin{} y \CtrlRandomAMax: un efecto de magnitud mediana en I6 y grande en las otras siete.
 
-Tres patrones concretos se desprenden de la tabla. Primero, los dos contrastes significativos corresponden a PSO+GA frente a GA (I2 e I4), ambos a favor del híbrido, mientras que PSO+GA frente a PSO no se distingue en ninguna instancia ($A_{12}$ entre 0,37 y 0,52): el híbrido hereda la calidad del bucle del enjambre, y reemplazar el cuarto peor de las partículas por hijos genéticos ni mejora ni empeora al PSO puro bajo este presupuesto. Segundo, SHO+LS ocupa el primer lugar por mediana en I2, la instancia de región factible estrecha, y supera a SHO en mediana sólo allí; en I3 e I4 cae al sexto lugar. La búsqueda local consume entre 66 y 69 solicitudes por corrida, un 11\,\% del presupuesto, que en una región estrecha se invierten en afinar $W$ sobre el borde de C5 y que en un espacio discreto cinco veces mayor se restan a la exploración. Tercero, GA+LS no mejora a GA en ninguna instancia de forma detectable: parte de un método cuyo presupuesto ya se gasta en más de un 30\,\% en diseños repetidos (unas 180 a 207 solicitudes duplicadas por corrida en GA, 143 a 153 en GA+LS), y la búsqueda local añade cerca de 97 solicitudes más de intensificación sobre un individuo que el elitismo ya conserva. Las mejores corridas individuales de I1, I2 e I4 corresponden, sin embargo, a PSO+GA, y la de I3 a PSO, todas por debajo del óptimo discretizado gracias a $W$ continuo.
+En los contrastes de contexto el híbrido no supera significativamente a ninguna de las otras tres metaheurísticas en ninguna instancia. Los recuentos $+/\approx/-$ son \CtrlGwoPlus/\CtrlGwoEqual/\CtrlGwoMinus{} frente a GWO, que lo supera en \CtrlGwoMinusInstances, entre ellas las tres instancias con el límite de 0,10; \CtrlShoPlus/\CtrlShoEqual/\CtrlShoMinus{} frente a SHO, que lo supera en \CtrlShoMinusInstances; y \CtrlWoaPlus/\CtrlWoaEqual/\CtrlWoaMinus{} frente a WOA, que lo supera en \CtrlWoaMinusInstances.
+
+La lectura de estos recuentos es asimétrica. Un símbolo $+$ o $-$ es una diferencia que sobrevive a la corrección de Holm sobre las ocho instancias del par, y su relevancia práctica se juzga con $\hat{A}_{12}$, su intervalo y el desplazamiento de Hodges--Lehmann que acompaña a cada contraste en los archivos de resultados: una probabilidad de superioridad alta puede corresponder a un desplazamiento de centésimas de punto porcentual de brecha. Un símbolo $\approx$ no afirma que los dos algoritmos sean equivalentes en esa instancia; indica que \Replicates{} réplicas por algoritmo no bastaron para distinguirlos al nivel exigido, y el intervalo de $\hat{A}_{12}$ muestra qué tamaños de efecto siguen siendo compatibles con los datos.
+
+La Tabla~\ref{tab:linea_base_auto} responde la misma pregunta para cada metaheurística frente a la búsqueda aleatoria.
+
+\TablaLineaBaseAuto
+
+Los recuentos $+/\approx/-$ frente a RANDOM son \BaseGwoPlus/\BaseGwoEqual/\BaseGwoMinus{} para GWO, \BasePsoPlus/\BasePsoEqual/\BasePsoMinus{} para PSO, \BaseGaPlus/\BaseGaEqual/\BaseGaMinus{} para GA, \BaseShoPlus/\BaseShoEqual/\BaseShoMinus{} para SHO y \BaseWoaPlus/\BaseWoaEqual/\BaseWoaMinus{} para WOA. Cuatro de las cinco metaheurísticas clásicas superan a la búsqueda aleatoria en las ocho instancias. La excepción es GA, que la supera en \BaseGaPlus{} (\BaseGaPlusInstances) y no se distingue de ella en las otras \BaseGaEqual, con un $\hat{A}_{12}$ mínimo de \BaseGaAMin{} en I6. A igual número de diseños únicos la supera en \UniqueBaseGaPlus{} (Sección~\ref{sec:sens_unicos}). Una metaheurística que no se distingue de la búsqueda aleatoria en una instancia no ha demostrado, bajo este presupuesto, aprovechar la información que acumula durante la búsqueda; la conclusión es local a esa instancia y a las \RequestsPerRun{} solicitudes por corrida, y no descalifica al método en otros problemas.
+
+\subsection{P2: comparación en general}
+
+P2 pregunta si un algoritmo difiere de otro sobre el conjunto de las instancias, con una mediana por algoritmo e instancia como observación. La Tabla~\ref{tab:global_auto} reúne los once contrastes; el bloque superior es la familia de control y el inferior la de línea base.
+
+\TablaGlobalAuto
+
+Frente a PSO, el híbrido obtiene mejor mediana en \CtrlPsoMedianWins{} instancias, igual en \CtrlPsoMedianTies{} y peor en \CtrlPsoMedianLosses. El contraste de Wilcoxon da un valor $p$ de \CtrlPsoWilcoxonP{} (\CtrlPsoWilcoxonHolm{} tras Holm); las comprobaciones de robustez dan \CtrlPsoRelativeP{} sobre las brechas relativas y \CtrlPsoSignP{} con la prueba de signos, y el desplazamiento de Hodges--Lehmann pareado es de \CtrlPsoShift{} puntos porcentuales de brecha. Frente a GA, las medianas favorecen al híbrido en \CtrlGaMedianWins{} instancias, empatan en \CtrlGaMedianTies{} y lo desfavorecen en \CtrlGaMedianLosses, con un valor $p$ de \CtrlGaWilcoxonP{} (\CtrlGaWilcoxonHolm{} tras Holm), \CtrlGaRelativeP{} y \CtrlGaSignP{} en las comprobaciones de robustez y un desplazamiento de \CtrlGaShift{} puntos porcentuales. Frente a la búsqueda aleatoria, el recuento es \CtrlRandomMedianWins, \CtrlRandomMedianTies{} y \CtrlRandomMedianLosses, con un valor $p$ de \CtrlRandomWilcoxonP{} (\CtrlRandomWilcoxonHolm{} tras Holm), \CtrlRandomRelativeP{} y \CtrlRandomSignP{} en las comprobaciones de robustez y un desplazamiento de \CtrlRandomShift{} puntos porcentuales. Un desplazamiento negativo significa que el híbrido queda más cerca del óptimo que el algoritmo con el que se compara.
+
+Cada contraste se decide comparando su valor $p$ ajustado con $\alpha=\text{\StatAlpha}$, y la decisión se considera robusta si las dos comprobaciones apuntan en el mismo sentido. Con esa regla, los tres contrastes confirmatorios llegan a conclusiones distintas. Frente a la búsqueda aleatoria la diferencia es significativa y robusta: el híbrido obtiene mejor mediana en las ocho instancias, las tres pruebas dan el menor valor $p$ que el contraste puede producir y el desplazamiento es de unos tres cuartos de punto porcentual de brecha a su favor. Frente a GA la diferencia no queda establecida: las medianas favorecen al híbrido en \CtrlGaMedianWins{} instancias y el desplazamiento es a su favor, pero el valor $p$ ajustado (\CtrlGaWilcoxonHolm) supera $\alpha$ y la prueba de signos (\CtrlGaSignP) tampoco la respalda. Frente a PSO el contraste favorece al padre: el híbrido tiene peor mediana en \CtrlPsoMedianLosses{} de las ocho instancias y el valor $p$ ajustado (\CtrlPsoWilcoxonHolm) queda por debajo de $\alpha$, pero por un margen estrecho, con un desplazamiento pequeño (\CtrlPsoShift{} puntos porcentuales) y sin el respaldo de la prueba de signos (\CtrlPsoSignP). Es, por tanto, una diferencia significativa pero no robusta, y, como muestra la Sección~\ref{sec:sens_unicos}, su significación depende también de los demás contrastes de la familia. No contradice el resultado de P1: una desventaja pequeña que se repite en casi todas las instancias puede ser indetectable con \Replicates{} réplicas en cada una y hacerse visible al considerarlas en conjunto.
+
+Los contrastes de contexto y los de la familia de línea base se leen del mismo modo en la tabla. El híbrido obtiene peor mediana que GWO, SHO y WOA en las ocho instancias, con un valor $p$ ajustado de \CtrlGwoWilcoxonHolm{} en los tres casos. En la familia de línea base, los valores $p$ de Wilcoxon de cada metaheurística frente a RANDOM son \BaseGwoWilcoxonP{} para GWO, \BasePsoWilcoxonP{} para PSO, \BaseGaWilcoxonP{} para GA, \BaseShoWilcoxonP{} para SHO y \BaseWoaWilcoxonP{} para WOA, y tras Holm \BaseGwoWilcoxonHolm, \BasePsoWilcoxonHolm, \BaseGaWilcoxonHolm, \BaseShoWilcoxonHolm{} y \BaseWoaWilcoxonHolm: GWO, PSO, SHO y WOA difieren de la búsqueda aleatoria en general, y GA no, aunque su mediana es mejor en \BaseGaMedianWins{} de las ocho instancias; esta última lectura depende de cómo se contabilizan las solicitudes repetidas (Sección~\ref{sec:sens_unicos}).
+
+Estos resultados deben leerse con la potencia de la Tabla~\ref{tab:potencia_auto}. Con ocho instancias, sólo un efecto estandarizado de al menos \PowerInstancesDetectable{} se detecta con potencia 0,8, y el menor valor $p$ que el contraste exacto puede producir es \WilcoxonMinP, que se obtiene únicamente cuando un algoritmo es mejor en las ocho. Con seis contrastes en la familia de control, ese mínimo equivale tras Holm a \CtrlRandomWilcoxonHolm: aun el resultado más extremo posible queda apenas por debajo de $\alpha$, y los valores ajustados cercanos a ese umbral deben leerse con la misma cautela. Un contraste no significativo en P2 no demuestra que dos algoritmos rindan igual en general: indica que ocho instancias de un mismo sitio no bastan para establecer la diferencia. La última columna de la tabla repite los recuentos de P1, que señalan en cuántas instancias la diferencia sí pudo establecerse con las réplicas disponibles; P1 y P2 responden preguntas distintas y pueden discrepar sin contradicción.
+
+\subsection{P3: los siete algoritmos a la vez}
+
+P3 pregunta si existe alguna diferencia entre los siete algoritmos considerados conjuntamente. La Tabla~\ref{tab:ranking_transversal_auto} da el rango de cada algoritmo en cada instancia, calculado sobre la brecha mediana con tolerancia, y su rango medio.
+
+\TablaRankingTransversalAuto
+
+El contraste de Friedman arroja $\chi^2_F=\text{\FriedmanChi}$, con un valor $p$ de \FriedmanP, y la corrección de Iman--Davenport $F_F=\text{\ImanDavenportF}$ con \ImanDavenportDfA{} y \ImanDavenportDfB{} grados de libertad, con un valor $p$ de \ImanDavenportP. Ambos valores son menores que $\alpha$: se rechaza que los siete algoritmos rindan igual sobre estas instancias. Por rango medio, \BestMeanRankAlgorithm{} ocupa la primera posición (\BestMeanRank) y \SecondMeanRankAlgorithm{} la segunda (\SecondMeanRank), seguidos de WOA (\MeanRankWoa) y PSO (\MeanRankPso). El híbrido PSO+GA ocupa el lugar \ControlRankPosition{} de siete con un rango medio de \MeanRankPsoGa, entre sus dos padres: por detrás de PSO y por delante de GA (\MeanRankGa). La búsqueda aleatoria cierra el orden con \MeanRankRandom.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig11_diferencia_critica.png}
+\caption{Diagrama de diferencia crítica de Nemenyi sobre los rangos medios de las ocho instancias (1 = mejor). Las barras unen algoritmos cuyos rangos medios difieren menos que la diferencia crítica.}
+\label{fig:cd}
+\end{figure}
+
+Como el contraste global rechaza la igualdad, el protocolo autoriza a interpretar el post-hoc. La diferencia crítica de Nemenyi es $\mathrm{CD}=\text{\CriticalDifference}$, con $q_\alpha=\text{\NemenyiQ}$, $k=7$ y $N=8$. De los \NemenyiPairsTotal{} pares posibles, \NemenyiPairsCount{} se separan en más de la diferencia crítica: \NemenyiPairs. El híbrido aparece en dos de ellos, ambos en su contra (\NemenyiControlPairs). El post-hoc no lo separa de ninguno de sus padres ni tampoco de la búsqueda aleatoria, pese a que P1 y P2 sí establecen esta última diferencia: Nemenyi compara los \NemenyiPairsTotal{} pares a la vez y es más conservador que un contraste planificado sobre un par concreto. Tampoco separa a SHO, GWO, WOA y PSO entre sí. La diferencia crítica es grande frente al recorrido posible de los rangos medios, de 1 a 7: con ocho instancias el post-hoc sólo puede separar algoritmos situados en extremos opuestos del orden, lo que coincide con la potencia limitada de P2.
+
+Los mecanismos de movimiento ofrecen hipótesis para interpretar estos resultados: memoria personal y social en PSO, tres líderes en GWO, recombinación en GA, cambios de rama o agrupación en WOA y SHO, y diversidad inyectada por recombinación en PSO+GA. La comparación del híbrido con PSO equivale a una ablación en bloque del componente inyectado; la comparación con GA no lo es, porque ambos difieren en todo el bucle de búsqueda y sólo comparten los operadores de variación. El experimento no contiene ablaciones por operador ni en el híbrido ni en los clásicos, de modo que la explicación causal por operador se mantiene como vacío metodológico, no como conclusión demostrada.
+
+\subsection{Comportamiento de convergencia}
+\label{sec:convergencia}
+
+P1, P2 y P3 juzgan cada corrida al agotar sus \RequestsPerRun{} solicitudes; la Figura~\ref{fig:convergencia} muestra cómo se llega a ese estado. Para resumirla sobre las ocho instancias se calculó, en cada punto de control del historial, es decir, cada \Population{} solicitudes, el mismo rango medio que en P3: dentro de cada instancia, los algoritmos se ordenan por la brecha mediana del mejor diseño factible hallado hasta ese punto, y el rango se promedia sobre las instancias. En el último punto de control este rango coincide con el de la Tabla~\ref{tab:ranking_transversal_auto}. La Tabla~\ref{tab:convergencia_auto} lo da cada 100 solicitudes, junto con la brecha mediana media a mitad y al final del presupuesto. El análisis es descriptivo: en los puntos intermedios no se contrasta nada, porque hacerlo multiplicaría los contrastes sin un plan que los fijara de antemano.
+
+\TablaConvergenciaAuto
+
+El orden final se establece tarde. A mitad del presupuesto, con \ConvHalfRequests{} solicitudes, \ConvHalfLeader{} encabeza el rango medio, aunque termina en el lugar \ConvHalfLeaderFinalPosition, y el híbrido ocupa el lugar \ConvHalfControlPosition; la concordancia entre ese orden y el final es moderada, con una $\tau$ de Kendall de \ConvTauHalf. Sólo a partir de \ConvSettleFrom{} solicitudes ningún algoritmo se aparta más de un lugar de su posición final ($\tau=\text{\ConvTauSettle}$).
+
+Las curvas muestran dos perfiles. PSO y el híbrido convergen pronto. El híbrido tiene el menor rango medio de los siete en todos los puntos de control entre \ConvControlLeadFrom{} y \ConvControlLeadTo{} solicitudes: a las \ConvEarlyRequests{} solicitudes, por ejemplo, su rango medio es \ConvRankEarlyPsoGa{} y el de PSO, \ConvRankEarlyPso. En la segunda mitad del presupuesto, en cambio, su brecha mediana media se reduce sólo un \ConvReductionPsoGa\,\%, de \ConvGapHalfPsoGa{} a \ConvGapFinalPsoGa\,\%, y la de PSO un \ConvReductionPso\,\%. GWO, SHO y WOA siguen mejorando hasta el final: en esa misma mitad reducen su brecha mediana media un \ConvReductionGwo, un \ConvReductionSho{} y un \ConvReductionWoa\,\%, respectivamente. GA se estanca con una brecha mayor, que se reduce un \ConvReductionGa\,\% y termina en \ConvGapFinalGa\,\%, y la búsqueda aleatoria ocupa el último lugar desde las primeras iteraciones.
+
+El segundo perfil responde, al menos en parte, al diseño de esos tres algoritmos. En GWO y WOA el parámetro $a$, y en SHO el parámetro $h$, decrecen linealmente con la fracción de iteraciones transcurridas (Tabla~\ref{tab:hiperparametros_auto}): la búsqueda pasa gradualmente de explorar a explotar, y la explotación se intensifica al final del presupuesto. En PSO, GA y el híbrido ningún parámetro depende del número de iteraciones. De ahí se siguen dos consecuencias. Primero, el estado de GWO, WOA y SHO a \ConvHalfRequests{} solicitudes no es el que habrían alcanzado con ese presupuesto, porque con la mitad de las iteraciones su transición habría sido más rápida; los puntos intermedios no permiten, por tanto, anticipar el orden con un presupuesto menor. Segundo, el orden final y las conclusiones de P1 a P3 son relativos al presupuesto de \RequestsPerRun{} solicitudes: establecen qué algoritmo termina más cerca del óptimo con ese presupuesto, no cuál progresa más rápido.
+
+Para el híbrido, la convergencia matiza los contrastes sin contradecirlos. La inyección genética acelera la convergencia inicial del enjambre, pero no evita su estancamiento: pasadas las \ConvControlLeadTo{} solicitudes lo supera PSO y, después, SHO, GWO y WOA. Su desventaja final frente a PSO no es, por tanto, la de un método lento, sino la de uno que se estanca antes. El diseño de la inyección es compatible con una pérdida de diversidad: en cada iteración, los hijos se generan a partir de las mejores posiciones personales, reemplazan a la cuarta parte del enjambre con peor mérito y, en parte, repiten diseños ya evaluados (Sección~\ref{sec:uso_presupuesto}). El experimento no mide la diversidad de la población, de modo que esta explicación queda como hipótesis.
+
+\subsection{Uso del presupuesto}
+\label{sec:uso_presupuesto}
+
+Las \RequestsPerRun{} solicitudes de una corrida no equivalen a \RequestsPerRun{} diseños distintos. La Tabla~\ref{tab:duplicados_auto} da el número medio de solicitudes repetidas por ejecución: propuestas que, tras la decodificación, coinciden con un diseño ya evaluado en la misma corrida. Cuentan contra el presupuesto aunque no aporten información nueva.
+
+\TablaDuplicadosAuto
+
+Como $W$ es continuo, un diseño sólo se repite cuando un vector se copia sin cambios o cuando el recorte lo lleva a un límite del dominio. Dos mecanismos producen copias por construcción: el elitismo del GA, que vuelve a solicitar en cada generación los individuos que conserva, y los hijos que reproducen a un padre, tanto en el GA como en la inyección genética del híbrido, cuyos padres son mejores posiciones personales ya evaluadas. Un hijo reproduce a su padre cuando no hay cruce ni mutación efectiva, o cuando se cruzan dos padres idénticos, lo que puede ocurrir a medida que la población converge.
+
+GA es el método que más presupuesto repite: en promedio \DupGaMean{} de las \RequestsPerRun{} solicitudes de cada corrida (\DupGaPct\,\%, un tercio del presupuesto), y entre \DupGaMin{} y \DupGaMax{} según la instancia. El híbrido y WOA repiten unas \DupPsoGaMean{} y \DupWoaMean{} (\DupPsoGaPct\,\% y \DupWoaPct\,\%), GWO y SHO unas \DupGwoMean{} y \DupShoMean{}, PSO prácticamente ninguna salvo en \DupPsoMaxInstance{} (\DupPsoMax{} por corrida), y la búsqueda aleatoria ninguna. I8, la instancia de límite más holgado, es la que más repeticiones produce en todos los métodos excepto en la búsqueda aleatoria.
+
+El número de duplicados mide cuánto presupuesto efectivo pierde cada método y matiza los contrastes anteriores: una diferencia entre el híbrido y PSO puede deberse tanto a la calidad de los hijos como a las solicitudes que estos consumen en diseños repetidos, y el experimento principal no separa ambos efectos. La sección siguiente examina hasta qué punto las conclusiones dependen de esa contabilidad.
+
+\subsection{Sensibilidad a la contabilidad del presupuesto}
+\label{sec:sens_unicos}
+
+La regla principal cuenta toda solicitud, aunque repita un diseño ya evaluado, y por eso no es neutral entre algoritmos: el GA destina un tercio de su presupuesto a diseños repetidos y la búsqueda aleatoria, ninguno. Para saber si esa regla determina las conclusiones, el protocolo completo se repitió a igual número de diseños únicos. En cada instancia, el corte es la mediana de diseños únicos de las corridas del GA, entre \UniqueCutMin{} y \UniqueCutMax{}. Cada corrida aporta el mejor LCOE factible que tenía al alcanzar ese número de diseños distintos, y la que nunca lo alcanza aporta su valor final. La comparación favorece deliberadamente al GA: conserva sus \RequestsPerRun{} solicitudes, mientras que los demás algoritmos quedan truncados, en mediana, entre \UniqueCutRequestsMin{} y \UniqueCutRequestsMax. La Tabla~\ref{tab:unicos_auto} compara los once contrastes con ambas reglas.
+
+\TablaUnicosAuto
+
+La posición del GA en el orden conjunto no se explica por sus repeticiones. A igual número de diseños únicos, el GA sigue en el lugar \UniqueGaRankPosition{} de siete por rango medio (\UniqueMeanRankGa{} frente a \MeanRankGa{} con la regla principal), por detrás del híbrido y de las otras cuatro metaheurísticas clásicas. El híbrido sigue siendo significativamente mejor que el GA en \UniqueCtrlGaPlus{} instancias y, en general, la diferencia sigue sin alcanzar la significación ($p_{Holm}$ de \UniqueCtrlGaWilcoxonHolm). El contraste conjunto sigue rechazando que los siete algoritmos rindan igual ($F_F=\text{\UniqueImanDavenportF}$, con un valor $p$ de \UniqueImanDavenportP).
+
+Dos lecturas sí dependen de la regla. La primera es la del GA frente a la búsqueda aleatoria. A igual número de diseños únicos, el GA la supera en \UniqueBaseGaPlus{} instancias (\UniqueBaseGaPlusInstances) en lugar de \BaseGaPlus, y en general la diferencia pasa a ser significativa tras Holm (\UniqueBaseGaWilcoxonHolm), con el respaldo de la versión sobre brechas relativas (\UniqueBaseGaRelativeP) pero no de la prueba de signos (\UniqueBaseGaSignP). La afirmación de que el GA no se distingue de la búsqueda aleatoria en general es, por tanto, relativa a la regla principal: con ella, la búsqueda aleatoria aprovecha íntegramente las solicitudes que el GA gasta en repeticiones.
+
+La segunda es la desventaja del híbrido frente a PSO en general. Su valor $p$ sin ajustar no cambia (\UniqueCtrlPsoWilcoxonP), pero tras Holm queda en \UniqueCtrlPsoWilcoxonHolm, por encima de $\alpha$, porque otros contrastes de su familia dejan de estar en el valor mínimo que admite la prueba. Que la decisión dependa de la composición de la familia confirma que esa diferencia es significativa pero no robusta. Frente a GWO y WOA, por último, el híbrido deja de ser significativamente peor en cualquier instancia: esas diferencias de contexto sólo aparecen con el presupuesto completo.
+
 
 \section{Análisis de sensibilidad}
+\label{sec:sensibilidad}
 
 \TablaSensAGSRAuto
 \TablaSensCargaAuto
@@ -177,10 +242,13 @@ Tres patrones concretos se desprenden de la tabla. Primero, los dos contrastes s
 \label{fig:sens_carga}
 \end{figure}
 
-Los barridos separan el efecto de las restricciones del ruido de los optimizadores. Muestran cómo cambian simultáneamente el tamaño de la región factible y el mejor punto de la malla base; no constituyen una prueba de robustez del ranking algorítmico. El barrido del límite de AGSR anticipa, sobre la malla base, el estrechamiento que la instancia I2 impone al dominio mixto.
+Los barridos separan el efecto de las restricciones del ruido de los optimizadores. Muestran cómo cambian simultáneamente el tamaño de la región factible y el mejor punto de la malla base; no constituyen una prueba de robustez del ranking algorítmico. Lo mismo vale para las sensibilidades al año bisiesto y a la altura del viento de la Sección~\ref{sec:sens_horizonte}, calculadas sobre un diseño fijo. El barrido del límite de AGSR anticipa, sobre la malla base, el estrechamiento que las instancias I2, I6 e I7 imponen al dominio mixto y la holgura que introduce I8.
+
+El efecto de ese límite sobre la comparación de algoritmos se lee, en cambio, en las propias instancias, porque I2 e I8 sólo difieren de I1 en él: \InstAGSRB{} y \InstAGSRH{} frente a \InstAGSRA. En las tres, SHO y GWO ocupan los dos primeros lugares por brecha mediana, el híbrido el quinto y la búsqueda aleatoria el último, mientras que WOA, PSO y GA se reparten los lugares tercero, cuarto y sexto (Tabla~\ref{tab:ranking_transversal_auto}). Con tres valores del límite, esta lectura es descriptiva: muestra que los extremos del orden no cambian con él, no que el orden sea insensible a cualquier restricción operacional.
 
 \section{Verificaciones y alcance de los resultados}
+\label{sec:verificaciones}
 
-Las \TotalRuns{} corridas registraron exactamente \RequestsPerRun{} solicitudes cada una y el residuo máximo de balance observado fue \texttt{\MaxBalanceResidual} MW; como mínimo \MinFeasibleRuns{} de las \Replicates{} corridas de cada algoritmo e instancia terminaron en un diseño factible. GWO, SHO, WOA y la inyección genética de PSO+GA superaron pruebas de una actualización determinista contra sus ecuaciones; la búsqueda local superó las pruebas de convergencia, presupuesto y ausencia de duplicados; los tres híbridos produjeron exactamente \Iterations{} puntos de control por corrida; y clásicos e híbridos superaron las pruebas de dirección y límites sobre Sphere y Rastrigin. La corrida de I1 reproduce bit a bit la comparativa previa de seis algoritmos.
+Las \TotalRuns{} corridas registraron exactamente \RequestsPerRun{} solicitudes cada una y el residuo máximo de balance observado fue \MaxBalanceResidual~MW; todas terminaron en un diseño factible. GWO, SHO, WOA y la inyección genética de PSO+GA superaron pruebas de una actualización determinista contra sus ecuaciones; el híbrido produjo exactamente \Iterations{} puntos de control por corrida; y clásicos e híbrido superaron las pruebas de dirección y límites sobre Sphere y Rastrigin. Las corridas de I1 a I4 de los siete algoritmos reproducen bit a bit las de la campaña anterior, porque el flujo aleatorio de cada algoritmo no depende de la instancia ni de qué otros algoritmos se ejecuten. Las tablas de inferencia se regeneran con \texttt{scripts/analisis\_estadistico.py} a partir de los CSV de corridas y se comprueban con \texttt{scripts/verificar\_resultados.py}, que verifica el balance del diseño, el presupuesto exacto de cada corrida y la coherencia entre las tablas.
 
-Los resultados continúan condicionados por un solo emplazamiento aproximado y un solo año meteorológico; por instancias que varían una restricción, la finura de los catálogos y la escala, pero no el recurso ni la estructura de costos; por la ausencia de una demanda explícita de hidrógeno; por la idealización continua de $W$; por la regla declarada para operacionalizar la agrupación de SHO; y por valores de la búsqueda local y de la inyección genética fijados a priori y sin ablación por operador. El experimento compara implementaciones concretas bajo un presupuesto concreto, no familias algorítmicas en general.
+Los resultados continúan condicionados por un solo emplazamiento aproximado y un solo año meteorológico; por ocho instancias que varían el límite de ventas a red, la finura de los catálogos y la escala, pero no el recurso ni la estructura de costos, y que por tanto no son una muestra de problemas independientes; por la ausencia de una demanda explícita de hidrógeno; por la idealización continua de $W$; por la regla declarada para operacionalizar la agrupación de SHO; por los parámetros de la inyección genética, fijados a priori y sin ablación por operador; por un plan de análisis fijado antes de ejecutar I5 a I8 pero conociendo ya los resultados de I1 a I4; por un único presupuesto, con un orden que sólo se estabiliza a partir de \ConvSettleFrom{} de las \RequestsPerRun{} solicitudes; y por la potencia limitada de los contrastes que toman la instancia como unidad de análisis. El experimento compara implementaciones concretas bajo un presupuesto concreto, no familias algorítmicas en general.

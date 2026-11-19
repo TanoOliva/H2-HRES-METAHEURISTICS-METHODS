@@ -10,7 +10,7 @@ Las figuras comparativas de este documento emplean una codificación visual cons
 \label{fig:identidad_visual}
 \end{figure}
 
-La forma del marcador actúa como codificación primaria y el color como refuerzo secundario. Esta redundancia evita que la identificación de nueve series dependa exclusivamente de la percepción cromática y mantiene la lectura al imprimir en escala de grises. Los tres híbridos heredan el tono de su padre y se distinguen por un patrón de línea de puntos y rayas y por un marcador propio.
+La forma del marcador actúa como codificación primaria y el color como refuerzo secundario. Esta redundancia evita que la identificación de siete series dependa exclusivamente de la percepción cromática y mantiene la lectura al imprimir en escala de grises. El híbrido PSO+GA hereda el tono de PSO, su padre de enjambre, y se distingue de él por un patrón de línea de puntos y rayas y por un marcador propio; la búsqueda aleatoria se dibuja en gris neutro y con línea discontinua, como referencia y no como una serie más.
 
 \chapter{Plan de trabajo del proyecto}
 
@@ -22,9 +22,9 @@ Su propósito es evaluar la aplicabilidad, flexibilidad y limitaciones de las me
 
 \begin{itemize}
     \item \textbf{Tarea 1.1:} revisión del estado del arte sobre modelos HRES-H$_2$ y análisis de su complejidad computacional. \textit{Completada}, véase el marco teórico.
-    \item \textbf{Tarea 1.2:} revisión del estado del arte sobre metaheurísticas modernas basadas en población. \textit{Completada}, con la incorporación de GWO \cite{Mirjalili2014GWO}, PSO \cite{Kennedy1995PSO}, GA \cite{Goldberg1989GA}, SHO \cite{Dhiman2017SHO} y WOA \cite{Mirjalili2016WOA}.
-    \item \textbf{Tarea 1.3:} análisis de enfoques híbridos de optimización basados en población. \textit{Completada}, con la taxonomía de Talbi \cite{Talbi2002Taxonomy} y tres híbridos integrativos de bajo nivel: GA+LS \cite{Moscato1989Memetic}, PSO+GA \cite{Kao2008HybridGAPSO} y SHO+LS. La integración de componentes de aprendizaje se traslada al WP2.
-    \item \textbf{Tarea 1.4:} implementación, experimentación y evaluación de los enfoques seleccionados. \textit{Completada} para las cuatro instancias y las sensibilidades declaradas; véanse los capítulos de diseño experimental y de resultados.
+    \item \textbf{Tarea 1.2:} revisión del estado del arte sobre metaheurísticas modernas basadas en población. \textit{Completada}, con la incorporación de GWO \cite{Mirjalili2014GWO}, PSO \cite{Kennedy1995PSO}, GA \cite{Goldberg1989GA}, SHO \cite{Dhiman2017SHO} y WOA \cite{Mirjalili2016WOA} y de la crítica a las metaheurísticas basadas en metáforas (Sección~\ref{sec:metaforas}).
+    \item \textbf{Tarea 1.3:} análisis de enfoques híbridos de optimización basados en población. \textit{Completada}, con la taxonomía de Talbi \cite{Talbi2002Taxonomy} y un híbrido integrativo de bajo nivel, PSO+GA \cite{Kao2008HybridGAPSO}, comparado con los dos métodos de los que parte. La integración de componentes de aprendizaje se traslada al WP2.
+    \item \textbf{Tarea 1.4:} implementación, experimentación y evaluación de los enfoques seleccionados. \textit{Completada} para las ocho instancias y las sensibilidades declaradas, con el protocolo de comparación estadística del capítulo de diseño experimental; véanse ese capítulo y el de resultados.
 \end{itemize}
 
 \section{WP2: Integración de componentes de aprendizaje basados en ANN}
@@ -46,13 +46,15 @@ Contempla la comunicación de los avances metodológicos y de los resultados obt
 La totalidad de los resultados reportados en esta tesis se regenera a partir de los siguientes artefactos:
 
 \begin{itemize}
-    \item \texttt{notebooks/H2\_HRES\_trabajo.ipynb} --- cuaderno autocontenido de 22 secciones que incluye configuración, modelos físicos y económicos, pruebas deterministas, reproducción parcial, las cuatro instancias y su óptimo exacto por fuerza bruta, seis optimizadores clásicos y tres híbridos, análisis estadístico y sensibilidades.
+    \item \texttt{notebooks/H2\_HRES\_trabajo.ipynb} --- cuaderno autocontenido de 22 secciones que incluye configuración, modelos físicos y económicos, pruebas deterministas, reproducción parcial, las ocho instancias y su óptimo exacto por fuerza bruta, las cinco metaheurísticas clásicas, el híbrido PSO+GA y la búsqueda aleatoria, la inferencia estadística y las sensibilidades.
     \item \texttt{notebooks/src/hourly\_2008.csv} --- serie meteorológica de 8.784 registros obtenida de NASA POWER \cite{NasaPower}; el caso principal excluye las 24 horas del 29 de febrero.
     \item \texttt{notebooks/src/data\_provenance.csv} --- procedencia disponible del archivo horario y declaración explícita de que la versión de API no quedó registrada.
     \item \texttt{scripts/execute\_notebook.py} --- ejecutor reproducible de los modos rápido y completo.
-    \item \texttt{notebooks/results/} --- tablas CSV de validación, instancias, fuerza bruta, corridas, historiales, semillas, estadística y sensibilidades exportadas por el cuaderno, con una columna \texttt{instance} donde corresponde.
+    \item \texttt{scripts/analisis\_estadistico.py} --- única implementación del protocolo de comparación estadística. El cuaderno lo importa y también puede ejecutarse por separado sobre los CSV de corridas; contiene como constantes el nivel de significación, la tolerancia, el número de remuestreos, el algoritmo de control y la línea base. Ejecutado por separado, calcula además, a partir de los historiales, la sensibilidad a igual número de diseños únicos (archivos \texttt{stat\_unicos\_*.csv}) y el perfil de convergencia (\texttt{stat\_convergencia.csv}).
+    \item \texttt{scripts/verificar\_resultados.py} --- comprobación de los criterios cuantitativos del experimento completo: metadatos, una corrida por instancia, algoritmo y réplica con presupuesto exacto, historiales, fuerza bruta y coherencia de las tablas de inferencia.
+    \item \texttt{notebooks/results/} --- tablas CSV de validación, instancias, fuerza bruta, corridas, historiales, semillas, inferencia estadística (archivos \texttt{stat\_*.csv}) y sensibilidades, con una columna \texttt{instance} donde corresponde.
     \item \texttt{notebooks/cache/} --- resultados reducidos de la fuerza bruta por instancia (mejor $W$ por catálogo, envolvente y celdas de control), indexados por una huella del escenario, de los datos y del paso. No se versiona; se regenera.
-    \item \texttt{scripts/generar\_tablas\_latex.py} y \texttt{scripts/extraer\_figuras.py} --- generación automática de tablas y figuras para el documento.
+    \item \texttt{scripts/generar\_tablas\_latex.py} y \texttt{scripts/extraer\_figuras.py} --- generación automática de las macros, tablas y figuras del documento.
 \end{itemize}
 
 \section{Requisitos y ejecución}
@@ -62,30 +64,60 @@ El cuaderno requiere Python 3.13, \texttt{numpy}, \texttt{pandas}, \texttt{matpl
 La ejecución se controla mediante el argumento \texttt{--mode} del script o el interruptor equivalente situado en la primera celda de código:
 
 \begin{itemize}
-    \item \texttt{MODO = "rapido"} --- 3 semillas, 8 individuos y 8 iteraciones, con fuerza bruta a paso de 1 MW. Unos diez minutos de ejecución. Destinado a verificar que el cuaderno se ejecuta de principio a fin sin errores.
+    \item \texttt{MODO = "rapido"} --- 3 semillas, 8 individuos y 8 iteraciones, con fuerza bruta a paso de 1 MW. Destinado a verificar que el flujo completo se ejecuta de principio a fin sin errores; sus cifras no se reportan.
     \item \texttt{MODO = "completo"} --- \Replicates{} semillas, \Population{} individuos y \Iterations{} iteraciones: \RequestsPerInstance{} solicitudes de evaluación de diseños anuales por instancia, \TotalDesignRequests{} en total, más \BruteForceDesignsTotal{} diseños de fuerza bruta (unas \BruteForceElapsedHours{} horas). El tiempo depende del equipo empleado. Es el modo con el que se generaron las cifras y figuras de este documento.
 \end{itemize}
 
+Las cifras del documento se regeneran con cinco pasos, en este orden:
+
+\begin{enumerate}
+    \item \texttt{scripts/execute\_notebook.py} ejecuta el cuaderno y exporta los CSV de \texttt{notebooks/results/}.
+    \item \texttt{scripts/analisis\_estadistico.py} recalcula las tablas de inferencia y las dos figuras estadísticas a partir de esos CSV, y calcula la sensibilidad a igual número de diseños únicos y el perfil de convergencia, que el cuaderno no incluye. Permite repetir el análisis sin repetir el experimento.
+    \item \texttt{scripts/verificar\_resultados.py} comprueba los criterios cuantitativos del experimento y se detiene ante cualquier incumplimiento.
+    \item \texttt{scripts/generar\_tablas\_latex.py} escribe las macros y tablas de \texttt{latex/generated/resultados\_auto.tex}.
+    \item \texttt{scripts/extraer\_figuras.py} extrae las figuras del cuaderno ejecutado a \texttt{latex/figures/}.
+\end{enumerate}
+
+Las cifras de la comparación de algoritmos no se transcriben a mano: el texto las cita mediante las macros generadas en el cuarto paso.
+
 \section{Determinismo}
 
-Cada corrida se inicializa con un generador de números pseudoaleatorios propio, derivado de una semilla explícita del conjunto $\{42, 43, \ldots, 71\}$. La reproducibilidad no depende por tanto del estado global del intérprete ni del orden de ejecución de las celdas. Dos ejecuciones del cuaderno en modo completo producen resultados numéricamente idénticos.
+Cada corrida se inicializa con un generador de números pseudoaleatorios propio, derivado del identificador de réplica, del conjunto $\{42, 43, \ldots, 71\}$, y del nombre del algoritmo. El flujo no depende de la instancia, del estado global del intérprete, del orden de ejecución de las celdas ni de qué otros algoritmos participen en el experimento. Los intervalos bootstrap del análisis estadístico usan igualmente semillas fijas, derivadas del par de algoritmos y de la instancia. Dos ejecuciones del cuaderno en modo completo producen resultados numéricamente idénticos.
 
 \section{Extracción de las figuras}
 
-Las once figuras incluidas en este documento se extraen directamente de las salidas persistidas en el cuaderno ejecutado mediante el script \texttt{scripts/extraer\_figuras.py}. Cada celda que produce una figura lleva un marcador \texttt{\# FIG: nombre} en su código, de modo que la correspondencia no depende de la posición de la celda y las imágenes corresponden exactamente a la misma ejecución de la que provienen las cifras citadas en el texto.
+Las once figuras incluidas en este documento se extraen directamente de las salidas persistidas en el cuaderno ejecutado mediante el script \texttt{scripts/extraer\_figuras.py}. Cada celda que produce una figura lleva un marcador \texttt{\# FIG: nombre} en su código, de modo que la correspondencia no depende de la posición de la celda y las imágenes corresponden exactamente a la misma ejecución de la que provienen las cifras citadas en el texto. Las dos figuras de inferencia, la de $\hat{A}_{12}$ por instancia y el diagrama de diferencia crítica, las produce el módulo de análisis estadístico y pueden regenerarse también con él.
 
-\chapter{Contrastes completos por instancia}
+\chapter{Resultados detallados por instancia y contrastes de contexto}
+\label{anx:detalle}
 
-El análisis principal usa la familia planificada de 12 contrastes por instancia. Para completitud se reportan aquí los 36 pares de cada instancia, con Mann--Whitney bilateral, corrección de Holm sobre los 36 pares y $A_{12}$ con intervalo bootstrap al 95\,\%, junto con las matrices de $A_{12}$.
+Este anexo recoge las tablas que el capítulo de resultados resume: la calidad final y la proximidad al óptimo exacto de cada algoritmo en cada una de las ocho instancias, y los tres contrastes de contexto del híbrido, frente a GWO, SHO y WOA, que completan la familia de control.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.98\textwidth]{figures/fig11_matrices_a12.png}
-\caption{Tamaño del efecto $A_{12}$ entre todos los pares de algoritmos, por instancia. Valores mayores que 0,5 indican que la fila obtiene menor LCOE con más frecuencia que la columna.}
-\label{fig:matrices_a12}
-\end{figure}
+\section{Calidad final y proximidad al óptimo por instancia}
 
-\TablaParesCompletaAutoA
-\TablaParesCompletaAutoB
-\TablaParesCompletaAutoC
-\TablaParesCompletaAutoD
+Para cada instancia, la primera tabla ordena los algoritmos por la mediana del LCOE final y da su rango intercuartílico, su mejor y su peor ejecución y la brecha mediana respecto del óptimo exacto. La segunda da el número de ejecuciones que terminaron en un diseño factible y la fracción que terminó a 0,1\,\%, 0,5\,\% y 1\,\% o menos del óptimo.
+
+\TablaRankingAutoA
+\TablaExitoAutoA
+\TablaRankingAutoB
+\TablaExitoAutoB
+\TablaRankingAutoC
+\TablaExitoAutoC
+\TablaRankingAutoD
+\TablaExitoAutoD
+\TablaRankingAutoE
+\TablaExitoAutoE
+\TablaRankingAutoF
+\TablaExitoAutoF
+\TablaRankingAutoG
+\TablaExitoAutoG
+\TablaRankingAutoH
+\TablaExitoAutoH
+
+\section{Contrastes de contexto del híbrido}
+
+Las tres tablas siguientes tienen el mismo formato que las de los contrastes confirmatorios del capítulo de resultados: Mann--Whitney bilateral por instancia con corrección de Holm sobre las ocho instancias del par, $\hat{A}_{12}$ con intervalo bootstrap al 95\,\% y, al pie, el recuento $+/\approx/-$ y el contraste de Wilcoxon sobre las ocho medianas. Sitúan al híbrido frente a las metaheurísticas que no son sus padres y no sustentan conclusiones sobre la hibridación.
+
+\TablaPUnoAutoGwo
+\TablaPUnoAutoSho
+\TablaPUnoAutoWoa
