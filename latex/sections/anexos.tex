@@ -29,7 +29,7 @@ Su propósito es evaluar la aplicabilidad, flexibilidad y limitaciones de las me
 
 \section{WP2: Integración de componentes de aprendizaje basados en ANN}
 
-Orientado al diseño e integración de redes neuronales artificiales dentro de marcos de optimización híbrida, con el objetivo de reducir el número de evaluaciones costosas mediante modelos sustitutos de la función objetivo. Su pertinencia queda reforzada por los resultados de esta tesis: siendo la simulación horaria el costo dominante, un modelo sustituto suficientemente preciso permitiría ampliar el presupuesto efectivo de búsqueda en órdenes de magnitud.
+Orientado al diseño e integración de redes neuronales artificiales dentro de marcos de optimización híbrida, con el objetivo de reducir el número de evaluaciones costosas mediante modelos sustitutos de la función objetivo. Su pertinencia depende de que la simulación anual domine el costo de cada solicitud, algo que esta tesis no midió por separado del costo propio de los algoritmos; si es así, un modelo sustituto suficientemente preciso permitiría ampliar el presupuesto efectivo de búsqueda.
 
 \section{WP3: Extensión ambiental y multiobjetivo}
 
@@ -40,6 +40,7 @@ Aborda la incorporación de métricas de sostenibilidad al proceso de optimizaci
 Contempla la comunicación de los avances metodológicos y de los resultados obtenidos a audiencias académicas y técnicas.
 
 \chapter{Reproducibilidad del experimento}
+\label{anx:reproducibilidad}
 
 \section{Artefactos computacionales}
 
@@ -59,13 +60,13 @@ La totalidad de los resultados reportados en esta tesis se regenera a partir de 
 
 \section{Requisitos y ejecución}
 
-El cuaderno requiere Python 3.13, \texttt{numpy}, \texttt{pandas}, \texttt{matplotlib}, \texttt{scipy}, \texttt{nbformat} y \texttt{nbclient}. No requiere conexión de red en tiempo de ejecución ni la instalación de paquetes propios del proyecto.
+El cuaderno requiere Python 3.13, \texttt{numpy}, \texttt{pandas}, \texttt{matplotlib}, \texttt{scipy}, \texttt{nbformat} y \texttt{nbclient}. El entorno de la ejecución reportada es Python 3.13.14, NumPy 2.4.4, SciPy 1.17.1, pandas 3.0.2 y matplotlib 3.10.8; se declara porque los valores $p$ exactos y los intervalos bootstrap dependen de la implementación de las bibliotecas. No requiere conexión de red en tiempo de ejecución ni la instalación de paquetes propios del proyecto.
 
 La ejecución se controla mediante el argumento \texttt{--mode} del script o el interruptor equivalente situado en la primera celda de código:
 
 \begin{itemize}
     \item \texttt{MODO = "rapido"} --- 3 semillas, 8 individuos y 8 iteraciones, con fuerza bruta a paso de 1 MW. Destinado a verificar que el flujo completo se ejecuta de principio a fin sin errores; sus cifras no se reportan.
-    \item \texttt{MODO = "completo"} --- \Replicates{} semillas, \Population{} individuos y \Iterations{} iteraciones: \RequestsPerInstance{} solicitudes de evaluación de diseños anuales por instancia, \TotalDesignRequests{} en total, más \BruteForceDesignsTotal{} diseños de fuerza bruta (unas \BruteForceElapsedHours{} horas). El tiempo depende del equipo empleado. Es el modo con el que se generaron las cifras y figuras de este documento.
+    \item \texttt{MODO = "completo"} --- \Replicates{} semillas, \Population{} individuos y \Iterations{} iteraciones: \RequestsPerInstance{} solicitudes de evaluación de diseños anuales por instancia, \TotalDesignRequests{} en total (\SimulationsTotal{} simulaciones, porque las repetidas se responden desde la memoria de cada corrida), más \BruteForceDesignsTotal{} diseños de fuerza bruta (unas \BruteForceElapsedHours{} horas). El tiempo depende del equipo empleado. Es el modo con el que se generaron las cifras y figuras de este documento.
 \end{itemize}
 
 Las cifras del documento se regeneran con cinco pasos, en este orden:

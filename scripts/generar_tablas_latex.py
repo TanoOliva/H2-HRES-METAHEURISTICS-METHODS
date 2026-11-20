@@ -18,9 +18,10 @@ import re
 from pathlib import Path
 
 import pandas as pd
+from scipy.stats import binomtest
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT =Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "notebooks" / "results"
 OUTPUT = ROOT / "latex" / "generated" / "resultados_auto.tex"
 
@@ -38,6 +39,8 @@ ACCENTED_WORDS = {
     "linea": "línea", "estandar": "estándar", "catalogo": "catálogo",
     "reconstruccion": "reconstrucción", "eolica": "eólica", "elite": "élite",
 }
+NUMBERS_ES = {1: "una", 2: "dos", 3: "tres", 4: "cuatro", 5: "cinco", 6: "seis", 7: "siete",
+              8: "ocho"}
 ORDINALS_EN = {1: "first", 2: "second", 3: "third", 4: "fourth", 5: "fifth",
                6: "sixth", 7: "seventh"}
 
@@ -302,6 +305,93 @@ def main() -> None:
     macro(lines, "BoundaryUnitsInstances", spanish_list(units_at_max))
     macro(lines, "BoundaryDurationInstances",
           "todas las instancias" if len(shortest) == len(codes) else spanish_list(shortest))
+
+    # Solicitudes frente a simulaciones: una solicitud repetida dentro de una corrida se
+    # responde desde la memoria de resultados de esa corrida, sin volver a simular.
+    macro(lines, "SimulationsTotal", integer(runs["n_unique_evaluations"].sum()))
+    macro(lines, "DuplicatesTotal", integer(runs["n_duplicates"].sum()))
+
+    # Estructura del problema: catálogos cuyo mejor diseño factible queda sobre el borde de
+    # C5 (holgura de AGSR menor que BORDER_SLACK). Se separan las instancias en que casi
+    # todos los catálogos lo cumplen de las que no.
+    border_slack = 1e-3
+    per_catalog = read("brute_force_per_catalog.csv")
+    per_catalog = per_catalog[per_catalog["has_feasible"].map(truthy)]
+    catalog_limit = per_catalog["instance"].map(by_instance["agsr_max"].astype(float))
+    on_border = (catalog_limit - per_catalog["agsr"].astype(float)) < border_slack
+    border_pct = 100.0 * on_border.groupby(per_catalog["instance"]).mean()
+    border_high = border_pct[border_pct >= 95.0]
+    border_low = border_pct[border_pct < 95.0]
+    # El texto dice «en siete de las ocho instancias ... en la restante»: exige una sola excepción.
+    if len(border_low) != 1:
+        raise ValueError("el texto supone exactamente una instancia con menos del 95 % de "
+                         "catálogos sobre el borde de C5; revise la Sección 2.3.2")
+    macro(lines, "BorderCatalogSlack", num(border_slack, 3))
+    macro(lines, "BorderCatalogHighCountWord", NUMBERS_ES[len(border_high)])
+    macro(lines, "BorderCatalogHighMin", num(border_high.min(), 0))
+    macro(lines, "BorderCatalogHighMax", num(border_high.max(), 0))
+    macro(lines, "BorderCatalogLowInstance", tex(border_low.index[0]))
+    macro(lines, "BorderCatalogLowPct", num(border_low.iloc[0], 0))
+
+    # Óptimo en la frontera del electrolizador: quién encabeza por mediana las instancias
+    # en que el óptimo exacto usa un número interior de módulos. El texto afirma que son
+    # las dos primeras del rango medio; si deja de ser cierto, el texto debe revisarse.
+    interior_units = [code for code in codes if code not in units_at_max]
+    interior_leaders: dict[str, list[str]] = {}
+    for code in interior_units:
+        leader = (ranking[ranking["instance"] == code]
+                  .sort_values("ranking_descriptivo").iloc[0]["algorithm"])
+        interior_leaders.setdefault(str(leader), []).append(code)
+    top_two = set(read("stat_ranks.csv").sort_values("mean_rank")["algorithm"].head(2))
+    if not set(interior_leaders) <= top_two:
+        raise ValueError("las instancias con electrolizador interior ya no las encabezan "
+                         "los dos primeros del rango medio; revise el texto de Limitaciones")
+    macro(lines, "InteriorUnitsLeaders", tex(spanish_list(
+        [f"{label(a)} en {spanish_list(items)}" for a, items in interior_leaders.items()])))
+
+    # Tasa de éxito según el umbral: al 0,5 % (Tabla de rangos) y en el óptimo (g <= eps).
+    eps_gap = float(design["eps_gap_pct"])
+    optimum = brute["optimum_lcoe_cny_per_kwh"].astype(float)
+    run_gap = 100.0 * (runs["lcoe_cny_per_kwh"] / runs["instance"].map(optimum) - 1.0)
+    in_optimum = 100.0 * (run_gap <= eps_gap).groupby(runs["algorithm"]).mean()
+    success_half = 100.0 * cross.set_index("algorithm")["mean_success_0.5pct"]
+    for algorithm in in_optimum.index:
+        name = MACRO_NAMES[algorithm]
+        macro(lines, f"InOptPct{name}", num(in_optimum[algorithm], 1))
+        macro(lines, f"SuccessHalfPct{name}", num(success_half[algorithm], 1))
+    in_optimum_best = in_optimum.idxmax()
+    macro(lines, "InOptBestAlgorithm", tex(label(in_optimum_best)))
+    macro(lines, "InOptBestPct", num(in_optimum.max(), 1))
+    macro(lines, "InOptRunsPerAlgorithm", integer(runs.groupby("algorithm").size().min()))
+    ahead_at_half = success_half[success_half > success_half[in_optimum_best]].sort_values(ascending=False)
+    macro(lines, "InOptBestBehindAtHalf", tex(spanish_list([label(a) for a in ahead_at_half.index])))
+
+    # P2 frente a PSO: instancias en que las medianas difieren por menos que la tolerancia
+    # (que sólo iguala corridas en el óptimo) y prueba de signos contándolas como empates.
+    medians = ranking.pivot(index="instance", columns="algorithm", values="median")
+    control_name = str(design["control"])
+    pso_diff = 100.0 * (medians[control_name] - medians["pso"]) / optimum.loc[medians.index]
+    below_tol = pso_diff[pso_diff.abs() < eps_gap]
+    above_tol = pso_diff[pso_diff.abs() >= eps_gap]
+    macro(lines, "CtrlPsoSubTolInstances", tex(spanish_list(list(below_tol.index), "ninguna")))
+    macro(lines, "CtrlPsoSubTolDiff", num(below_tol.abs().max(), 4) if len(below_tol) else "--")
+    macro(lines, "CtrlPsoSignTiesP",
+          pvalue(binomtest(int((above_tol < 0).sum()), len(above_tol), 0.5).pvalue))
+    # P2: la versión sobre LCOE mediano y la versión sobre brecha relativa dan el mismo p.
+    macro(lines, "PTwoSamePCount", integer(sum(
+        pvalue(row.p_value) == pvalue(row.p_value_relativa) for row in global_tests.itertuples())))
+
+    # Reproducción: el diseño que Li et al. publican como óptimo (W190) bajo la reconstrucción.
+    # La malla base usa el mismo límite de AGSR que la instancia de referencia.
+    published_optimum = cases[cases["caso"] == "W190"].iloc[0]
+    base_limit = float(by_instance.loc[codes[0], "agsr_max"])
+    macro(lines, "ReproOptimumAGSR", num(published_optimum["AGSR"], 4))
+    macro(lines, "ReproOptimumExcessPct", num(100.0 * (published_optimum["AGSR"] / base_limit - 1.0), 0))
+    macro(lines, "ReproOptimumPublishedLCOE",
+          num(validation.loc[validation["metrica"] == "LCOE W190", "publicado"].iloc[0], 4))
+    pv_cf = validation[validation["metrica"] == "CF fotovoltaico"].iloc[0]
+    macro(lines, "ReproCFPv", num(pv_cf["reconstruido"], 4))
+    macro(lines, "ReproCFPvErr", "$" + num(pv_cf["error_rel_pct"], 2).replace(",", "{,}") + "$")
 
     # ------------------------------------------------------------------ transversal
     # Los rangos son los del contraste de Friedman (mediana de la brecha con tolerancia).

@@ -8,7 +8,7 @@ Este encadenamiento responde a un principio metodológico explícito: antes de c
 
 La implementación se desarrolla íntegramente en Python 3.13 dentro de un cuaderno Jupyter autocontenido, \texttt{notebooks/H2\_HRES\_trabajo.ipynb}, organizado en 22 secciones numeradas. El cuaderno y el archivo horario local contienen el modelo, las pruebas, el experimento y las salidas necesarias para reproducir las cifras, sin depender de servicios externos durante la ejecución.
 
-Las bibliotecas empleadas se limitan a cuatro dependencias científicas de uso extendido: \texttt{NumPy} para el álgebra vectorial y la generación de números pseudoaleatorios \cite{Harris2020NumPy}, \texttt{pandas} para la manipulación tabular de resultados \cite{McKinney2010Pandas}, \texttt{matplotlib} para la visualización \cite{Hunter2007Matplotlib} y \texttt{SciPy} para los contrastes estadísticos no paramétricos \cite{Virtanen2020SciPy}. Los algoritmos de optimización se implementan desde cero, sin recurrir a bibliotecas de metaheurísticas de terceros, con el fin de garantizar que los siete competidores comparten exactamente el mismo mecanismo de conteo de evaluaciones, de registro de historial y de interacción con la función objetivo.
+Las bibliotecas empleadas se limitan a cuatro dependencias científicas de uso extendido: \texttt{NumPy} para el álgebra vectorial y la generación de números pseudoaleatorios \cite{Harris2020NumPy}, \texttt{pandas} para la manipulación tabular de resultados \cite{McKinney2010Pandas}, \texttt{matplotlib} para la visualización \cite{Hunter2007Matplotlib} y \texttt{SciPy} para los contrastes estadísticos no paramétricos \cite{Virtanen2020SciPy}; sus versiones se detallan en el Anexo~\ref{anx:reproducibilidad}. Los algoritmos de optimización se implementan desde cero, sin recurrir a bibliotecas de metaheurísticas de terceros, con el fin de garantizar que los siete competidores comparten exactamente el mismo mecanismo de conteo de solicitudes, de registro de historial y de interacción con la función objetivo.
 
 \subsection{Decisiones de arquitectura del software}
 
@@ -17,7 +17,7 @@ Varias decisiones de diseño del código son parte sustantiva de la contribució
 \begin{itemize}
     \item \textbf{Configuración inmutable y autovalidada.} Los once bloques de parámetros del escenario se modelan como \textit{dataclasses} con el atributo \texttt{frozen=True} y validación en \texttt{\_\_post\_init\_\_}. Una configuración inconsistente (una eficiencia fuera del intervalo $[0,1]$, una vida útil negativa) falla en el momento de su construcción y no a mitad de una campaña experimental. La inmutabilidad garantiza además que ninguna etapa del experimento puede alterar inadvertidamente los parámetros que otra etapa ya empleó.
 
-    \item \textbf{Separación entre instancia y optimizador.} Los siete algoritmos derivan de una clase base \texttt{Optimizer} que fija el contrato de tres métodos: \texttt{\_search} implementa la estrategia de búsqueda propia del algoritmo, \texttt{\_evaluate} contabiliza cada llamada a la función objetivo y \texttt{\_record} registra el historial de convergencia. Un registro de algoritmos permite añadir un competidor nuevo sin tocar el código de ejecución del banco de pruebas. Esta separación es la que hace posible garantizar el presupuesto idéntico de evaluaciones.
+    \item \textbf{Separación entre instancia y optimizador.} Los siete algoritmos derivan de una clase base \texttt{Optimizer} que fija el contrato de tres métodos: \texttt{\_search} implementa la estrategia de búsqueda propia del algoritmo, \texttt{\_evaluate} contabiliza cada llamada a la función objetivo y \texttt{\_record} registra el historial de convergencia. Un registro de algoritmos permite añadir un competidor nuevo sin tocar el código de ejecución del banco de pruebas. Esta separación es la que hace posible garantizar el presupuesto idéntico de solicitudes.
 
     \item \textbf{Contrato de presupuesto e infraestructura de hibridación.} Un híbrido no puede exceder el presupuesto aunque intercale operadores de dos métodos: un método \texttt{\_evaluate\_budgeted} rechaza toda solicitud por encima del presupuesto y registra un punto de control del historial cada \texttt{population} solicitudes, y \texttt{optimize} verifica al cierre que cada corrida hizo exactamente el presupuesto. Los operadores genéticos (selección por torneo, cruce BLX-$\alpha$ y mutación gaussiana) viven en un \textit{mixin} reutilizable, \texttt{GeneticOperatorsMixin}, que comparten el GA y el híbrido. PSO+GA hereda de ese \textit{mixin} y de la clase del PSO sin modificar ninguno de los dos, de modo que el código de los padres que se ejecuta dentro del híbrido es literalmente el mismo que se ejecuta en ellos.
 
@@ -25,7 +25,7 @@ Varias decisiones de diseño del código son parte sustantiva de la contribució
 
     \item \textbf{Instancias paramétricas.} Una instancia es un escenario completo (\texttt{ScenarioConfig}) más un código y una etiqueta. Las ocho derivan de la de referencia mediante \texttt{replace}, que revalida la coherencia entre bloques (por ejemplo, que el catálogo del electrolizador no exceda la restricción C3). Cada instancia construye su propia función objetivo y su propio espacio de decisión; el bucle experimental, la agregación y la inferencia reciben la instancia como parámetro en lugar de leer un escenario global.
 
-    \item \textbf{Memoización de perfiles de generación.} Los perfiles horarios eólico y fotovoltaico dependen únicamente de la capacidad instalada. Una memoria intermedia indexada por capacidad evita recalcular 8.760 valores cuando reaparece una capacidad ya evaluada. Las solicitudes repetidas cuentan igualmente contra el presupuesto y se informan por separado.
+    \item \textbf{Memoria intermedia en dos niveles.} Los perfiles horarios eólico y fotovoltaico dependen únicamente de la capacidad instalada, y una memoria indexada por capacidad evita recalcular sus 8.760 valores cuando reaparece una capacidad ya evaluada. Además, la función objetivo de cada corrida guarda el resultado de cada diseño decodificado: si un algoritmo vuelve a proponer un diseño que ya evaluó en esa corrida, recibe el resultado guardado sin repetir la simulación. Esas solicitudes repetidas cuentan igualmente contra el presupuesto y se informan por separado.
 
     \item \textbf{Ejecución a dos escalas.} Un único interruptor de configuración alterna entre un modo rápido (3 semillas, 8 individuos y 8 iteraciones) y el modo completo empleado para los resultados definitivos (30 semillas, 20 individuos y 30 iteraciones). El primero permite verificar el flujo de extremo a extremo antes de ejecutar el presupuesto definitivo.
 
@@ -60,7 +60,7 @@ El artículo declara una altura de buje de 105 m, pero no publica la curva de po
 
 \subsection{Corrección de la interpretación de la irradiancia}
 
-Una versión anterior de la implementación interpretaba la irradiancia global horizontal en unidades incompatibles con el modelo térmico de la celda fotovoltaica, lo que producía temperaturas de celda físicamente imposibles y, como consecuencia, una producción fotovoltaica prácticamente nula: el factor de capacidad resultante era del 0,72\,\% frente al 19\,\% publicado. Corregida la interpretación, el factor de capacidad fotovoltaico pasa a 0,1874, con un desvío del $-1{,}34\,\%$.
+Una versión anterior de la implementación interpretaba la irradiancia global horizontal en unidades incompatibles con el modelo térmico de la celda fotovoltaica, lo que producía temperaturas de celda físicamente imposibles y, como consecuencia, una producción fotovoltaica prácticamente nula: el factor de capacidad resultante era del 0,72\,\% frente al 19\,\% publicado. Corregida la interpretación, el factor de capacidad fotovoltaico pasa a \ReproCFPv, con un desvío del \ReproCFPvErr\,\% (Tabla~\ref{tab:validacion_auto}).
 
 El episodio se consigna por su valor metodológico. El error no producía excepciones ni resultados manifiestamente absurdos en las magnitudes agregadas: el simulador entregaba costos nivelados plausibles, y solo el contraste sistemático contra indicadores publicados permitió detectarlo. Es un argumento a favor de la verificación cuantitativa frente a la mera inspección de que el código «funciona».
 
@@ -100,7 +100,7 @@ La generación eólica se calcula con una curva de potencia cúbica por tramos e
 \label{fig:generacion}
 \end{figure}
 
-La Figura~\ref{fig:generacion} ilustra la complementariedad que justifica la hibridación: la generación fotovoltaica se concentra en las horas centrales del día, mientras que la eólica presenta una distribución más uniforme y con frecuencia máximos nocturnos. Es esta complementariedad la que permite sostener el electrolizador por encima de su carga mínima durante una fracción mayor del año que la alcanzable con cualquiera de los dos recursos por separado.
+La Figura~\ref{fig:generacion} ilustra la complementariedad que justifica la hibridación: la generación fotovoltaica se concentra en las horas centrales del día, mientras que la eólica presenta una distribución más uniforme y con frecuencia máximos nocturnos. Cabe esperar que esa complementariedad permita sostener el electrolizador por encima de su carga mínima durante una fracción del año mayor que la alcanzable con cualquiera de los dos recursos por separado, aunque esta tesis no lo cuantifica.
 
 \section{Modelo económico}
 
@@ -176,7 +176,7 @@ Las Tablas~\ref{tab:parametros_configuracion_replica}--\ref{tab:parametros_costo
 \textbf{HHV del hidrógeno} & 39,4 kWh/kg & Poder calorífico superior empleado para el balance de masa. \\
 \textbf{Eficiencia del electrolizador} & 0,75 & Eficiencia energética; implica 52,53 kWh por kg de H$_2$. \\
 \textbf{Carga mínima del electrolizador} & 0,30 & Fracción mínima de carga para operar. \\
-\textbf{Módulo de electrólisis} & 5,0 MW & Tamaño unitario en la instancia mixta (10 a 20 módulos). \\
+\textbf{Módulo de electrólisis} & 5,0 MW & Tamaño unitario en I1 (10 a 20 módulos); el catálogo de cada instancia figura en la Tabla~\ref{tab:instancias_auto}. \\
 \textbf{Almacenamiento de H$_2$} & 10.000 kg & Capacidad fija del tanque; no es variable de decisión. \\
 \textbf{Vida del proyecto} & 25 años & Horizonte económico. \\
 \textbf{Tasa de descuento real} & 0,0435 & Tasa empleada en el descuento de flujos. \\

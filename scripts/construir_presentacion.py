@@ -717,7 +717,7 @@ def dibujar_mapa_decision(slide, d):
     add_box(slide, 0.5, 1.1, 9.0, 0.78, [], fill=LIGHT, name="Hipotesis tarjeta")
     add_label(slide, 0.65, 1.15, 8.7, 0.7, [
         ["Hipótesis: ", "H0, los algoritmos comparados tienen la misma distribución de brecha; H1, difieren (contraste bilateral)."],
-        ["Fijado a priori: ", f"α = {alfa} · tolerancia ε = {eps} del óptimo (una brecha ≤ ε cuenta como 0) · variable: brecha relativa al óptimo exacto."],
+        ["Fijado antes de I5–I8: ", f"α = {alfa} · tolerancia ε = {eps} del óptimo (una brecha ≤ ε cuenta como 0) · variable: brecha relativa al óptimo exacto."],
     ], size=10, ajustar=True)
     anchos = [2.0, 1.75, 1.85, 1.5, 1.6]
     hueco = (9.0 - sum(anchos)) / 4
@@ -1315,7 +1315,7 @@ def main(argv=None) -> None:
     s = S(2)
     filas = [("TextBox 8", "TextBox 9", "El problema", "Qué se optimiza, por qué es difícil y qué se propuso el trabajo."),
              ("TextBox 13", "TextBox 14", "El método: PSO+GA", "Los padres, el híbrido paso a paso y sus competidores."),
-             ("TextBox 18", "TextBox 19", "Diseño experimental", "Protocolo de siete pasos, ocho instancias y pruebas elegidas a priori."),
+             ("TextBox 18", "TextBox 19", "Diseño experimental", "Protocolo de siete pasos, ocho instancias y pruebas fijadas antes de I5–I8."),
              ("TextBox 23", "TextBox 24", "Resultados", "Explorar y luego tres preguntas: por instancia, en general y entre los siete."),
              ("TextBox 28", "TextBox 29", "Conclusiones", "Qué se puede afirmar, qué no, aporte y trabajo futuro.")]
     for a, b, t, sub in filas:
@@ -1347,7 +1347,7 @@ def main(argv=None) -> None:
     set_text(s, "TextBox 13", "Cada diseño se evalúa simulando un año completo: sin fórmula ni gradiente, es terreno de metaheurísticas.")
     set_text(s, "TextBox 15", "Pregunta de investigación")
     set_text(s, "TextBox 16", "¿Aporta algo hibridar PSO y GA?")
-    set_text(s, "TextBox 17", [f"Con el mismo presupuesto, pequeño, de {PRESUPUESTO} evaluaciones por corrida, ¿un híbrido PSO+GA llega al óptimo exacto con más fiabilidad que PSO, que GA y que la búsqueda aleatoria?",
+    set_text(s, "TextBox 17", [f"Con el mismo presupuesto, pequeño, de {PRESUPUESTO} solicitudes por corrida, ¿un híbrido PSO+GA llega al óptimo exacto con más fiabilidad que PSO, que GA y que la búsqueda aleatoria?",
                                f"Banco de pruebas: el sistema WPEB de Li et al. (2024), en {N_INST} instancias.",
                                "Foco: las metaheurísticas y cómo se comparan, no la ingeniería eléctrica."])
     set_notes(s, "[1:10] El contexto, breve. El hidrógeno verde se produce con electricidad renovable; como el viento y el sol "
@@ -1356,8 +1356,10 @@ def main(argv=None) -> None:
                  "informático es que eso es un problema de optimización difícil: cada diseño se evalúa simulando un año "
                  "completo, no hay fórmula ni gradiente, y por eso se resuelve con metaheurísticas. Uso como banco de pruebas "
                  "el sistema publicado por Li y colaboradores en 2024. Y la pregunta de investigación es de método: con un "
-                 f"presupuesto idéntico y pequeño de {PRESUPUESTO} evaluaciones por corrida, ¿un híbrido de PSO y GA alcanza el "
-                 "óptimo exacto con más fiabilidad que los dos métodos de los que parte y que una búsqueda aleatoria? El foco "
+                 f"presupuesto idéntico y pequeño de {PRESUPUESTO} solicitudes por corrida, ¿un híbrido de PSO y GA alcanza el "
+                 "óptimo exacto con más fiabilidad que los dos métodos de los que parte y que una búsqueda aleatoria? Por "
+                 "fiabilidad entiendo la distribución de la brecha final en las corridas independientes, no una tasa de acierto "
+                 "con un umbral fijo, porque el orden por tasa de acierto cambia según el umbral. El foco "
                  "de la defensa está en las metaheurísticas y en cómo se comparan, no en el detalle eléctrico.")
 
     # ==== 5. QUÉ SE OPTIMIZA (ex 9)
@@ -1677,7 +1679,8 @@ def main(argv=None) -> None:
                  "[Si preguntan si con menos presupuesto ganaría el híbrido:] No se puede concluir. GWO, WOA y SHO bajan su "
                  "parámetro a o h según la fracción de iteraciones transcurridas, así que con menos presupuesto habrían pasado "
                  f"antes a explotar. Lo que sí sostengo es que el orden es relativo a {solicitudes} solicitudes, y que la "
-                 "inyección genética acelera al enjambre al principio pero no evita que se estanque.")
+                 "inyección genética se asocia con una convergencia más rápida al principio, sin contrastarla, pero no evita "
+                 "que el enjambre se estanque.")
 
     # ==== 20. EXPLORAR: DISTRIBUCIÓN DE LA BRECHA Y NORMALIDAD
     s = s_brecha
